@@ -11,7 +11,6 @@ RUN rpm --rebuilddb \
 	gzip \
 	haproxy \
 	openssl \
-	stunnel \
 	&& yum clean all
 
 RUN mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.default
@@ -57,11 +56,6 @@ RUN { \
 		echo 'fs.nr_open = 1048576'; \
 	} >> /etc/sysctl.conf
 
-# RUN echo '1048576' > /proc/sys/fs/file-max
-
-# RUN echo -e 'session\trequired\tpam_limits.so' >> /etc/pam.d/login
-# RUN echo -e 'session\trequired\tpam_limits.so' >> /etc/pam.d/common-session
-
 # -----------------------------------------------------------------------------
 # Copy files into place
 # -----------------------------------------------------------------------------
@@ -69,19 +63,9 @@ ADD usr/sbin/haproxy-start \
 	/usr/sbin/haproxy-start
 ADD etc/services-config/haproxy/haproxy.cfg \
 	/etc/services-config/haproxy/
-# ADD etc/services-config/stunnel/stunnel.conf \
-# 	/etc/services-config/stunnel/
 
 ADD etc/services-config/supervisor/supervisord.d/haproxy.conf \
-	etc/services-config/supervisor/supervisord.d/stunnel.conf \
 	/etc/services-config/supervisor/supervisord.d/
-
-# RUN ln -sf /etc/services-config/haproxy /etc/haproxy/haproxy.cfg \
-# 	&& ln -sf /etc/services-config/stunnel /etc/stunnel/stunnel.conf \
-# 	&& ln -sf /etc/services-config/supervisor/supervisord.conf /etc/supervisord.conf \
-# 	&& ln -sf /etc/services-config/supervisor/supervisord.d/haproxy.conf /etc/supervisord.d/haproxy.conf \
-# 	&& ln -sf /etc/services-config/supervisor/supervisord.d/stunnel.conf /etc/supervisord.d/stunnel.conf \
-# 	&& chmod +x /usr/sbin/haproxy-start
 
 RUN ln -sf /etc/services-config/supervisor/supervisord.conf /etc/supervisord.conf \
 	&& ln -sf /etc/services-config/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg \
