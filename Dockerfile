@@ -25,6 +25,11 @@ RUN curl -LsSO http://hatop.googlecode.com/files/hatop-0.7.7.tar.gz \
 	&& gzip /usr/local/share/man/man1/hatop.1 \
 	&& rm -rf hatop-0.7.7*
 
+# Add a global alias for running htop using the default socket
+RUN touch /etc/profile.d/hatop.sh \
+	&& echo 'alias hatop="env TERM=xterm hatop -s /var/lib/haproxy/stats"' \
+		> /etc/profile.d/hatop.sh
+
 # TODO Needs to be in a boostrap otherwise the key is part of the image
 # TODO Server Name needs to be a variable
 # TODO Use Let's Encrypt to periodically generate a certificate
