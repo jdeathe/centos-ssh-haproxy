@@ -23,11 +23,11 @@ RUN curl -LsSO http://hatop.googlecode.com/files/hatop-0.7.7.tar.gz \
 	&& install -m 755 bin/hatop /usr/local/bin \
 	&& install -m 644 man/hatop.1 /usr/local/share/man/man1 \
 	&& gzip /usr/local/share/man/man1/hatop.1 \
-	&& rm -rf hatop-0.7.7*
+	&& rm -rf /hatop-0.7.7*
 
 # Add a global alias for running htop using the default socket
 RUN touch /etc/profile.d/hatop.sh \
-	&& echo 'alias hatop="env TERM=xterm hatop -s /var/lib/haproxy/stats"' \
+	&& echo 'alias hatop="env TERM=xterm hatop -s /var/lib/haproxy/stats -i 1"' \
 		> /etc/profile.d/hatop.sh
 
 # TODO Needs to be in a boostrap otherwise the key is part of the image
@@ -39,7 +39,7 @@ RUN mkdir -p /etc/haproxy/certs/ \
 	-x509 \
 	-sha256 \
 	-nodes \
-	-newkey rsa:4096 \
+	-newkey rsa:2048 \
 	-days 365 \
 	-subj "/C=GB/ST=STATE/L=LOCALITY/O=ORGANISATION/CN=app-1.local" \
 	-keyout /etc/haproxy/certs/haproxy.key \
@@ -55,10 +55,14 @@ RUN { \
 	} >> /etc/security/limits.conf
 
 RUN { \
-		echo ''; \ 
+		echo ''; \
 		echo 'fs.file-max = 1048576'; \
-		echo 'fs.file-nr = 1025216 0 1048576'; \
-		echo 'fs.nr_open = 1048576'; \
+		echo 'fs.nr_open = 65536'; \
+		echo ''; \
+		echo 'net.core.somaxconn = 32768'; \
+		echo ''; \
+		echo 'net.ipv4.ip_local_port_range = 1024 65000'; \
+		echo 'net.ipv4.route.flush = 1'; \
 	} >> /etc/sysctl.conf
 
 # -----------------------------------------------------------------------------
