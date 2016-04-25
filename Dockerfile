@@ -60,8 +60,7 @@ RUN { \
 		echo 'fs.nr_open = 65536'; \
 		echo ''; \
 		echo 'net.core.somaxconn = 32768'; \
-		echo ''; \
-		echo 'net.ipv4.ip_local_port_range = 1024 65000'; \
+		echo 'net.ipv4.ip_local_port_range = 1024 65535'; \
 		echo 'net.ipv4.route.flush = 1'; \
 	} >> /etc/sysctl.conf
 

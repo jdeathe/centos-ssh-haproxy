@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
-DAEMON_OPTS="-p ${HAPROXY_PIDFILE:-/var/run/haproxy.pid} \
-             -f ${HAPROXY_CONFIG:-/etc/haproxy/haproxy.cfg}
-             -db"
+DAEMON_OPTS="
+ -db
+ -f ${HAPROXY_CONFIG:-/etc/haproxy/haproxy.cfg}
+"
+
+sleep 1
+
+/usr/sbin/sysctl -p
 
 # ulimit settings require docker containers to be run with --privileged
 # https://github.com/dotcloud/docker/issues/4717
-ulimit -n ${NFILES:-131072}
-ulimit -l ${MEMLOCK:-82000}
-ulimit -u ${NPROCS:-unlimited}
+# ulimit -n ${NFILES:-131072}
+# ulimit -l ${MEMLOCK:-82000}
+# ulimit -u ${NPROCS:-unlimited}
 
 /usr/sbin/haproxy ${DAEMON_OPTS}
