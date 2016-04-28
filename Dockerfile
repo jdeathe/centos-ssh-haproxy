@@ -86,7 +86,7 @@ EXPOSE 80 443
 # Set default environment variables
 # -----------------------------------------------------------------------------
 ENV HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
-	HAPROXY_SERVER_ADDRESS_1="192.169.99.100" \
+	HAPROXY_SERVER_ADDRESS_1="192.168.99.100" \
 	HAPROXY_SERVER_ADDRESS_2="" \
 	HAPROXY_SERVER_ADDRESS_3="" \
 	HAPROXY_SERVER_ADDRESS_4=""
