@@ -5,8 +5,6 @@ DAEMON_OPTS="
  -f ${HAPROXY_CONFIG:-/etc/haproxy/haproxy.cfg}
 "
 
-sleep 1
-
 /usr/sbin/sysctl -p
 
 # ulimit settings require docker containers to be run with --privileged
