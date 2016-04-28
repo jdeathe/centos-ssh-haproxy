@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 
+HAPROXY=/usr/sbin/haproxy
+NICE=/bin/nice
+SYSCTL=/usr/sbin/sysctl
+
 DAEMON_OPTS="
  -db
  -f ${HAPROXY_CONFIG:-/etc/haproxy/haproxy.cfg}
 "
 
-/usr/sbin/sysctl -p
+NICENESS=15
+
+${SYSCTL} -p
 
 # ulimit settings require docker containers to be run with --privileged
 # https://github.com/dotcloud/docker/issues/4717
@@ -13,4 +19,7 @@ DAEMON_OPTS="
 # ulimit -l ${MEMLOCK:-82000}
 # ulimit -u ${NPROCS:-unlimited}
 
-/usr/sbin/haproxy ${DAEMON_OPTS}
+exec ${NICE} \
+	-n ${NICENESS} \
+	${HAPROXY} \
+	${DAEMON_OPTS}

@@ -67,8 +67,8 @@ RUN { \
 # -----------------------------------------------------------------------------
 # Copy files into place
 # -----------------------------------------------------------------------------
-ADD usr/sbin/haproxy-start \
-	/usr/sbin/haproxy-start
+ADD usr/sbin/haproxy-wrapper \
+	/usr/sbin/haproxy-wrapper
 ADD etc/services-config/haproxy/haproxy.cfg \
 	/etc/services-config/haproxy/
 
@@ -78,7 +78,7 @@ ADD etc/services-config/supervisor/supervisord.d/haproxy.conf \
 RUN ln -sf /etc/services-config/supervisor/supervisord.conf /etc/supervisord.conf \
 	&& ln -sf /etc/services-config/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg \
 	&& ln -sf /etc/services-config/supervisor/supervisord.d/haproxy.conf /etc/supervisord.d/haproxy.conf \
-	&& chmod +x /usr/sbin/haproxy-start
+	&& chmod +x /usr/sbin/haproxy-wrapper
 
 EXPOSE 80 443
 
