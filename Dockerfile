@@ -70,7 +70,7 @@ RUN { \
 ADD usr/sbin/haproxy-wrapper \
 	/usr/sbin/haproxy-wrapper
 ADD etc/services-config/haproxy/haproxy.cfg \
-	/etc/services-config/haproxy/
+	/etc/services-config/haproxy/haproxy.cfg
 
 ADD etc/services-config/supervisor/supervisord.d/haproxy.conf \
 	/etc/services-config/supervisor/supervisord.d/
