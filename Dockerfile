@@ -27,14 +27,14 @@ RUN curl -LsSO http://hatop.googlecode.com/files/hatop-0.7.7.tar.gz \
 
 # Add a global alias for running htop using the default socket
 RUN touch /etc/profile.d/hatop.sh \
-	&& echo 'alias hatop="env TERM=xterm hatop -s /var/lib/haproxy/stats -i 1"' \
+	&& echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
 		> /etc/profile.d/hatop.sh
 
 # TODO Needs to be in a boostrap otherwise the key is part of the image
 # TODO Server Name needs to be a variable
 # TODO Use Let's Encrypt to periodically generate a certificate
 # Generate a self-signed certificate
-RUN mkdir -p /etc/haproxy/certs/ \
+RUN mkdir -p /etc/haproxy/certs/sni \
 	&& openssl req \
 	-x509 \
 	-sha256 \
@@ -46,7 +46,7 @@ RUN mkdir -p /etc/haproxy/certs/ \
 	-out /etc/haproxy/certs/haproxy.pem \
 	&& cat /etc/haproxy/certs/haproxy.pem \
 		/etc/haproxy/certs/haproxy.key \
-		> /etc/haproxy/certs/app-1.local.pem
+		> /etc/haproxy/certs/sni/app-1.local.pem
 
 # Increase the FD limit to 8015 or more
 RUN { \
@@ -85,7 +85,8 @@ EXPOSE 80 443
 # -----------------------------------------------------------------------------
 # Set default environment variables
 # -----------------------------------------------------------------------------
-ENV HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
+ENV TERM="xterm" \ 
+	HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
 	HAPROXY_SERVER_ADDRESS_1="192.168.99.100" \
 	HAPROXY_SERVER_ADDRESS_2="" \
 	HAPROXY_SERVER_ADDRESS_3="" \
