@@ -10,6 +10,7 @@ RUN rpm --rebuilddb \
 	tar \
 	gzip \
 	haproxy \
+	letsencrypt \
 	openssl \
 	&& yum clean all
 
@@ -41,7 +42,7 @@ RUN mkdir -p /etc/haproxy/certs/sni \
 	-nodes \
 	-newkey rsa:2048 \
 	-days 365 \
-	-subj "/C=GB/ST=STATE/L=LOCALITY/O=ORGANISATION/CN=app-1.local" \
+	-subj "/C=--/ST=STATE/L=LOCALITY/O=ORGANISATION/CN=app-1.local" \
 	-keyout /etc/haproxy/certs/haproxy.key \
 	-out /etc/haproxy/certs/haproxy.pem \
 	&& cat /etc/haproxy/certs/haproxy.pem \
@@ -80,16 +81,15 @@ RUN ln -sf /etc/services-config/supervisor/supervisord.conf /etc/supervisord.con
 	&& ln -sf /etc/services-config/supervisor/supervisord.d/haproxy.conf /etc/supervisord.d/haproxy.conf \
 	&& chmod +x /usr/sbin/haproxy-wrapper
 
-EXPOSE 80 443
+EXPOSE 80 443 5443
 
 # -----------------------------------------------------------------------------
 # Set default environment variables
 # -----------------------------------------------------------------------------
-ENV TERM="xterm" \ 
+ENV TERM="xterm" \
 	HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
 	HAPROXY_SERVER_ADDRESS_1="192.168.99.100" \
 	HAPROXY_SERVER_ADDRESS_2="" \
-	HAPROXY_SERVER_ADDRESS_3="" \
-	HAPROXY_SERVER_ADDRESS_4=""
+	HAPROXY_SERVER_ADDRESS_3=""
 
 CMD ["/usr/bin/supervisord", "--configuration=/etc/supervisord.conf"]
