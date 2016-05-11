@@ -31,7 +31,7 @@ RUN touch /etc/profile.d/hatop.sh \
 	&& echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
 		> /etc/profile.d/hatop.sh
 
-# TODO Needs to be in a boostrap otherwise the key is part of the image
+# TODO Needs to be in a bootstrap otherwise the key is part of the image
 # TODO Server Name needs to be a variable
 # TODO Use Let's Encrypt to periodically generate a certificate
 # Generate a self-signed certificate
@@ -51,14 +51,16 @@ RUN mkdir -p /etc/haproxy/certs/sni \
 
 # Increase the FD limit to 8015 or more
 RUN { \
-		echo -e '\nhaproxy\tsoft\tnofile\t8192'; \
-		echo -e '\nhaproxy\thard\tnofile\t48052'; \
+		echo -e '\nhaproxy\tsoft\tnofile\t16777216'; \
+		echo -e '\nhaproxy\thard\tnofile\t8388608'; \
 	} >> /etc/security/limits.conf
 
+# 1.12.0 should make this simpler:
+# https://github.com/docker/docker/pull/19265
 RUN { \
 		echo ''; \
-		echo 'fs.file-max = 1048576'; \
-		echo 'fs.nr_open = 65536'; \
+		echo 'fs.file-max = 16777216'; \
+		echo 'fs.nr_open = 8388608'; \
 		echo ''; \
 		echo 'net.core.somaxconn = 32768'; \
 		echo 'net.ipv4.ip_local_port_range = 1024 65535'; \
@@ -81,7 +83,7 @@ RUN ln -sf /etc/services-config/supervisor/supervisord.conf /etc/supervisord.con
 	&& ln -sf /etc/services-config/supervisor/supervisord.d/haproxy.conf /etc/supervisord.d/haproxy.conf \
 	&& chmod +x /usr/sbin/haproxy-wrapper
 
-EXPOSE 80 443 5443
+EXPOSE 80 442 443
 
 # -----------------------------------------------------------------------------
 # Set default environment variables
