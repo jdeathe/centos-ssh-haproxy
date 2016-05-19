@@ -27,9 +27,8 @@ RUN curl -LsSO http://hatop.googlecode.com/files/hatop-0.7.7.tar.gz \
 	&& rm -rf /hatop-0.7.7*
 
 # Add a global alias for running htop using the default socket
-RUN touch /etc/profile.d/hatop.sh \
-	&& echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
-		> /etc/profile.d/hatop.sh
+RUN echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
+	> /etc/profile.d/hatop.sh
 
 # TODO Needs to be in a bootstrap otherwise the key is part of the image
 # TODO Server Name needs to be a variable
@@ -88,8 +87,7 @@ EXPOSE 80 442 443
 # -----------------------------------------------------------------------------
 # Set default environment variables
 # -----------------------------------------------------------------------------
-ENV TERM="xterm" \
-	HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
+ENV HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
 	HAPROXY_SERVER_ADDRESS_1="192.168.99.100" \
 	HAPROXY_SERVER_ADDRESS_2="" \
 	HAPROXY_SERVER_ADDRESS_3=""

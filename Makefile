@@ -29,6 +29,7 @@ get-docker-info := $(shell $(docker) info)
 
 # Common parameters of create and run targets
 define DOCKER_CONTAINER_PARAMETERS
+-t \
 --privileged \
 --name $(DOCKER_NAME) \
 --publish $(DOCKER_PORT_MAP_TCP_80):80 \
