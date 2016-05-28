@@ -1,7 +1,8 @@
 export SHELL := /usr/bin/env bash
 export PATH := ${PATH}
 
-include make.conf
+include environment.mk
+include default.mk
 
 # UI constants
 COLOUR_NEGATIVE := \033[1;31m
@@ -26,22 +27,6 @@ xz := $(shell type -p xz)
 
 # Used to test docker host is accessible
 get-docker-info := $(shell $(docker) info)
-
-# Common parameters of create and run targets
-define DOCKER_CONTAINER_PARAMETERS
--t \
---privileged \
---name $(DOCKER_NAME) \
---publish $(DOCKER_PORT_MAP_TCP_80):80 \
---publish $(DOCKER_PORT_MAP_TCP_442):442 \
---publish $(DOCKER_PORT_MAP_TCP_443):443 \
---restart $(DOCKER_RESTART_POLICY) \
---env "HAPROXY_CONFIG=$(HAPROXY_CONFIG)" \
---env "HAPROXY_SERVER_ADDRESS_1=$(HAPROXY_SERVER_ADDRESS_1)" \
---env "HAPROXY_SERVER_ADDRESS_2=$(HAPROXY_SERVER_ADDRESS_2)" \
---env "HAPROXY_SERVER_ADDRESS_3=$(HAPROXY_SERVER_ADDRESS_3)" \
---env "HAPROXY_SERVER_ADDRESS_4=$(HAPROXY_SERVER_ADDRESS_4)"
-endef
 
 .PHONY: \
 	all \
