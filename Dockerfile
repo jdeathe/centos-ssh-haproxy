@@ -80,6 +80,7 @@ ADD etc/services-config/supervisor/supervisord.d/haproxy.conf \
 RUN ln -sf /etc/services-config/supervisor/supervisord.conf /etc/supervisord.conf \
 	&& ln -sf /etc/services-config/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg \
 	&& ln -sf /etc/services-config/supervisor/supervisord.d/haproxy.conf /etc/supervisord.d/haproxy.conf \
+	&& chmod 600 /etc/services-config/haproxy/haproxy.cfg \
 	&& chmod +x /usr/sbin/haproxy-wrapper
 
 EXPOSE 80 442 443
