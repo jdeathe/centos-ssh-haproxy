@@ -1,24 +1,24 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:centos-7-2.0.1
+FROM jdeathe/centos-ssh:centos-7-2.1.3
 
 MAINTAINER James Deathe <james.deathe@gmail.com>
 
 RUN rpm --rebuilddb \
 	&& yum --setopt=tsflags=nodocs -y install \
-	tar \
-	gzip \
-	haproxy \
-	letsencrypt \
-	openssl \
+		tar \
+		gzip \
+		haproxy \
+		letsencrypt \
+		openssl \
 	&& yum clean all
 
 RUN mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.default
 
 # Install HATop
 # Usage: env TERM=xterm hatop -s /var/lib/haproxy/stats
-RUN curl -LsSO http://hatop.googlecode.com/files/hatop-0.7.7.tar.gz \
+RUN curl -LsSO https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/hatop/hatop-0.7.7.tar.gz \
 	&& tar -xzf hatop-0.7.7.tar.gz \
 	&& cd hatop-0.7.7 \
 	&& install -m 755 bin/hatop /usr/local/bin \
@@ -70,18 +70,28 @@ RUN { \
 # Copy files into place
 # -----------------------------------------------------------------------------
 ADD usr/sbin/haproxy-wrapper \
-	/usr/sbin/haproxy-wrapper
+	/usr/sbin/
 ADD etc/services-config/haproxy/haproxy.cfg \
-	/etc/services-config/haproxy/haproxy.cfg
+	/etc/services-config/haproxy/
 
-ADD etc/services-config/supervisor/supervisord.d/haproxy.conf \
+ADD etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
 
-RUN ln -sf /etc/services-config/supervisor/supervisord.conf /etc/supervisord.conf \
-	&& ln -sf /etc/services-config/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg \
-	&& ln -sf /etc/services-config/supervisor/supervisord.d/haproxy.conf /etc/supervisord.d/haproxy.conf \
-	&& chmod 600 /etc/services-config/haproxy/haproxy.cfg \
-	&& chmod +x /usr/sbin/haproxy-wrapper
+RUN ln -sf \
+		/etc/services-config/supervisor/supervisord.conf \
+		/etc/supervisord.conf \
+	&& ln -sf \
+		/etc/services-config/haproxy/haproxy.cfg \
+		/etc/haproxy/haproxy.cfg \
+	&& ln -sf \
+		/etc/services-config/supervisor/supervisord.d/haproxy-wrapper.conf \
+		/etc/supervisord.d/haproxy-wrapper.conf \
+	&& chmod 600 \
+		/etc/services-config/haproxy/haproxy.cfg \
+	&& chmod 600 \
+		/etc/services-config/supervisor/supervisord.d/haproxy-wrapper.conf \
+	&& chmod 700 \
+		/usr/sbin/haproxy-wrapper
 
 EXPOSE 80 442 443
 
