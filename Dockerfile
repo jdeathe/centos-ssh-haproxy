@@ -76,11 +76,11 @@ ADD etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
 
 RUN ln -sf \
-		/etc/services-config/supervisor/supervisord.conf \
-		/etc/supervisord.conf \
-	&& ln -sf \
 		/etc/services-config/haproxy/haproxy.cfg \
 		/etc/haproxy/haproxy.cfg \
+	&& ln -sf \
+		/etc/services-config/supervisor/supervisord.conf \
+		/etc/supervisord.conf \
 	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-wrapper.conf \
 		/etc/supervisord.d/haproxy-wrapper.conf \
