@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+RSYSLOGD=/usr/sbin/rsyslogd
+NICE=/usr/bin/nice
+SYSCTL=/usr/sbin/sysctl
+
+DAEMON_OPTS="
+ -n
+ -4
+ -Q
+ -l 127.0.0.1
+ -f /etc/rsyslog.conf
+"
+
+NICENESS=${RSYSLOGD_NICENESS:-10}
+
+exec ${NICE} \
+	-n ${NICENESS} \
+	${RSYSLOGD} \
+	${DAEMON_OPTS}

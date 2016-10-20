@@ -12,9 +12,29 @@ RUN rpm --rebuilddb \
 		haproxy \
 		letsencrypt \
 		openssl \
+		rsyslog \
 	&& yum clean all
 
-RUN mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.default
+RUN mv \
+	/etc/haproxy/haproxy.cfg \
+	/etc/haproxy/haproxy.cfg.default
+
+# Enable local syslog logging
+RUN sed -i \
+		-e 's~^#\$ModLoad imudp$~\$ModLoad imudp~' \
+		-e 's~^#\$UDPServerRun 514$~\$UDPServerRun 514~' \
+		-e 's~^\$OmitLocalLogging on$~\$OmitLocalLogging off~' \
+		-e 's~^\(\$ModLoad imuxsock .*\)$~#\1~' \
+		-e 's~^\(\$ModLoad imjournal .*\)$~#\1~' \
+		-e 's~^\(\$IMJournalStateFile .*\)$~#\1~' \
+		/etc/rsyslog.conf \
+	&& mkdir -p \
+		/run/systemd/journal \
+	&& { \
+		echo -e '$UDPServerAddress 127.0.0.1'; \
+		echo -e 'local2.* /var/log/haproxy.log'; \
+		echo -e '& stop'; \
+	} > /etc/rsyslog.d/listen.conf
 
 # Install HATop
 # Usage: env TERM=xterm hatop -s /var/lib/haproxy/stats
@@ -68,6 +88,7 @@ RUN { \
 # Copy files into place
 # -----------------------------------------------------------------------------
 ADD usr/sbin/haproxy-wrapper \
+	/usr/sbin/rsyslogd-wrapper \
 	/usr/sbin/
 ADD etc/services-config/haproxy/haproxy.cfg \
 	/etc/services-config/haproxy/
@@ -84,12 +105,15 @@ RUN ln -sf \
 	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-wrapper.conf \
 		/etc/supervisord.d/haproxy-wrapper.conf \
+	&& ln -sf \
+		/etc/services-config/supervisor/supervisord.d/rsyslogd-wrapper.conf \
+		/etc/supervisord.d/rsyslogd-wrapper.conf \
 	&& chmod 600 \
 		/etc/services-config/haproxy/haproxy.cfg \
 	&& chmod 600 \
 		/etc/services-config/supervisor/supervisord.d/haproxy-wrapper.conf \
 	&& chmod 700 \
-		/usr/sbin/haproxy-wrapper
+		/usr/sbin/{haproxy,rsyslogd}-wrapper
 
 EXPOSE 80 442 443
 
