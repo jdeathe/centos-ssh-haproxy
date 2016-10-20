@@ -55,7 +55,7 @@ RUN echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
 # TODO Use Let's Encrypt to periodically generate a certificate
 # Generate a self-signed certificate
 RUN mkdir -p \
-		/etc/haproxy/certs/sni \
+		/etc/pki/tls/certs/sni \
 	&& openssl req \
 		-x509 \
 		-sha256 \
@@ -63,8 +63,8 @@ RUN mkdir -p \
 		-newkey rsa:2048 \
 		-days 365 \
 		-subj "/C=--/ST=STATE/L=LOCALITY/O=ORGANISATION/CN=app-1.local" \
-		-keyout /etc/haproxy/certs/sni/app-1.local.pem \
-		-out /etc/haproxy/certs/sni/app-1.local.pem
+		-keyout /etc/pki/tls/certs/sni/app-1.local.pem \
+		-out /etc/pki/tls/certs/sni/app-1.local.pem
 
 # Increase the FD limit to 8015 or more
 RUN { \
