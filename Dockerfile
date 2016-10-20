@@ -123,6 +123,8 @@ EXPOSE 80 442 443
 ENV HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
 	HAPROXY_SERVER_ADDRESS_1="192.168.99.100" \
 	HAPROXY_SERVER_ADDRESS_2="" \
-	HAPROXY_SERVER_ADDRESS_3=""
+	HAPROXY_SERVER_ADDRESS_3="" \
+	SSH_AUTOSTART_SSHD=false \
+	SSH_AUTOSTART_SSHD_BOOTSTRAP=false
 
 CMD ["/usr/bin/supervisord", "--configuration=/etc/supervisord.conf"]
