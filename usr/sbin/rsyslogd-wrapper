@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 RSYSLOGD=/usr/sbin/rsyslogd
-NICE=/usr/bin/nice
+NICE=/bin/nice
 SYSCTL=/usr/sbin/sysctl
 
 DAEMON_OPTS="

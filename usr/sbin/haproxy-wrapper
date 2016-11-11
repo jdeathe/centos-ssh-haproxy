@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 HAPROXY=/usr/sbin/haproxy
-NICE=/usr/bin/nice
+NICE=/bin/nice
 SYSCTL=/usr/sbin/sysctl
 
 DAEMON_OPTS="
