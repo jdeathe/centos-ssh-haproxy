@@ -10,7 +10,6 @@ RUN rpm --rebuilddb \
 		tar \
 		gzip \
 		haproxy \
-		letsencrypt \
 		openssl \
 		rsyslog \
 	&& yum clean all
@@ -52,7 +51,6 @@ RUN echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
 
 # TODO Needs to be in a bootstrap otherwise the key is part of the image
 # TODO Server Name needs to be a variable
-# TODO Use Let's Encrypt to periodically generate a certificate
 # Generate a self-signed certificate
 RUN mkdir -p \
 		/etc/pki/tls/certs/sni \
@@ -111,7 +109,7 @@ RUN ln -sf \
 	&& chmod 700 \
 		/usr/sbin/{haproxy,rsyslogd}-wrapper
 
-EXPOSE 80 442 443
+EXPOSE 80 443
 
 # -----------------------------------------------------------------------------
 # Set default environment variables
