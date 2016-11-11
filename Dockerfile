@@ -66,10 +66,10 @@ RUN mkdir -p \
 		-keyout /etc/pki/tls/certs/sni/app-1.local.pem \
 		-out /etc/pki/tls/certs/sni/app-1.local.pem
 
-# Increase the FD limit to 8015 or more
+# Increase the FD limit
 RUN { \
-		echo -e '\nhaproxy\tsoft\tnofile\t16777216'; \
-		echo -e '\nhaproxy\thard\tnofile\t8388608'; \
+		echo -e '\nhaproxy\tsoft\tnofile\t8388608'; \
+		echo -e '\nhaproxy\thard\tnofile\t16777216'; \
 	} >> /etc/security/limits.conf
 
 # 1.12.0 should make this simpler:
@@ -92,16 +92,12 @@ ADD usr/sbin/haproxy-wrapper \
 	/usr/sbin/
 ADD etc/services-config/haproxy/haproxy.cfg \
 	/etc/services-config/haproxy/
-
 ADD etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
 
 RUN ln -sf \
 		/etc/services-config/haproxy/haproxy.cfg \
 		/etc/haproxy/haproxy.cfg \
-	&& ln -sf \
-		/etc/services-config/supervisor/supervisord.conf \
-		/etc/supervisord.conf \
 	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-wrapper.conf \
 		/etc/supervisord.d/haproxy-wrapper.conf \
