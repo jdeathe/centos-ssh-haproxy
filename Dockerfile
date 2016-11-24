@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:centos-7-2.1.3
+FROM jdeathe/centos-ssh:centos-6-1.7.3
 
 MAINTAINER James Deathe <james.deathe@gmail.com>
 
@@ -56,7 +56,7 @@ RUN curl -LsSO \
 		man/hatop.1 \
 		/usr/local/share/man/man1 \
 	&& gzip /usr/local/share/man/man1/hatop.1 \
-	&& rm -rf /hatop-0.7.7*
+	&& rm -rf /hatop-0.7.7* \
 	&& echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
 		> /etc/profile.d/hatop.sh
 
