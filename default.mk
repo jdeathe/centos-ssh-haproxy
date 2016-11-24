@@ -16,6 +16,5 @@ endef
 
 DOCKER_PUBLISH := $(shell \
 	if [[ $(DOCKER_PORT_MAP_TCP_80) != NULL ]]; then printf -- '--publish %s:80\n' $(DOCKER_PORT_MAP_TCP_80); fi; \
-	if [[ $(DOCKER_PORT_MAP_TCP_442) != NULL ]]; then printf -- '--publish %s:442\n' $(DOCKER_PORT_MAP_TCP_442); fi; \
 	if [[ $(DOCKER_PORT_MAP_TCP_443) != NULL ]]; then printf -- '--publish %s:443\n' $(DOCKER_PORT_MAP_TCP_443); fi; \
 )
