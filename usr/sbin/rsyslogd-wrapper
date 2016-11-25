@@ -3,8 +3,15 @@
 RSYSLOGD=/usr/sbin/rsyslogd
 NICE=/bin/nice
 SYSCTL=/usr/sbin/sysctl
+DAEMON_OPTS=""
 
-DAEMON_OPTS="
+if [[ ! -f /usr/sbin/rsyslogd ]] \
+	&& [[ -f /sbin/rsyslogd ]]; then
+	RSYSLOGD=/sbin/rsyslogd
+	DAEMON_OPTS+=" -c5"
+fi
+
+DAEMON_OPTS+="
  -n
  -4
  -Q
