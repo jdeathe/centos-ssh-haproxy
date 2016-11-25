@@ -45,6 +45,3 @@ SSH_USER_PASSWORD_HASHED ?= false
 SSH_USER_SHELL ?= /bin/bash
 # ------------------------------------------------------------------------------
 HAPROXY_CONFIG ?= /etc/haproxy/haproxy.cfg
-HAPROXY_SERVER_ADDRESS_1 ?= 192.168.99.100
-HAPROXY_SERVER_ADDRESS_2 ?=
-HAPROXY_SERVER_ADDRESS_3 ?=
