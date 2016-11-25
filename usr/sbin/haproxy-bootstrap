@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# Create lock file
+touch /tmp/httpd-bootstrap.lock
+
+TIMER_START="$(
+	date +%s.%N
+)"
+
+# source /etc/haproxy-bootstrap.conf
+
+
+TIMER_TOTAL="$(
+	echo - | awk "\
+	{ T1=\"${TIMER_START}\" } \
+	{ T2=\"$(date +%s.%N)\" } \
+	{ print T2 - T1; }"
+)"
+
+cat <<-EOT
+
+	================================================================================
+	HAProxy Details
+	--------------------------------------------------------------------------------
+	$(haproxy -vv)
+	--------------------------------------------------------------------------------
+	${TIMER_TOTAL}
+
+EOT
+
+# Release lock file
+rm -f /tmp/haproxy-bootstrap.lock
+
+exit 0

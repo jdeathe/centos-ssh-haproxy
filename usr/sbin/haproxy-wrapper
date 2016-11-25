@@ -18,6 +18,11 @@ NICENESS=10
 
 ${SYSCTL} -p
 
+while true; do
+	sleep 0.1
+	[[ -e /tmp/haproxy-bootstrap.lock ]] || break
+done
+
 exec ${NICE} \
 	-n ${NICENESS} \
 	${HAPROXY} \

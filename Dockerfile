@@ -96,8 +96,9 @@ RUN { \
 # -----------------------------------------------------------------------------
 # Copy files into place
 # -----------------------------------------------------------------------------
-ADD usr/sbin/haproxy-wrapper \
-	/usr/sbin/rsyslogd-wrapper \
+ADD usr/sbin/haproxy-bootstrap \
+	usr/sbin/haproxy-wrapper \
+	usr/sbin/rsyslogd-wrapper \
 	/usr/sbin/
 ADD etc/services-config/haproxy/haproxy.cfg \
 	/etc/services-config/haproxy/
@@ -108,6 +109,9 @@ RUN ln -sf \
 		/etc/services-config/haproxy/haproxy.cfg \
 		/etc/haproxy/haproxy.cfg \
 	&& ln -sf \
+		/etc/services-config/supervisor/supervisord.d/haproxy-bootstrap.conf \
+		/etc/supervisord.d/haproxy-bootstrap.conf \
+	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-wrapper.conf \
 		/etc/supervisord.d/haproxy-wrapper.conf \
 	&& ln -sf \
@@ -116,9 +120,9 @@ RUN ln -sf \
 	&& chmod 600 \
 		/etc/services-config/haproxy/haproxy.cfg \
 	&& chmod 600 \
-		/etc/services-config/supervisor/supervisord.d/haproxy-wrapper.conf \
+		/etc/services-config/supervisor/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
 	&& chmod 700 \
-		/usr/sbin/{haproxy,rsyslogd}-wrapper
+		/usr/sbin/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}
 
 EXPOSE 80 443
 
