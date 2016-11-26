@@ -2,12 +2,6 @@
 
 HAPROXY=/usr/sbin/haproxy
 NICE=/bin/nice
-SYSCTL=/usr/sbin/sysctl
-
-if [[ ! -f /usr/sbin/sysctl ]] \
-	&& [[ -f /sbin/sysctl ]]; then
-	SYSCTL=/sbin/sysctl
-fi
 
 DAEMON_OPTS="
  -db
@@ -15,8 +9,6 @@ DAEMON_OPTS="
 "
 
 NICENESS=10
-
-${SYSCTL} -p
 
 while true; do
 	sleep 0.1

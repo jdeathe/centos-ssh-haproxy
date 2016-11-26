@@ -18,7 +18,9 @@ RUN rpm --rebuilddb \
 	&& yum clean all \
 	&& mv \
 		/etc/haproxy/haproxy.cfg \
-		/etc/haproxy/haproxy.cfg.default
+		/etc/haproxy/haproxy.cfg.default \
+	&& mkdir -p \
+		/etc/pki/tls/certs/sni
 
 # -----------------------------------------------------------------------------
 # Enable local syslog logging
@@ -59,21 +61,6 @@ RUN curl -LsSO \
 	&& rm -rf /hatop-0.7.7* \
 	&& echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
 		> /etc/profile.d/hatop.sh
-
-# Generate a self-signed certificate
-# TODO: Needs to be in a bootstrap otherwise the key is part of the image
-#   + Server Name needs to be a variable.
-RUN mkdir -p \
-		/etc/pki/tls/certs/sni \
-	&& openssl req \
-		-x509 \
-		-sha256 \
-		-nodes \
-		-newkey rsa:2048 \
-		-days 365 \
-		-subj "/C=--/ST=STATE/L=LOCALITY/O=ORGANISATION/CN=app-1.local" \
-		-keyout /etc/pki/tls/certs/sni/app-1.local.pem \
-		-out /etc/pki/tls/certs/sni/app-1.local.pem
 
 # -----------------------------------------------------------------------------
 # Increase the system limits

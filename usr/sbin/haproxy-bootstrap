@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Create lock file
-touch /tmp/httpd-bootstrap.lock
+touch /tmp/haproxy-bootstrap.lock
 
 TIMER_START="$(
 	date +%s.%N
@@ -9,6 +9,41 @@ TIMER_START="$(
 
 # source /etc/haproxy-bootstrap.conf
 
+function make_self_signed_certificate ()
+{
+	local C="${1:-"--"}"
+	local ST="${2:-STATE}"
+	local L="${3:-LOCALITY}"
+	local O="${4:-ORGANIZATION}"
+	local CN="${5:-localhost.localdomain}"
+	local OUT_PATH="${6:-/etc/pki/tls/certs/localhost.crt}"
+
+	openssl req \
+		-x509 \
+		-sha256 \
+		-nodes \
+		-newkey rsa:2048 \
+		-days 365 \
+		-subj "/C=${C}/ST=${ST}/L=${L}/O=${O}/CN=${CN}" \
+		-keyout "${OUT_PATH}" \
+		-out "${OUT_PATH}"
+}
+
+# Generate a default self-signed SSL/TLS certificate if necessary.
+if [[ ! -f /etc/pki/tls/certs/localhost.crt ]]; then
+	make_self_signed_certificate
+	cp -pf \
+		/etc/pki/tls/certs/localhost.crt \
+		/etc/pki/tls/certs/sni/
+fi
+
+# Set sysctl changes
+SYSCTL=/usr/sbin/sysctl
+if [[ ! -f /usr/sbin/sysctl ]] \
+	&& [[ -f /sbin/sysctl ]]; then
+	SYSCTL=/sbin/sysctl
+fi
+${SYSCTL} -p
 
 TIMER_TOTAL="$(
 	echo - | awk "\
