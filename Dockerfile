@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:centos-6-1.7.3
+FROM jdeathe/centos-ssh:1.7.5
 
 MAINTAINER James Deathe <james.deathe@gmail.com>
 
