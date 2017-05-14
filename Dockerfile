@@ -7,12 +7,14 @@ FROM jdeathe/centos-ssh:1.7.5
 # Install HAProxy
 # -----------------------------------------------------------------------------
 RUN rpm --rebuilddb \
-	&& yum --setopt=tsflags=nodocs -y install \
-		tar \
+	&& yum -y install \
+			--setopt=tsflags=nodocs \
+			--disableplugin=fastestmirror \
 		gzip \
 		haproxy \
 		openssl \
 		rsyslog \
+		tar \
 	&& yum clean all \
 	&& mv \
 		/etc/haproxy/haproxy.cfg \
@@ -34,9 +36,9 @@ RUN sed -i \
 	&& mkdir -p \
 		/run/systemd/journal \
 	&& { \
-		echo -e '$UDPServerAddress 127.0.0.1'; \
-		echo -e 'local2.* /var/log/haproxy.log'; \
-		echo -e '& stop'; \
+		echo '$UDPServerAddress 127.0.0.1'; \
+		echo 'local2.* /var/log/haproxy.log'; \
+		echo '& stop'; \
 	} > /etc/rsyslog.d/listen.conf
 
 # -----------------------------------------------------------------------------
@@ -64,8 +66,9 @@ RUN curl -LsSO \
 # Increase the system limits
 # -----------------------------------------------------------------------------
 RUN { \
-		echo -e '\nhaproxy\tsoft\tnofile\t8388608'; \
-		echo -e '\nhaproxy\thard\tnofile\t16777216'; \
+		echo ''; \
+		echo -e 'haproxy\tsoft\tnofile\t8388608'; \
+		echo -e 'haproxy\thard\tnofile\t16777216'; \
 	} >> /etc/security/limits.conf
 
 RUN { \
