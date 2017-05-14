@@ -3,8 +3,6 @@
 # =============================================================================
 FROM jdeathe/centos-ssh:1.7.5
 
-MAINTAINER James Deathe <james.deathe@gmail.com>
-
 # -----------------------------------------------------------------------------
 # Install HAProxy
 # -----------------------------------------------------------------------------
@@ -119,5 +117,11 @@ EXPOSE 80 443
 ENV HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
 	SSH_AUTOSTART_SSHD=false \
 	SSH_AUTOSTART_SSHD_BOOTSTRAP=false
+
+# -----------------------------------------------------------------------------
+# Set image metadata
+# -----------------------------------------------------------------------------
+LABEL \
+	maintainer="James Deathe <james.deathe@gmail.com>"
 
 CMD ["/usr/bin/supervisord", "--configuration=/etc/supervisord.conf"]
