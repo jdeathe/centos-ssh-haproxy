@@ -9,29 +9,63 @@ TIMER_START="$(
 
 # source /etc/haproxy-bootstrap.conf
 
-function make_self_signed_certificate ()
+function make_self_signed_san_certificate ()
 {
-	local C="${1:-"--"}"
-	local ST="${2:-STATE}"
-	local L="${3:-LOCALITY}"
-	local O="${4:-ORGANIZATION}"
-	local CN="${5:-localhost.localdomain}"
-	local OUT_PATH="${6:-/etc/pki/tls/certs/localhost.crt}"
+	local CN
+	local HOST
+	local HOSTS="${@}"
+	local SAN
 
+	# Use default host if none specified.
+	if [[ ${#HOSTS[@]} -eq 0 ]]; then
+		HOSTS="localhost.localdomain"
+	fi
+
+	if [[ ${#HOSTS[@]} -gt 0 ]]; then
+		for HOST in ${HOSTS[@]}; do
+			if [[ -z ${SAN} ]]; then
+				# Common Name is required - use the first host.
+				CN="${HOST}"
+			else
+				# Additional hosts should be comma separated.
+				SAN+=","
+			fi
+
+			# Build up the subjectAltName value.
+			SAN+="DNS:${HOST}"
+		done
+	fi
+
+	# Generate a custom openssl configuration - appending a san section.
+	cat \
+		/etc/pki/tls/openssl.cnf \
+		- \
+		<<-CONFIG > /etc/pki/tls/certs/localhost.cnf
+
+	[ san ]
+	subjectAltName="${SAN:-root@localhost.localdomain}"
+	CONFIG
+
+	# Generate the certificate.
 	openssl req \
 		-x509 \
 		-sha256 \
 		-nodes \
 		-newkey rsa:2048 \
 		-days 365 \
-		-subj "/C=${C}/ST=${ST}/L=${L}/O=${O}/CN=${CN}" \
-		-keyout "${OUT_PATH}" \
-		-out "${OUT_PATH}"
+		-reqexts san \
+		-extensions san \
+		-subj "/CN=${CN}" \
+		-config /etc/pki/tls/certs/localhost.cnf \
+		-keyout /etc/pki/tls/certs/localhost.crt \
+		-out /etc/pki/tls/certs/localhost.crt
+
 }
 
 # Generate a default self-signed SSL/TLS certificate if necessary.
 if [[ ! -f /etc/pki/tls/certs/localhost.crt ]]; then
-	make_self_signed_certificate
+	make_self_signed_san_certificate \
+		1&> /dev/null
 	cp -pf \
 		/etc/pki/tls/certs/localhost.crt \
 		/etc/pki/tls/certs/sni/
