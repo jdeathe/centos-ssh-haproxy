@@ -86,13 +86,13 @@ RUN { \
 # -----------------------------------------------------------------------------
 # Copy files into place
 # -----------------------------------------------------------------------------
-ADD usr/sbin/haproxy-bootstrap \
-	usr/sbin/haproxy-wrapper \
-	usr/sbin/rsyslogd-wrapper \
+ADD src/usr/sbin/haproxy-bootstrap \
+	src/usr/sbin/haproxy-wrapper \
+	src/usr/sbin/rsyslogd-wrapper \
 	/usr/sbin/
-ADD etc/services-config/haproxy/haproxy.cfg \
+ADD src/etc/services-config/haproxy/haproxy.cfg \
 	/etc/services-config/haproxy/
-ADD etc/services-config/supervisor/supervisord.d \
+ADD src/etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
 
 RUN ln -sf \
