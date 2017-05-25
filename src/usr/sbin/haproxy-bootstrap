@@ -65,7 +65,8 @@ function make_self_signed_san_certificate ()
 # Generate a default self-signed SSL/TLS certificate if necessary.
 if [[ ! -f /etc/pki/tls/certs/localhost.crt ]]; then
 	make_self_signed_san_certificate \
-		1&> /dev/null
+		"localhost.localdomain" \
+		&> /dev/null
 	cp -pf \
 		/etc/pki/tls/certs/localhost.crt \
 		/etc/pki/tls/certs/sni/
