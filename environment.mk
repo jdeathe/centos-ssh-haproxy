@@ -3,10 +3,11 @@
 # -----------------------------------------------------------------------------
 DOCKER_USER := jdeathe
 DOCKER_IMAGE_NAME := centos-ssh-haproxy
+SHPEC_ROOT := test/shpec
 
 # Tag validation patterns
-DOCKER_IMAGE_TAG_PATTERN := ^(latest|(centos-[6-7])|(centos-(6-1|7-2).[0-9]+.[0-9]+))$
-DOCKER_IMAGE_RELEASE_TAG_PATTERN := ^centos-(6-1|7-2).[0-9]+.[0-9]+$
+DOCKER_IMAGE_TAG_PATTERN := ^(latest|centos-6|((1|centos-6-1)\.[0-9]+\.[0-9]+))$
+DOCKER_IMAGE_RELEASE_TAG_PATTERN := ^(1|centos-6-1)\.[0-9]+\.[0-9]+$
 
 # -----------------------------------------------------------------------------
 # Variables
@@ -16,7 +17,7 @@ DOCKER_IMAGE_RELEASE_TAG_PATTERN := ^centos-(6-1|7-2).[0-9]+.[0-9]+$
 DOCKER_CONTAINER_OPTS ?=
 DOCKER_IMAGE_TAG ?= latest
 DOCKER_NAME ?= haproxy.pool-1.1.1
-DOCKER_PORT_MAP_TCP_22 ?= 
+DOCKER_PORT_MAP_TCP_22 ?= NULL
 DOCKER_PORT_MAP_TCP_80 ?= 80
 DOCKER_PORT_MAP_TCP_443 ?= 443
 DOCKER_RESTART_POLICY ?= always
@@ -26,6 +27,9 @@ NO_CACHE ?= false
 
 # Directory path for release packages
 DIST_PATH ?= ./dist
+
+# Number of seconds expected to complete container startup including bootstrap.
+STARTUP_TIME ?= 2
 
 # ------------------------------------------------------------------------------
 # Application container configuration

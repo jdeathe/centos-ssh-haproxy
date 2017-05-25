@@ -1,7 +1,7 @@
 
 # Common parameters of create and run targets
 define DOCKER_CONTAINER_PARAMETERS
--t \
+--tty \
 --privileged \
 --name $(DOCKER_NAME) \
 --restart $(DOCKER_RESTART_POLICY) \
