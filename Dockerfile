@@ -73,16 +73,6 @@ RUN { \
 		echo -e 'haproxy\thard\tnofile\t16777216'; \
 	} >> /etc/security/limits.conf
 
-RUN { \
-		echo ''; \
-		echo 'fs.file-max = 16777216'; \
-		echo 'fs.nr_open = 8388608'; \
-		echo ''; \
-		echo 'net.core.somaxconn = 32768'; \
-		echo 'net.ipv4.ip_local_port_range = 1024 65535'; \
-		echo 'net.ipv4.route.flush = 1'; \
-	} >> /etc/sysctl.conf
-
 # -----------------------------------------------------------------------------
 # Copy files into place
 # -----------------------------------------------------------------------------

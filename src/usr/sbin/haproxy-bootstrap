@@ -72,14 +72,6 @@ if [[ ! -f /etc/pki/tls/certs/localhost.crt ]]; then
 		/etc/pki/tls/certs/sni/
 fi
 
-# Set sysctl changes
-SYSCTL=/usr/sbin/sysctl
-if [[ ! -f /usr/sbin/sysctl ]] \
-	&& [[ -f /sbin/sysctl ]]; then
-	SYSCTL=/sbin/sysctl
-fi
-${SYSCTL} -p
-
 TIMER_TOTAL="$(
 	echo - | awk "\
 	{ T1=\"${TIMER_START}\" } \
