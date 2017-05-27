@@ -12,7 +12,6 @@ RUN rpm --rebuilddb \
 	&& yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
-		gzip \
 		haproxy \
 		openssl \
 		rsyslog \
@@ -55,11 +54,6 @@ RUN curl -LsSO \
 		-m 0755 \
 		bin/hatop \
 		/usr/local/bin \
-	&& install \
-		-m 0644 \
-		man/hatop.1 \
-		/usr/local/share/man/man1 \
-	&& gzip -9 /usr/local/share/man/man1/hatop.1 \
 	&& rm -rf /hatop-${HATOP_VERSION}* \
 	&& echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
 		> /etc/profile.d/hatop.sh
