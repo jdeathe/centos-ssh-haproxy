@@ -1,0 +1,63 @@
+# ------------------------------------------------------------------------------
+# Ref: https://docs.docker.com/compose/compose-file/
+# 
+# docker-compose -p p1 down
+# docker-compose -p p1 up -d
+# ------------------------------------------------------------------------------
+version: "2.1"
+networks:
+  tier1:
+    driver: "bridge"
+  tier2:
+    driver: "bridge"
+    internal: true
+services:
+  haproxy:
+    image: "jdeathe/centos-ssh-haproxy:latest"
+    mem_limit: "512M"
+    networks:
+      - "tier1"
+      - "tier2"
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: "always"
+    sysctls:
+      net.core.somaxconn: "32768"
+      net.ipv4.ip_local_port_range: "1024 65535"
+      net.ipv4.route.flush: "1"
+    tty: true
+  httpd_1:
+    environment:
+      APACHE_MPM: "event"
+      APACHE_SERVER_ALIAS: "www.app"
+      APACHE_SERVER_NAME: "www.app.local"
+    image: "jdeathe/centos-ssh-apache-php:2.1.0"
+    mem_limit: "512M"
+    networks:
+      tier2:
+        aliases:
+          - "httpd_1"
+          - "web_1"
+    restart: "always"
+    sysctls:
+      net.core.somaxconn: "2048"
+      net.ipv4.ip_local_port_range: "1024 65535"
+      net.ipv4.route.flush: "1"
+  httpd_2:
+    environment:
+      APACHE_MPM: "event"
+      APACHE_SERVER_ALIAS: "www.app"
+      APACHE_SERVER_NAME: "www.app.local"
+    image: "jdeathe/centos-ssh-apache-php:2.1.0"
+    mem_limit: "512M"
+    networks:
+      tier2:
+        aliases:
+          - "httpd_2"
+          - "web_2"
+    restart: "always"
+    sysctls:
+      net.core.somaxconn: "2048"
+      net.ipv4.ip_local_port_range: "1024 65535"
+      net.ipv4.route.flush: "1"
