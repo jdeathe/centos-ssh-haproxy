@@ -13,7 +13,7 @@ DAEMON_OPTS="
  -p ${PID_PATH}
 "
 
-function __is_valid_configuration()
+function __is_valid_configuration ()
 {
 	${HAPROXY} \
 		-c \
@@ -33,7 +33,7 @@ function __is_valid_configuration()
 	return 0
 }
 
-function reload()
+function reload ()
 {
 	local pids
 	local return_value
@@ -70,7 +70,7 @@ function reload()
 	return ${return_value}
 }
 
-function start()
+function start ()
 {
 	local return_value
 
@@ -92,7 +92,7 @@ function start()
 	return ${return_value}
 }
 
-function stop()
+function stop ()
 {
 	local return_value
 
