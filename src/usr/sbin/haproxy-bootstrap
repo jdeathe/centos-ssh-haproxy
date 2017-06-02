@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 
 # Create lock file
-touch /tmp/haproxy-bootstrap.lock
+touch /var/lock/subsys/haproxy-bootstrap
 
 TIMER_START="$(
 	date +%s.%N
 )"
-
-# source /etc/haproxy-bootstrap.conf
 
 function make_self_signed_san_certificate ()
 {
@@ -91,6 +89,6 @@ cat <<-EOT
 EOT
 
 # Release lock file
-rm -f /tmp/haproxy-bootstrap.lock
+rm -f /var/lock/subsys/haproxy-bootstrap
 
 exit 0

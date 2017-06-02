@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
-RSYSLOGD=/usr/sbin/rsyslogd
-NICE=/bin/nice
-SYSCTL=/usr/sbin/sysctl
+readonly NICE=/bin/nice
+readonly SYSCTL=/usr/sbin/sysctl
 DAEMON_OPTS=""
+NICENESS=${RSYSLOGD_NICENESS:-10}
 
 if [[ ! -f /usr/sbin/rsyslogd ]] \
 	&& [[ -f /sbin/rsyslogd ]]; then
-	RSYSLOGD=/sbin/rsyslogd
+	readonly RSYSLOGD=/sbin/rsyslogd
 	DAEMON_OPTS+=" -c5"
+else
+	readonly RSYSLOGD=/usr/sbin/rsyslogd
 fi
 
 DAEMON_OPTS+="
@@ -18,8 +20,6 @@ DAEMON_OPTS+="
  -l 127.0.0.1
  -f /etc/rsyslog.conf
 "
-
-NICENESS=${RSYSLOGD_NICENESS:-10}
 
 exec ${NICE} \
 	-n ${NICENESS} \

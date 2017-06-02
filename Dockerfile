@@ -55,7 +55,7 @@ RUN curl -LsSO \
 		bin/hatop \
 		/usr/local/bin \
 	&& rm -rf /hatop-${HATOP_VERSION}* \
-	&& echo 'alias hatop="hatop -s /var/lib/haproxy/stats -i 1"' \
+	&& echo 'alias hatop="hatop -s /var/lib/haproxy/stats-1 -i 1"' \
 		> /etc/profile.d/hatop.sh
 
 # -----------------------------------------------------------------------------

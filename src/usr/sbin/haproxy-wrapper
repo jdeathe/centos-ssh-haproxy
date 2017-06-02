@@ -1,21 +1,138 @@
 #!/usr/bin/env bash
 
-HAPROXY=/usr/sbin/haproxy
-NICE=/bin/nice
+readonly HAPROXY=/usr/sbin/haproxy
+readonly HAPROXY_CONFIG="${HAPROXY_CONFIG:-/etc/haproxy/haproxy.cfg}"
+readonly HAPROXY_LOCK_FILE=/var/lock/subsys/haproxy
+readonly HAPROXY_BOOTSTRAP_LOCK_FILE=/var/lock/subsys/haproxy-bootstrap
+readonly PID_PATH=/var/run/haproxy.pid
 
+BLOCKER_PID=""
 DAEMON_OPTS="
- -db
- -f ${HAPROXY_CONFIG:-/etc/haproxy/haproxy.cfg}
+ -D
+ -f ${HAPROXY_CONFIG}
+ -p ${PID_PATH}
 "
 
-NICENESS=10
+function __is_valid_configuration()
+{
+	${HAPROXY} \
+		-c \
+		-q \
+		-f ${HAPROXY_CONFIG}
+
+	if [[ ${?} -ne 0 ]]; then
+		printf -- \
+			'Errors in configuration file.\n' \
+			"$(
+				basename \
+				${HAPROXY}
+			)" >&2
+		return 1
+	fi
+
+	return 0
+}
+
+function reload()
+{
+	local pids
+	local return_value
+
+	if ! __is_valid_configuration; then
+		return 1
+	fi
+
+	pids="$(
+		cat "${PID_PATH}"
+	)"
+
+	if [[ -n ${pids} ]]; then
+		${HAPROXY} \
+			${DAEMON_OPTS} \
+			-sf ${pids}
+	else
+		${HAPROXY} \
+			${DAEMON_OPTS}
+	fi
+
+	return_value=${?}
+
+	if [[ -n ${BLOCKER_PID} ]]; then
+		kill ${BLOCKER_PID}
+	fi
+
+	# Create a lockfile on successful startup.
+	if [[ ${return_value} -eq 0 ]]; then
+		touch \
+			${HAPROXY_LOCK_FILE}
+	fi
+
+	return ${return_value}
+}
+
+function start()
+{
+	local return_value
+
+	if ! __is_valid_configuration; then
+		return 1
+	fi
+
+	${HAPROXY} \
+		${DAEMON_OPTS}
+
+	return_value=${?}
+
+	# Create a lockfile on successful startup.
+	if [[ ${return_value} -eq 0 ]]; then
+		touch \
+			${HAPROXY_LOCK_FILE}
+	fi
+
+	return ${return_value}
+}
+
+function stop()
+{
+	local return_value
+
+	killall "$(
+		basename \
+		${HAPROXY}
+	)"
+
+	return_value=${?}
+
+	if [[ -n ${BLOCKER_PID} ]]; then
+		kill ${BLOCKER_PID}
+	fi
+
+	# Remove the lockfile on successful stop.
+	if [[ ${return_value} -eq 0 ]]; then
+		rm -f \
+			${HAPROXY_LOCK_FILE}
+	fi
+
+	return ${return_value}
+}
+
+# Use SIGHUP, (kill -1 <pid>), signal to reload instead of stop.
+trap reload \
+	HUP
+trap stop \
+	INT TERM EXIT
 
 while true; do
 	sleep 0.1
-	[[ -e /tmp/haproxy-bootstrap.lock ]] || break
+	[[ -e ${HAPROXY_BOOTSTRAP_LOCK_FILE} ]] || break
 done
 
-exec ${NICE} \
-	-n ${NICENESS} \
-	${HAPROXY} \
-	${DAEMON_OPTS}
+start
+
+# Keep script in the foreground and allow reload/stop traps to function.
+while [[ -e ${HAPROXY_LOCK_FILE} ]]; do
+	sleep \
+		infinity &
+	BLOCKER_PID=${!}
+	wait ${BLOCKER_PID}
+done
