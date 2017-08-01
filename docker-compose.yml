@@ -32,7 +32,7 @@ services:
       APACHE_MPM: "event"
       APACHE_SERVER_ALIAS: "www.app"
       APACHE_SERVER_NAME: "www.app.local"
-    image: "jdeathe/centos-ssh-apache-php:2.1.0"
+    image: "jdeathe/centos-ssh-apache-php:2.2.0"
     mem_limit: "512M"
     networks:
       tier2:
@@ -49,7 +49,7 @@ services:
       APACHE_MPM: "event"
       APACHE_SERVER_ALIAS: "www.app"
       APACHE_SERVER_NAME: "www.app.local"
-    image: "jdeathe/centos-ssh-apache-php:2.1.0"
+    image: "jdeathe/centos-ssh-apache-php:2.2.0"
     mem_limit: "512M"
     networks:
       tier2:
