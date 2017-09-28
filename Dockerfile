@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:1.8.0
+FROM jdeathe/centos-ssh:1.8.2
 
 ARG HATOP_VERSION="0.7.7"
 
@@ -70,9 +70,7 @@ RUN { \
 # -----------------------------------------------------------------------------
 # Copy files into place
 # -----------------------------------------------------------------------------
-ADD src/usr/sbin/haproxy-bootstrap \
-	src/usr/sbin/haproxy-wrapper \
-	src/usr/sbin/rsyslogd-wrapper \
+ADD src/usr/sbin \
 	/usr/sbin/
 ADD src/etc/services-config/haproxy/haproxy.cfg \
 	/etc/services-config/haproxy/
