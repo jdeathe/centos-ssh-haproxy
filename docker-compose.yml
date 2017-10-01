@@ -14,6 +14,8 @@ networks:
 services:
   haproxy:
     image: "jdeathe/centos-ssh-haproxy:latest"
+    environment:
+      HAPROXY_CONFIG: "/etc/haproxy/haproxy-http.cfg"
     mem_limit: "512M"
     networks:
       - "tier1"
@@ -29,6 +31,7 @@ services:
     tty: true
   httpd_1:
     environment:
+      APACHE_MOD_SSL_ENABLED: "false"
       APACHE_MPM: "event"
       APACHE_SERVER_ALIAS: "www.app"
       APACHE_SERVER_NAME: "www.app.local"
@@ -46,6 +49,7 @@ services:
       net.ipv4.route.flush: "1"
   httpd_2:
     environment:
+      APACHE_MOD_SSL_ENABLED: "false"
       APACHE_MPM: "event"
       APACHE_SERVER_ALIAS: "www.app"
       APACHE_SERVER_NAME: "www.app.local"

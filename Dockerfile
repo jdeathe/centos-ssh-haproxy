@@ -72,14 +72,21 @@ RUN { \
 # -----------------------------------------------------------------------------
 ADD src/usr/sbin \
 	/usr/sbin/
-ADD src/etc/services-config/haproxy/haproxy.cfg \
+ADD src/etc/services-config/haproxy/haproxy-http.example.cfg \
+	src/etc/services-config/haproxy/haproxy-tcp.example.cfg \
 	/etc/services-config/haproxy/
 ADD src/etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
 
 RUN ln -sf \
-		/etc/services-config/haproxy/haproxy.cfg \
+		/etc/services-config/haproxy/haproxy-http.example.cfg \
 		/etc/haproxy/haproxy.cfg \
+	&& ln -sf \
+		/etc/services-config/haproxy/haproxy-http.example.cfg \
+		/etc/haproxy/haproxy-http.cfg \
+	&& ln -sf \
+		/etc/services-config/haproxy/haproxy-tcp.example.cfg \
+		/etc/haproxy/haproxy-tcp.cfg \
 	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-bootstrap.conf \
 		/etc/supervisord.d/haproxy-bootstrap.conf \
@@ -90,7 +97,7 @@ RUN ln -sf \
 		/etc/services-config/supervisor/supervisord.d/rsyslogd-wrapper.conf \
 		/etc/supervisord.d/rsyslogd-wrapper.conf \
 	&& chmod 600 \
-		/etc/services-config/haproxy/haproxy.cfg \
+		/etc/services-config/haproxy/haproxy-{http,tcp}.example.cfg \
 	&& chmod 600 \
 		/etc/services-config/supervisor/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
 	&& chmod 700 \
