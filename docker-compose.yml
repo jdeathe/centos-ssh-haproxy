@@ -16,6 +16,7 @@ services:
     image: "jdeathe/centos-ssh-haproxy:latest"
     environment:
       HAPROXY_CONFIG: "/etc/haproxy/haproxy-http.cfg"
+      HAPROXY_HOST_NAMES: "www.app.local app.local localhost.localdomain"
     mem_limit: "512M"
     networks:
       - "tier1"

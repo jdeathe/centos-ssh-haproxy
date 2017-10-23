@@ -63,7 +63,7 @@ function make_self_signed_san_certificate ()
 # Generate a default self-signed SSL/TLS certificate if necessary.
 if [[ ! -f /etc/pki/tls/certs/localhost.crt ]]; then
 	make_self_signed_san_certificate \
-		"localhost.localdomain" \
+		"${HAPROXY_HOST_NAMES:-localhost.localdomain}" \
 		&> /dev/null
 	cp -pf \
 		/etc/pki/tls/certs/localhost.crt \
@@ -82,6 +82,8 @@ cat <<-EOT
 	================================================================================
 	HAProxy Details
 	--------------------------------------------------------------------------------
+	host names : ${HAPROXY_HOST_NAMES}
+	
 	$(haproxy -vv)
 	--------------------------------------------------------------------------------
 	${TIMER_TOTAL}

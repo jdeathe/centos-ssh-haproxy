@@ -109,6 +109,7 @@ EXPOSE 80 443
 # Set default environment variables
 # -----------------------------------------------------------------------------
 ENV HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
+	HAPROXY_HOST_NAMES="localhost.localdomain" \
 	SSH_AUTOSTART_SSHD=false \
 	SSH_AUTOSTART_SSHD_BOOTSTRAP=false
 
