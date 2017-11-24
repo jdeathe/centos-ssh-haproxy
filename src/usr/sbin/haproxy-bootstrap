@@ -60,6 +60,38 @@ function make_self_signed_san_certificate ()
 
 }
 
+function set_haproxy_config ()
+{
+	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
+	local -r pattern_plain_text='.* /var/lib/haproxy.*'
+
+	local value="${1:-}"
+
+	if [[ -n ${value} ]] && [[ ! -s ${value} ]]; then
+		# Decode base64 encoded values
+		if [[ ${value} =~ ${pattern_base64} ]]; then
+			value="$(
+				base64 -d -i <<< "${value}"
+			)"
+		fi
+
+		if [[ ! ${value} =~ ${pattern_plain_text} ]]; then
+			printf -- \
+				'ERROR: Invalid HAProxy configuration file\n' \
+				>&2
+			sleep 0.1
+			exit 1
+		fi
+
+		printf \
+			-- '%s' \
+			"${value}" \
+		> /etc/haproxy/haproxy.cfg
+
+		unset HAPROXY_CONFIG
+	fi
+}
+
 # Generate a default self-signed SSL/TLS certificate if necessary.
 if [[ ! -f /etc/pki/tls/certs/localhost.crt ]]; then
 	make_self_signed_san_certificate \
@@ -69,6 +101,9 @@ if [[ ! -f /etc/pki/tls/certs/localhost.crt ]]; then
 		/etc/pki/tls/certs/localhost.crt \
 		/etc/pki/tls/certs/sni/
 fi
+
+set_haproxy_config \
+	"${HAPROXY_CONFIG}"
 
 TIMER_TOTAL="$(
 	echo - | awk "\
