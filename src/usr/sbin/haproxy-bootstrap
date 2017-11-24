@@ -64,6 +64,12 @@ function set_haproxy_config ()
 {
 	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
 	local -r pattern_plain_text='.* /var/lib/haproxy.*'
+	local -r pattern_nbproc='nbproc ([0-9]+)'
+	local -r system_nbproc="$(
+		grep -c \
+		"^processor" \
+		/proc/cpuinfo
+	)"
 
 	local value="${1:-}"
 
@@ -77,7 +83,20 @@ function set_haproxy_config ()
 
 		if [[ ! ${value} =~ ${pattern_plain_text} ]]; then
 			printf -- \
-				'ERROR: Invalid HAProxy configuration file\n' \
+				'ERROR: Invalid configuration file\n' \
+				>&2
+			sleep 0.1
+			exit 1
+		fi
+
+		if [[ ${value} =~ ${pattern_nbproc} ]] \
+			&& [[ -n ${BASH_REMATCH[1]} ]] \
+			&& [[ ${system_nbproc} -lt ${BASH_REMATCH[1]} ]]
+		then
+			printf -- \
+				'ERROR: Configuration - nbproc %s on system with %s available.\n' \
+				"${BASH_REMATCH[1]}" \
+				"${system_nbproc}" \
 				>&2
 			sleep 0.1
 			exit 1
