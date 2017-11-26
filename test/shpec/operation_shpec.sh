@@ -1,4 +1,4 @@
-readonly BOOTSTRAP_BACKOFF_TIME=2
+readonly STARTUP_TIME=2
 readonly TEST_DIRECTORY="test"
 
 # These should ideally be a static value but hosts might be using this port so 
@@ -9,12 +9,128 @@ DOCKER_PORT_MAP_TCP_443="${DOCKER_PORT_MAP_TCP_443:-443}"
 
 function __destroy ()
 {
-	:
+	local -r backend_alias_1="httpd_1"
+	local -r backend_alias_2="httpd_2"
+	local -r backend_name_1="apache-php.pool-1.1.1"
+	local -r backend_name_2="apache-php.pool-1.1.2"
+	local -r backend_network="bridge_t1"
+
+	# Destroy the backend
+	__terminate_container \
+		${backend_name_1} \
+	&> /dev/null
+
+	__terminate_container \
+		${backend_name_2} \
+	&> /dev/null
+
+	# Destroy the bridge network
+	if [[ -n $(docker network ls -q -f name="${backend_network}") ]]; then
+		docker network rm \
+			${backend_network} \
+		&> /dev/null
+	fi
+}
+
+function __get_container_port ()
+{
+	local container="${1:-}"
+	local port="${2:-}"
+	local value=""
+
+	value="$(
+		docker port \
+			${container} \
+			${port}
+	)"
+	value=${value##*:}
+
+	printf -- \
+		'%s' \
+		"${value}"
+}
+
+# container - Docker container name.
+# counter - Timeout counter in seconds.
+# process_pattern - Regular expression pattern used to match running process.
+# bootstrap_lock_file - Path to the bootstrap lock file.
+function __is_container_ready ()
+{
+	local bootstrap_lock_file="${4:-}"
+	local container="${1:-}"
+	local counter=$(
+		awk \
+			-v seconds="${2:-10}" \
+			'BEGIN { print 10 * seconds; }'
+	)
+	local process_pattern="${3:-}"
+
+	until (( counter == 0 )); do
+		sleep 0.1
+
+		if docker exec ${container} \
+				bash -c "ps axo command" \
+			| grep -qE "${process_pattern}" \
+			> /dev/null 2>&1 \
+			&& docker exec ${container} \
+				bash -c "[[ ! -e ${bootstrap_lock_file} ]]"
+		then
+			break
+		fi
+
+		(( counter -= 1 ))
+	done
+
+	if (( counter == 0 )); then
+		return 1
+	fi
+
+	return 0
 }
 
 function __setup ()
 {
-	:
+	local -r backend_alias_1="httpd_1"
+	local -r backend_alias_2="httpd_2"
+	local -r backend_name_1="apache-php.pool-1.1.1"
+	local -r backend_name_2="apache-php.pool-1.1.2"
+	local -r backend_network="bridge_t1"
+	local -r backend_release="2.2.1"
+
+	# Create the bridge network
+	if [[ -z $(docker network ls -q -f name="${backend_network}") ]]; then
+		docker network create \
+			--driver bridge \
+			${backend_network} \
+		&> /dev/null
+	fi
+
+	# Create the backend container
+	__terminate_container \
+		${backend_name_1} \
+	&> /dev/null
+
+	docker run \
+		--detach \
+		--name ${backend_name_1} \
+		--network ${backend_network} \
+		--network-alias ${backend_alias_1} \
+		--volume ${PWD}/test/fixture/apache/var/www/public_html:/opt/app/public_html:ro \
+		jdeathe/centos-ssh-apache-php:${backend_release} \
+	&> /dev/null
+
+	__terminate_container \
+		${backend_name_2} \
+	&> /dev/null
+
+	docker run \
+		--detach \
+		--name ${backend_name_2} \
+		--network ${backend_network} \
+		--network-alias ${backend_alias_2} \
+		--volume ${PWD}/test/fixture/apache/var/www/public_html:/opt/app/public_html:ro \
+		jdeathe/centos-ssh-apache-php:${backend_release} \
+	&> /dev/null
 }
 
 # Custom shpec matcher
@@ -60,6 +176,8 @@ function __terminate_container ()
 
 function test_basic_operations ()
 {
+	local -r backend_network="bridge_t1"
+
 	local container_port_80=""
 	local container_port_443=""
 
@@ -69,44 +187,45 @@ function test_basic_operations ()
 		INT TERM EXIT
 
 	describe "Basic HAProxy operations"
-		__terminate_container \
-			haproxy.pool-1.1.1 \
-		&> /dev/null
-
-		it "Runs a HAProxy container named haproxy.pool-1.1.1 on port ${DOCKER_PORT_MAP_TCP_80}."
-			docker run \
-				--detach \
-				--name haproxy.pool-1.1.1 \
-				--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
-				--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
-				jdeathe/centos-ssh-haproxy:latest \
+		it "Runs named container."
+			__terminate_container \
+				haproxy.pool-1.1.1 \
 			&> /dev/null
 
-			container_port_80="$(
-				docker port \
-					haproxy.pool-1.1.1 \
-					80/tcp
-			)"
-			container_port_80=${container_port_80##*:}
+			it "Can publish ${DOCKER_PORT_MAP_TCP_80}:80."
+				docker run \
+					--detach \
+					--name haproxy.pool-1.1.1 \
+					--network ${backend_network} \
+					--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
+					--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
+					jdeathe/centos-ssh-haproxy:latest \
+				&> /dev/null
 
-			if [[ ${DOCKER_PORT_MAP_TCP_80} == 0 ]] \
-				|| [[ -z ${DOCKER_PORT_MAP_TCP_80} ]]; then
-				assert gt \
-					"${container_port_80}" \
-					"30000"
-			else
-				assert equal \
-					"${container_port_80}" \
-					"${DOCKER_PORT_MAP_TCP_80}"
-			fi
+				container_port_80="$(
+					__get_container_port \
+						haproxy.pool-1.1.1 \
+						80/tcp
+				)"
 
-			it "Also binds to the encrypted port ${DOCKER_PORT_MAP_TCP_443}."
+				if [[ ${DOCKER_PORT_MAP_TCP_80} == 0 ]] \
+					|| [[ -z ${DOCKER_PORT_MAP_TCP_80} ]]; then
+					assert gt \
+						"${container_port_80}" \
+						"30000"
+				else
+					assert equal \
+						"${container_port_80}" \
+						"${DOCKER_PORT_MAP_TCP_80}"
+				fi
+			end
+
+			it "Can publish ${DOCKER_PORT_MAP_TCP_443}:443."
 				container_port_443="$(
-					docker port \
+					__get_container_port \
 						haproxy.pool-1.1.1 \
 						443/tcp
 				)"
-				container_port_443=${container_port_443##*:}
 
 				if [[ ${DOCKER_PORT_MAP_TCP_443} == 0 ]] \
 					|| [[ -z ${DOCKER_PORT_MAP_TCP_443} ]]; then
@@ -118,9 +237,17 @@ function test_basic_operations ()
 						"${container_port_443}" \
 						"${DOCKER_PORT_MAP_TCP_443}"
 				fi
+			end
 		end
 
-		# sleep ${BOOTSTRAP_BACKOFF_TIME}
+		if ! __is_container_ready \
+			haproxy.pool-1.1.1 \
+			${STARTUP_TIME} \
+			"/usr/sbin/haproxy " \
+			"/var/lock/subsys/haproxy-bootstrap"
+		then
+			exit 1
+		fi
 
 		__terminate_container \
 			haproxy.pool-1.1.1 \
