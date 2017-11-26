@@ -30,6 +30,12 @@ services:
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
     tty: true
+    ulimits:
+      memlock: 82000
+      nofile:
+        soft: 524288
+        hard: 1048576
+      nproc: 65535
   httpd_1:
     environment:
       APACHE_MOD_SSL_ENABLED: "false"

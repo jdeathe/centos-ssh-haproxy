@@ -31,6 +31,11 @@ DIST_PATH ?= ./dist
 # Number of seconds expected to complete container startup including bootstrap.
 STARTUP_TIME ?= 2
 
+# Docker --ulimit settings
+ULIMIT_MEMLOCK ?= 82000
+ULIMIT_NOFILE ?= 131072
+ULIMIT_NPROC ?= 9223372036854775807
+
 # ------------------------------------------------------------------------------
 # Application container configuration
 # ------------------------------------------------------------------------------

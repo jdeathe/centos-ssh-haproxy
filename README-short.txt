@@ -1,1 +1,1 @@
-CentOS-6 6.9 x86_64 / CentOS-7 7.2.1511 x86_64 - HAProxy / HATop.
+CentOS-6 6.9 x86_64 - HAProxy / HATop.

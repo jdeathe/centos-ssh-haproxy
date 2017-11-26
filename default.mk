@@ -5,6 +5,9 @@ define DOCKER_CONTAINER_PARAMETERS
 --sysctl "net.core.somaxconn=32768" \
 --sysctl "net.ipv4.ip_local_port_range=1024 65535" \
 --sysctl "net.ipv4.route.flush=1" \
+--ulimit memlock=$(ULIMIT_MEMLOCK) \
+--ulimit nofile=$(ULIMIT_NOFILE) \
+--ulimit nproc=$(ULIMIT_NPROC) \
 --name $(DOCKER_NAME) \
 --restart $(DOCKER_RESTART_POLICY) \
 --env "HAPROXY_CONFIG=$(HAPROXY_CONFIG)" \

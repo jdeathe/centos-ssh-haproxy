@@ -12,10 +12,11 @@ RUN rpm --rebuilddb \
 	&& yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
+		haproxy-1.5.18-1.el6 \
+		rsyslog-5.8.10-10.el6_6 \
+	&& yum versionlock add \
 		haproxy \
-		openssl \
 		rsyslog \
-		tar \
 	&& yum clean all \
 	&& mv \
 		/etc/haproxy/haproxy.cfg \
@@ -72,11 +73,15 @@ RUN { \
 # -----------------------------------------------------------------------------
 ADD src/usr/sbin \
 	/usr/sbin/
+ADD src/opt/scmi \
+	/opt/scmi/
 ADD src/etc/services-config/haproxy/haproxy-http.example.cfg \
 	src/etc/services-config/haproxy/haproxy-tcp.example.cfg \
 	/etc/services-config/haproxy/
 ADD src/etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
+ADD src/etc/systemd/system \
+	/etc/systemd/system/
 
 RUN ln -sf \
 		/etc/services-config/haproxy/haproxy-http.example.cfg \
@@ -116,7 +121,33 @@ ENV HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
 # -----------------------------------------------------------------------------
 # Set image metadata
 # -----------------------------------------------------------------------------
+ARG RELEASE_VERSION="1.0.0"
 LABEL \
-	maintainer="James Deathe <james.deathe@gmail.com>"
+	maintainer="James Deathe <james.deathe@gmail.com>" \
+	install="docker run \
+--rm \
+--privileged \
+--volume /:/media/root \
+jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
+/usr/sbin/scmi install \
+--chroot=/media/root \
+--name=\${NAME} \
+--tag=${RELEASE_VERSION}" \
+	uninstall="docker run \
+--rm \
+--privileged \
+--volume /:/media/root \
+jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
+/usr/sbin/scmi uninstall \
+--chroot=/media/root \
+--name=\${NAME} \
+--tag=${RELEASE_VERSION}" \
+	org.deathe.name="centos-ssh-haproxy" \
+	org.deathe.version="${RELEASE_VERSION}" \
+	org.deathe.release="jdeathe/centos-ssh-haproxy:${RELEASE_VERSION}" \
+	org.deathe.license="MIT" \
+	org.deathe.vendor="jdeathe" \
+	org.deathe.url="https://github.com/jdeathe/centos-ssh-haproxy" \
+	org.deathe.description="CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7."
 
 CMD ["/usr/bin/supervisord", "--configuration=/etc/supervisord.conf"]
