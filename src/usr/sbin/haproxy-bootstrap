@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+readonly HAPROXY_CERTIFICATE_PATH="/etc/pki/tls/certs/localhost.localdomain.crt"
+readonly HAPROXY_CONFIG_PATH="/etc/haproxy/haproxy.cfg"
+
 # Create lock file
 touch /var/lock/subsys/haproxy-bootstrap
 
@@ -57,9 +60,63 @@ function make_self_signed_san_certificate ()
 		-extensions san \
 		-subj "/CN=${CN}" \
 		-config /etc/pki/tls/certs/localhost.cnf \
-		-keyout /etc/pki/tls/certs/localhost.localdomain.crt \
-		-out /etc/pki/tls/certs/localhost.localdomain.crt
+		-keyout ${HAPROXY_CERTIFICATE_PATH} \
+		-out ${HAPROXY_CERTIFICATE_PATH}
 
+}
+
+function set_haproxy_certificate ()
+{
+	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
+	local -r pattern_plain_text='-----BEGIN PRIVATE KEY-----'
+
+	local value="${1:-}"
+
+	# Get value from file
+	if [[ -n ${value} ]] \
+		&& [[ -s ${value} ]]
+	then
+		value="$(
+			cat "${value}"
+		)"
+	fi
+
+	# Decode base64 encoded values
+	if [[ -n ${value} ]] \
+		&& [[ ! -s ${value} ]] \
+		&& [[ ${value} =~ ${pattern_base64} ]]
+	then
+		value="$(
+			base64 -d -i <<< "${value}"
+		)"
+	fi
+
+	if [[ -n ${value} ]] \
+		&& [[ ! ${value} =~ ${pattern_plain_text} ]]
+	then
+		printf -- \
+			'ERROR: Invalid HAPROXY_CERTIFICATE\n' \
+			>&2
+		sleep 0.1
+		exit 1
+	elif [[ -n ${value} ]]; then
+		printf \
+			-- '%s' \
+			"${value}" \
+		> ${HAPROXY_CERTIFICATE_PATH}
+	fi
+
+	if [[ ! -s ${HAPROXY_CERTIFICATE_PATH} ]]; then
+		make_self_signed_san_certificate \
+			"${HAPROXY_HOST_NAMES:-localhost.localdomain}" \
+			&> /dev/null
+	fi
+
+	if [[ ! -s /etc/pki/tls/certs/sni/localhost.localdomain.crt ]]; then
+		cp -pf \
+			${HAPROXY_CERTIFICATE_PATH} \
+			/etc/pki/tls/certs/sni/
+	fi
 }
 
 function set_haproxy_config ()
@@ -69,47 +126,43 @@ function set_haproxy_config ()
 
 	local value="${1:-}"
 
+	# Get value from file
 	if [[ -n ${value} ]] \
-		&& [[ ! -s ${value} ]]
+		&& [[ -s ${value} ]]
 	then
-		# Decode base64 encoded values
-		if [[ ${value} =~ ${pattern_base64} ]]; then
-			value="$(
-				base64 -d -i <<< "${value}"
-			)"
-		fi
+		value="$(
+			cat "${value}"
+		)"
+	fi
 
-		if [[ ! ${value} =~ ${pattern_plain_text} ]]; then
-			printf -- \
-				'ERROR: Invalid configuration file\n' \
-				>&2
-			sleep 0.1
-			exit 1
-		fi
+	# Decode base64 encoded values
+	if [[ -n ${value} ]] \
+		&& [[ ! -s ${value} ]] \
+		&& [[ ${value} =~ ${pattern_base64} ]]
+	then
+		value="$(
+			base64 -d -i <<< "${value}"
+		)"
+	fi
 
+	if [[ -n ${value} ]] \
+		&& [[ ! ${value} =~ ${pattern_plain_text} ]]
+	then
+		printf -- \
+			'ERROR: Invalid HAPROXY_CONFIG\n' \
+			>&2
+		sleep 0.1
+		exit 1
+	elif [[ -n ${value} ]]; then
 		printf \
 			-- '%s' \
 			"${value}" \
-		> /etc/haproxy/haproxy.cfg
-	elif [[ -n ${value} ]] \
-		&& [[ ${value} != /etc/haproxy/haproxy.cfg ]] \
-		&& [[ ${value} != /etc/haproxy/haproxy-http.cfg ]] \
-		&& [[ -s ${value} ]]
-	then
-		cat "${value}" \
-		> /etc/haproxy/haproxy.cfg
+		> ${HAPROXY_CONFIG_PATH}
 	fi
 }
 
-# Generate a default self-signed SSL/TLS certificate if necessary.
-if [[ ! -f /etc/pki/tls/certs/localhost.localdomain.crt ]]; then
-	make_self_signed_san_certificate \
-		"${HAPROXY_HOST_NAMES:-localhost.localdomain}" \
-		&> /dev/null
-	cp -pf \
-		/etc/pki/tls/certs/localhost.localdomain.crt \
-		/etc/pki/tls/certs/sni/
-fi
+set_haproxy_certificate \
+	"${HAPROXY_CERTIFICATE}"
 
 set_haproxy_config \
 	"${HAPROXY_CONFIG}"

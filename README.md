@@ -93,6 +93,10 @@ $ docker logs haproxy.pool-1.1.1
 
 There are several environmental variables defined at runtime which allows the operator to customise the running container.
 
+##### HAPROXY_CERTIFICATE
+
+The HAProxy SSL/TLS certificate can be defined using `HAPROXY_CERTIFICATE`. The value may be either a file path, a base64 encoded string of the certificate file contents or a multiline string containing a PEM formatted concatenation of private key and certificate. If set to a file path the contents may also be a base64 encoded string.
+
 ##### HAPROXY_CONF
 
 The HAProxy configuration file path, (or base64 encoded string of the configuration file contents), is set using `HAPROXY_CONF`. The default http configuration is located at the path `/etc/haproxy/haproxy-http.example.cfg` and will be copied into the runnning configuration path `/etc/haproxy/haproxy-http.example.cfg`. There's also an example tcp configuration in the path `/etc/haproxy/haproxy-tcp.example.cfg`. 
@@ -102,3 +106,5 @@ In most situations it will be necessary to define a custom configuration where t
 ##### HAPROXY_HOST_NAMES
 
 The `HAPROXY_HOST_NAMES` can be used to set a, space separated, list of hostnames to be added to the automatically generated self-signed SAN certificate.
+
+**Note:** The value is unused if `HAPROXY_CERTIFICATE` has a valid value set.

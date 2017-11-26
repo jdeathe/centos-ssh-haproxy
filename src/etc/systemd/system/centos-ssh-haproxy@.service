@@ -58,6 +58,7 @@ Environment="DOCKER_PORT_MAP_TCP_443=8500"
 Environment="ULIMIT_MEMLOCK=82000"
 Environment="ULIMIT_NOFILE=131072"
 Environment="ULIMIT_NPROC=9223372036854775807"
+Environment="HAPROXY_CERTIFICATE="
 Environment="HAPROXY_CONFIG=/etc/haproxy/haproxy.cfg"
 Environment="HAPROXY_HOST_NAMES=localhost.localdomain"
 
@@ -96,6 +97,7 @@ ExecStart=/bin/bash -c \
     --ulimit memlock=${ULIMIT_MEMLOCK} \
     --ulimit nofile=${ULIMIT_NOFILE} \
     --ulimit nproc=${ULIMIT_NPROC} \
+    --env \"HAPROXY_CERTIFICATE=${HAPROXY_CERTIFICATE}\" \
     --env \"HAPROXY_CONFIG=${HAPROXY_CONFIG}\" \
     --env \"HAPROXY_HOST_NAMES=${HAPROXY_HOST_NAMES}\" \
     $(if [[ ${DOCKER_PORT_MAP_TCP_80} != NULL ]]; then \
