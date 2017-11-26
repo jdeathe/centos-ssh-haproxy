@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-readonly HAPROXY_CERTIFICATE_PATH="/etc/pki/tls/certs/localhost.localdomain.crt"
+readonly HAPROXY_SSL_CERTIFICATE_PATH="/etc/pki/tls/certs/localhost.localdomain.crt"
 readonly HAPROXY_CONFIG_PATH="/etc/haproxy/haproxy.cfg"
 
 # Create lock file
@@ -60,8 +60,8 @@ function make_self_signed_san_certificate ()
 		-extensions san \
 		-subj "/CN=${CN}" \
 		-config /etc/pki/tls/certs/localhost.cnf \
-		-keyout ${HAPROXY_CERTIFICATE_PATH} \
-		-out ${HAPROXY_CERTIFICATE_PATH}
+		-keyout ${HAPROXY_SSL_CERTIFICATE_PATH} \
+		-out ${HAPROXY_SSL_CERTIFICATE_PATH}
 
 }
 
@@ -95,7 +95,7 @@ function set_haproxy_certificate ()
 		&& [[ ! ${value} =~ ${pattern_plain_text} ]]
 	then
 		printf -- \
-			'ERROR: Invalid HAPROXY_CERTIFICATE\n' \
+			'ERROR: Invalid HAPROXY_SSL_CERTIFICATE\n' \
 			>&2
 		sleep 0.1
 		exit 1
@@ -103,10 +103,10 @@ function set_haproxy_certificate ()
 		printf \
 			-- '%s' \
 			"${value}" \
-		> ${HAPROXY_CERTIFICATE_PATH}
+		> ${HAPROXY_SSL_CERTIFICATE_PATH}
 	fi
 
-	if [[ ! -s ${HAPROXY_CERTIFICATE_PATH} ]]; then
+	if [[ ! -s ${HAPROXY_SSL_CERTIFICATE_PATH} ]]; then
 		make_self_signed_san_certificate \
 			"${HAPROXY_HOST_NAMES:-localhost.localdomain}" \
 			&> /dev/null
@@ -114,7 +114,7 @@ function set_haproxy_certificate ()
 
 	if [[ ! -s /etc/pki/tls/certs/sni/localhost.localdomain.crt ]]; then
 		cp -pf \
-			${HAPROXY_CERTIFICATE_PATH} \
+			${HAPROXY_SSL_CERTIFICATE_PATH} \
 			/etc/pki/tls/certs/sni/
 	fi
 }
@@ -162,7 +162,7 @@ function set_haproxy_config ()
 }
 
 set_haproxy_certificate \
-	"${HAPROXY_CERTIFICATE}"
+	"${HAPROXY_SSL_CERTIFICATE}"
 
 set_haproxy_config \
 	"${HAPROXY_CONFIG}"

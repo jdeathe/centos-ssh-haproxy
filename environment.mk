@@ -53,6 +53,6 @@ SSH_USER_PASSWORD ?=
 SSH_USER_PASSWORD_HASHED ?= false
 SSH_USER_SHELL ?= /bin/bash
 # ------------------------------------------------------------------------------
-HAPROXY_CERTIFICATE ?=
+HAPROXY_SSL_CERTIFICATE ?=
 HAPROXY_CONFIG ?= /etc/haproxy/haproxy.cfg
 HAPROXY_HOST_NAMES ?= localhost.localdomain
