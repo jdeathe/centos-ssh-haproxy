@@ -7,6 +7,8 @@ TIMER_START="$(
 	date +%s.%N
 )"
 
+source /etc/haproxy-bootstrap.conf
+
 function make_self_signed_san_certificate ()
 {
 	local CN
@@ -91,6 +93,7 @@ function set_haproxy_config ()
 		> /etc/haproxy/haproxy.cfg
 	elif [[ -n ${value} ]] \
 		&& [[ ${value} != /etc/haproxy/haproxy.cfg ]] \
+		&& [[ ${value} != /etc/haproxy/haproxy-http.cfg ]] \
 		&& [[ -s ${value} ]]
 	then
 		cat "${value}" \

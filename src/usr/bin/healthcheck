@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+function has_nbproc_running ()
+{
+	local nbproc="$(
+		sed -rn \
+			-e 's~.*nbproc ([0-9]+).*~\1~p' \
+			/etc/haproxy/haproxy.cfg
+	)"
+	local nbproc_running="$(
+		ps axo command \
+		| grep -cE '^/usr/sbin/haproxy '
+	)"
+
+	if [[ ${nbproc_running} -lt ${nbproc} ]]; then
+		return 1
+	fi
+
+	return 0
+}
+
+# haproxy-wrapper
+if ! ps axo args \
+	| grep -qE '^bash /usr/sbin/haproxy-wrapper'
+then
+	exit 1
+fi
+
+# logging
+if ! ps axo command \
+	| grep -qE '^/sbin/rsyslogd '
+then
+	exit 1
+fi
+
+# child processes
+if ! ps axo command \
+	| grep -qE '^/usr/sbin/haproxy '
+then
+	exit 1
+fi
+
+if ! has_nbproc_running; then
+	exit 1
+fi
+
+exit 0

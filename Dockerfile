@@ -71,11 +71,14 @@ RUN { \
 # -----------------------------------------------------------------------------
 # Copy files into place
 # -----------------------------------------------------------------------------
+ADD src/usr/bin \
+	/usr/bin/
 ADD src/usr/sbin \
 	/usr/sbin/
 ADD src/opt/scmi \
 	/opt/scmi/
-ADD src/etc/services-config/haproxy/haproxy-http.example.cfg \
+ADD src/etc/services-config/haproxy/haproxy-bootstrap.conf \
+	src/etc/services-config/haproxy/haproxy-http.example.cfg \
 	src/etc/services-config/haproxy/haproxy-tcp.example.cfg \
 	/etc/services-config/haproxy/
 ADD src/etc/services-config/supervisor/supervisord.d \
@@ -93,6 +96,9 @@ RUN ln -sf \
 		/etc/services-config/haproxy/haproxy-tcp.example.cfg \
 		/etc/haproxy/haproxy-tcp.cfg \
 	&& ln -sf \
+		/etc/services-config/haproxy/haproxy-bootstrap.conf \
+		/etc/haproxy-bootstrap.conf \
+	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-bootstrap.conf \
 		/etc/supervisord.d/haproxy-bootstrap.conf \
 	&& ln -sf \
@@ -106,7 +112,7 @@ RUN ln -sf \
 	&& chmod 600 \
 		/etc/services-config/supervisor/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
 	&& chmod 700 \
-		/usr/sbin/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}
+		/usr/{bin/healthcheck,sbin/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}}
 
 EXPOSE 80 443
 
@@ -149,5 +155,11 @@ jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
 	org.deathe.vendor="jdeathe" \
 	org.deathe.url="https://github.com/jdeathe/centos-ssh-haproxy" \
 	org.deathe.description="CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7."
+
+HEALTHCHECK \
+	--interval=0.5s \
+	--timeout=1s \
+	--retries=4 \
+	CMD ["/usr/bin/healthcheck"]
 
 CMD ["/usr/bin/supervisord", "--configuration=/etc/supervisord.conf"]
