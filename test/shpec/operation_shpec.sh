@@ -176,6 +176,7 @@ function __terminate_container ()
 
 function test_basic_operations ()
 {
+	local -r backend_hostname="localhost.localdomain"
 	local -r backend_network="bridge_t1"
 
 	local container_port_80=""
@@ -187,7 +188,7 @@ function test_basic_operations ()
 		INT TERM EXIT
 
 	describe "Basic HAProxy operations"
-		it "Runs named container."
+		describe "Runs named container."
 			__terminate_container \
 				haproxy.pool-1.1.1 \
 			&> /dev/null
@@ -248,11 +249,26 @@ function test_basic_operations ()
 		then
 			exit 1
 		fi
-
-		__terminate_container \
-			haproxy.pool-1.1.1 \
-		&> /dev/null
 	end
+
+	describe "Response to HTTP requests"
+		describe "Backend HTML content"
+			it "Is unaltered."
+				curl -s \
+					-H "Host: ${backend_hostname}" \
+					http://127.0.0.1:${container_port_80}/ \
+				| grep -q '{{BODY}}'
+
+				assert equal \
+					"${?}" \
+					0
+			end
+		end
+	end
+
+	__terminate_container \
+		haproxy.pool-1.1.1 \
+	&> /dev/null
 
 	trap - \
 		INT TERM EXIT
