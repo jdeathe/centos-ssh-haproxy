@@ -57,8 +57,8 @@ function make_self_signed_san_certificate ()
 		-extensions san \
 		-subj "/CN=${CN}" \
 		-config /etc/pki/tls/certs/localhost.cnf \
-		-keyout /etc/pki/tls/certs/localhost.crt \
-		-out /etc/pki/tls/certs/localhost.crt
+		-keyout /etc/pki/tls/certs/localhost.localdomain.crt \
+		-out /etc/pki/tls/certs/localhost.localdomain.crt
 
 }
 
@@ -102,12 +102,12 @@ function set_haproxy_config ()
 }
 
 # Generate a default self-signed SSL/TLS certificate if necessary.
-if [[ ! -f /etc/pki/tls/certs/localhost.crt ]]; then
+if [[ ! -f /etc/pki/tls/certs/localhost.localdomain.crt ]]; then
 	make_self_signed_san_certificate \
 		"${HAPROXY_HOST_NAMES:-localhost.localdomain}" \
 		&> /dev/null
 	cp -pf \
-		/etc/pki/tls/certs/localhost.crt \
+		/etc/pki/tls/certs/localhost.localdomain.crt \
 		/etc/pki/tls/certs/sni/
 fi
 
