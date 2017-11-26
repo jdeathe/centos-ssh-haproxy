@@ -4,7 +4,7 @@
 # docker-compose -p p1 down
 # docker-compose -p p1 up -d
 # ------------------------------------------------------------------------------
-version: "2.1"
+version: "3.0"
 networks:
   tier1:
     driver: "bridge"
@@ -18,7 +18,6 @@ services:
       HAPROXY_CERTIFICATE: "${HAPROXY_CERTIFICATE}"
       HAPROXY_CONFIG: "/etc/haproxy/haproxy-http.cfg"
       HAPROXY_HOST_NAMES: "www.app.local app.local localhost.localdomain"
-    mem_limit: "512M"
     networks:
       - "tier1"
       - "tier2"
@@ -44,7 +43,6 @@ services:
       APACHE_SERVER_ALIAS: "www.app"
       APACHE_SERVER_NAME: "www.app.local"
     image: "jdeathe/centos-ssh-apache-php:2.2.1"
-    mem_limit: "512M"
     networks:
       tier2:
         aliases:
@@ -62,7 +60,6 @@ services:
       APACHE_SERVER_ALIAS: "www.app"
       APACHE_SERVER_NAME: "www.app.local"
     image: "jdeathe/centos-ssh-apache-php:2.2.1"
-    mem_limit: "512M"
     networks:
       tier2:
         aliases:
