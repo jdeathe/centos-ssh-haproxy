@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+readonly HAPROXY_SSL_CONFIG_PATH="/etc/pki/tls/certs/localhost.localdomain.cnf"
 readonly HAPROXY_SSL_CERTIFICATE_PATH="/etc/pki/tls/certs/localhost.localdomain.crt"
 readonly HAPROXY_CONFIG_PATH="/etc/haproxy/haproxy.cfg"
 
@@ -43,7 +44,7 @@ function make_self_signed_san_certificate ()
 	cat \
 		/etc/pki/tls/openssl.cnf \
 		- \
-		<<-CONFIG > /etc/pki/tls/certs/localhost.cnf
+		<<-CONFIG > ${HAPROXY_SSL_CONFIG_PATH}
 
 	[ san ]
 	subjectAltName="${SAN:-root@localhost.localdomain}"
@@ -59,7 +60,7 @@ function make_self_signed_san_certificate ()
 		-reqexts san \
 		-extensions san \
 		-subj "/CN=${CN}" \
-		-config /etc/pki/tls/certs/localhost.cnf \
+		-config ${HAPROXY_SSL_CONFIG_PATH} \
 		-keyout ${HAPROXY_SSL_CERTIFICATE_PATH} \
 		-out ${HAPROXY_SSL_CERTIFICATE_PATH}
 
