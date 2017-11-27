@@ -71,12 +71,14 @@ function set_haproxy_certificate ()
 	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
 	local -r pattern_plain_text='-----BEGIN PRIVATE KEY-----'
 
+	local file_path=""
 	local value="${1:-}"
 
 	# Get value from file
 	if [[ -n ${value} ]] \
 		&& [[ -s ${value} ]]
 	then
+		file_path="${value}"
 		value="$(
 			cat "${value}"
 		)"
@@ -90,6 +92,15 @@ function set_haproxy_certificate ()
 		value="$(
 			base64 -d -i <<< "${value}"
 		)"
+		# Write back decoded value to source file
+		if [[ -n ${file_path} ]] \
+			&& [[ ${file_path} != ${HAPROXY_SSL_CERTIFICATE_PATH} ]]
+		then
+			printf \
+				-- '%s' \
+				"${value}" \
+			> ${file_path}
+		fi
 	fi
 
 	if [[ -n ${value} ]] \
@@ -100,7 +111,15 @@ function set_haproxy_certificate ()
 			>&2
 		sleep 0.1
 		exit 1
-	elif [[ -n ${value} ]]; then
+	elif [[ -n ${value} ]] \
+		&& [[ -n ${file_path} ]]
+	then
+		# Create a sym-link if value is defined in a file
+		ln -sf \
+			${file_path} \
+			${HAPROXY_SSL_CERTIFICATE_PATH}
+	elif [[ -n ${value} ]]
+	then
 		printf \
 			-- '%s' \
 			"${value}" \
@@ -125,12 +144,14 @@ function set_haproxy_config ()
 	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
 	local -r pattern_plain_text='.* /var/lib/haproxy.*'
 
+	local file_path=""
 	local value="${1:-}"
 
 	# Get value from file
 	if [[ -n ${value} ]] \
 		&& [[ -s ${value} ]]
 	then
+		file_path="${value}"
 		value="$(
 			cat "${value}"
 		)"
@@ -144,6 +165,15 @@ function set_haproxy_config ()
 		value="$(
 			base64 -d -i <<< "${value}"
 		)"
+		# Write back decoded value to source file
+		if [[ -n ${file_path} ]] \
+			&& [[ ${file_path} != ${HAPROXY_CONFIG_PATH} ]]
+		then
+			printf \
+				-- '%s' \
+				"${value}" \
+			> ${file_path}
+		fi
 	fi
 
 	if [[ -n ${value} ]] \
@@ -154,7 +184,15 @@ function set_haproxy_config ()
 			>&2
 		sleep 0.1
 		exit 1
-	elif [[ -n ${value} ]]; then
+	elif [[ -n ${value} ]] \
+		&& [[ -n ${file_path} ]]
+	then
+		# Create a sym-link if value is defined in a file
+		ln -sf \
+			${file_path} \
+			${HAPROXY_CONFIG_PATH}
+	elif [[ -n ${value} ]]
+	then
 		printf \
 			-- '%s' \
 			"${value}" \
