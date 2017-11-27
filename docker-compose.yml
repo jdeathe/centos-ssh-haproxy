@@ -15,7 +15,7 @@ services:
   haproxy:
     image: "jdeathe/centos-ssh-haproxy:latest"
     environment:
-      HAPROXY_SSL_CERTIFICATE: "${HAPROXY_SSL_CERTIFICATE}"
+      HAPROXY_SSL_CERTIFICATE: "${HAPROXY_SSL_CERTIFICATE:-/var/run/secrets/haproxy_ssl_certificate}"
       HAPROXY_CONFIG: "/etc/haproxy/haproxy-http.cfg"
       HAPROXY_HOST_NAMES: "www.app.local app.local localhost.localdomain"
     networks:
@@ -36,6 +36,9 @@ services:
         soft: 524288
         hard: 1048576
       nproc: 65535
+    volumes:
+      # Emulate docker swarm secrets
+      - "${PWD}/test/fixture/secrets:/var/run/secrets"
   httpd_1:
     environment:
       APACHE_MOD_SSL_ENABLED: "false"
