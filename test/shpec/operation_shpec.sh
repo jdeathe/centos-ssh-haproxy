@@ -240,16 +240,16 @@ function test_basic_operations ()
 				fi
 			end
 		end
-
-		if ! __is_container_ready \
-			haproxy.pool-1.1.1 \
-			${STARTUP_TIME} \
-			"/usr/sbin/haproxy " \
-			"/var/lock/subsys/haproxy-bootstrap"
-		then
-			exit 1
-		fi
 	end
+
+	if ! __is_container_ready \
+		haproxy.pool-1.1.1 \
+		${STARTUP_TIME} \
+		"/usr/sbin/haproxy " \
+		"/var/lock/subsys/haproxy-bootstrap"
+	then
+		exit 1
+	fi
 
 	describe "Response to HTTP requests"
 		describe "Backend HTML content"
