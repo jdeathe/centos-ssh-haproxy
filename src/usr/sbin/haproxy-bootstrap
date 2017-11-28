@@ -112,7 +112,8 @@ function set_haproxy_certificate ()
 		sleep 0.1
 		exit 1
 	elif [[ -n ${value} ]] \
-		&& [[ -n ${file_path} ]]
+		&& [[ -n ${file_path} ]] \
+		&& [[ ${file_path} != ${HAPROXY_SSL_CERTIFICATE_PATH} ]]
 	then
 		# Create a sym-link if value is defined in a file
 		ln -sf \
@@ -185,7 +186,8 @@ function set_haproxy_config ()
 		sleep 0.1
 		exit 1
 	elif [[ -n ${value} ]] \
-		&& [[ -n ${file_path} ]]
+		&& [[ -n ${file_path} ]] \
+		&& [[ ${file_path} != ${HAPROXY_CONFIG_PATH} ]]
 	then
 		# Create a sym-link if value is defined in a file
 		ln -sf \
