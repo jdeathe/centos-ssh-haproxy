@@ -34,7 +34,7 @@ For cases where access to docker exec is not possible the preferred method is to
 
 ## Quick Example
 
-Run up a container named `haproxy.pool-1.1.1` from the docker image `jdeathe/centos-ssh-haproxy` on port 80 and 443 of your docker host. 2 backend hosts are defined with IP addresses 172.17.8.101 and 172.17.8.101; this is required to identify the backend hosts from within the Varnish VCL file when not using docker network aliases.
+Run up a container named `haproxy.pool-1.1.1` from the docker image `jdeathe/centos-ssh-haproxy` on port 80 and 443 of your docker host. 2 backend hosts, `httpd_1` and `httpd_2`, are defined with IP addresses 172.17.8.101 and 172.17.8.101; this is required to identify the backend hosts from within the HAProxy configuration file if not using docker network aliases.
 
 ```
 $ docker run -d -t \
