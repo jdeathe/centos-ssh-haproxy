@@ -53,10 +53,9 @@ function __get_container_port ()
 # container - Docker container name.
 # counter - Timeout counter in seconds.
 # process_pattern - Regular expression pattern used to match running process.
-# bootstrap_lock_file - Path to the bootstrap lock file.
+# ready_test - Command used to test if the service is ready.
 function __is_container_ready ()
 {
-	local bootstrap_lock_file="${4:-}"
 	local container="${1:-}"
 	local counter=$(
 		awk \
@@ -64,16 +63,16 @@ function __is_container_ready ()
 			'BEGIN { print 10 * seconds; }'
 	)
 	local process_pattern="${3:-}"
+	local ready_test="${4:-true}"
 
 	until (( counter == 0 )); do
 		sleep 0.1
 
 		if docker exec ${container} \
-				bash -c "ps axo command" \
-			| grep -qE "${process_pattern}" \
-			> /dev/null 2>&1 \
-			&& docker exec ${container} \
-				bash -c "[[ ! -e ${bootstrap_lock_file} ]]"
+			bash -c "ps axo command \
+				| grep -qE \"${process_pattern}\" \
+				&& eval \"${ready_test}\"" \
+			&> /dev/null
 		then
 			break
 		fi
@@ -246,7 +245,8 @@ function test_basic_operations ()
 		haproxy.pool-1.1.1 \
 		${STARTUP_TIME} \
 		"/usr/sbin/haproxy " \
-		"/var/lock/subsys/haproxy-bootstrap"
+		"[[ -s /etc/pki/tls/certs/sni/localhost.localdomain.crt ]] \
+			&& [[ ! -e /var/lock/subsys/haproxy-bootstrap ]]"
 	then
 		exit 1
 	fi
