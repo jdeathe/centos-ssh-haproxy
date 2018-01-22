@@ -6,7 +6,7 @@ Summary of release changes for Version 1.
 
 CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
 
-### 1.0.1 - Unreleased
+### 1.0.1 - 2018-01-22
 
 - Updates source image to [1.8.3 tag](https://github.com/jdeathe/centos-ssh/releases/tag/1.8.3).
 - Adds generic ready state test function.
