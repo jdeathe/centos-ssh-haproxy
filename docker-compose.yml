@@ -43,9 +43,11 @@ services:
     environment:
       APACHE_MOD_SSL_ENABLED: "false"
       APACHE_MPM: "event"
-      APACHE_SERVER_ALIAS: "www.app"
+      APACHE_SERVER_ALIAS: "app.local"
       APACHE_SERVER_NAME: "www.app.local"
-    image: "jdeathe/centos-ssh-apache-php:2.2.1"
+      PHP_OPTIONS_SESSION_SAVE_HANDLER: "memcached"
+      PHP_OPTIONS_SESSION_SAVE_PATH: "memcached:11211"
+    image: "jdeathe/centos-ssh-apache-php:2.2.5"
     networks:
       tier2:
         aliases:
@@ -60,9 +62,11 @@ services:
     environment:
       APACHE_MOD_SSL_ENABLED: "false"
       APACHE_MPM: "event"
-      APACHE_SERVER_ALIAS: "www.app"
+      APACHE_SERVER_ALIAS: "app.local"
       APACHE_SERVER_NAME: "www.app.local"
-    image: "jdeathe/centos-ssh-apache-php:2.2.1"
+      PHP_OPTIONS_SESSION_SAVE_HANDLER: "memcached"
+      PHP_OPTIONS_SESSION_SAVE_PATH: "memcached:11211"
+    image: "jdeathe/centos-ssh-apache-php:2.2.5"
     networks:
       tier2:
         aliases:
@@ -73,3 +77,13 @@ services:
       net.core.somaxconn: "2048"
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
+  memcached:
+    image: "jdeathe/centos-ssh-memcached:1.1.3"
+    environment:
+      MEMCACHED_CACHESIZE: "32"
+      MEMCACHED_MAXCONN: "2048"
+    networks:
+      - "tier2"
+    restart: "always"
+    sysctls:
+      net.core.somaxconn: "2048"
