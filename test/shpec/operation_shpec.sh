@@ -94,7 +94,7 @@ function __setup ()
 	local -r backend_name_1="apache-php.pool-1.1.1"
 	local -r backend_name_2="apache-php.pool-1.1.2"
 	local -r backend_network="bridge_t1"
-	local -r backend_release="2.2.1"
+	local -r backend_release="2.2.5"
 
 	# Create the bridge network
 	if [[ -z $(docker network ls -q -f name="${backend_network}") ]]; then
@@ -112,6 +112,7 @@ function __setup ()
 	docker run \
 		--detach \
 		--name ${backend_name_1} \
+		--env "APACHE_SERVER_NAME=www.app.local" \
 		--network ${backend_network} \
 		--network-alias ${backend_alias_1} \
 		--volume ${PWD}/test/fixture/apache/var/www/public_html:/opt/app/public_html:ro \
@@ -125,10 +126,23 @@ function __setup ()
 	docker run \
 		--detach \
 		--name ${backend_name_2} \
+		--env "APACHE_SERVER_NAME=www.app.local" \
 		--network ${backend_network} \
 		--network-alias ${backend_alias_2} \
 		--volume ${PWD}/test/fixture/apache/var/www/public_html:/opt/app/public_html:ro \
 		jdeathe/centos-ssh-apache-php:${backend_release} \
+	&> /dev/null
+
+	# Generate a self-signed certificate
+	openssl req \
+		-x509 \
+		-sha256 \
+		-nodes \
+		-newkey rsa:2048 \
+		-days 365 \
+		-subj "/CN=www.app.local" \
+		-keyout /tmp/www.app.local.pem \
+		-out /tmp/www.app.local.pem \
 	&> /dev/null
 }
 
@@ -177,31 +191,33 @@ function test_basic_operations ()
 {
 	local -r backend_hostname="localhost.localdomain"
 	local -r backend_network="bridge_t1"
+	local -r content="$(< test/fixture/apache/var/www/public_html/index.html)"
 
+	local backend_content=""
 	local container_port_80=""
 	local container_port_443=""
 
-	trap "__terminate_container haproxy.pool-1.1.1 &> /dev/null; \
-		__destroy; \
-		exit 1" \
-		INT TERM EXIT
-
 	describe "Basic HAProxy operations"
-		describe "Runs named container."
-			__terminate_container \
-				haproxy.pool-1.1.1 \
+		trap "__terminate_container haproxy.pool-1.1.1 &> /dev/null; \
+			__destroy; \
+			exit 1" \
+			INT TERM EXIT
+
+		__terminate_container \
+			haproxy.pool-1.1.1 \
+		&> /dev/null
+
+		describe "Runs named container"
+			docker run \
+				--detach \
+				--name haproxy.pool-1.1.1 \
+				--network ${backend_network} \
+				--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
+				--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
+				jdeathe/centos-ssh-haproxy:latest \
 			&> /dev/null
-
+	
 			it "Can publish ${DOCKER_PORT_MAP_TCP_80}:80."
-				docker run \
-					--detach \
-					--name haproxy.pool-1.1.1 \
-					--network ${backend_network} \
-					--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
-					--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
-					jdeathe/centos-ssh-haproxy:latest \
-				&> /dev/null
-
 				container_port_80="$(
 					__get_container_port \
 						haproxy.pool-1.1.1 \
@@ -239,44 +255,167 @@ function test_basic_operations ()
 				fi
 			end
 		end
-	end
 
-	if ! __is_container_ready \
-		haproxy.pool-1.1.1 \
-		${STARTUP_TIME} \
-		"/usr/sbin/haproxy " \
-		"[[ -s /etc/pki/tls/certs/sni/localhost.localdomain.crt ]] \
-			&& [[ ! -e /var/lock/subsys/haproxy-bootstrap ]]"
-	then
-		exit 1
-	fi
+		if ! __is_container_ready \
+			haproxy.pool-1.1.1 \
+			${STARTUP_TIME} \
+			"/usr/sbin/haproxy " \
+			"/usr/bin/healthcheck"
+		then
+			exit 1
+		fi
 
-	describe "Response to HTTP requests"
-		describe "Backend HTML content"
-			it "Is unaltered."
-				curl -s \
-					-H "Host: ${backend_hostname}" \
-					http://127.0.0.1:${container_port_80}/ \
-				| grep -q '{{BODY}}'
+		describe "HTTP requests"
+			describe "Unencrypted response"
+				it "Is unaltered."
+					backend_content="$(
+						curl -s \
+							-H "Host: ${backend_hostname}" \
+							http://127.0.0.1:${container_port_80}/
+					)"
 
-				assert equal \
-					"${?}" \
-					0
+					assert equal \
+						"${backend_content}" \
+						"${content}"
+				end
+			end
+
+			describe "Encrypted response"
+				it "Is unaltered."
+					backend_content="$(
+						curl -sk \
+							-H "Host: ${backend_hostname}" \
+							https://127.0.0.1:${container_port_443}/
+					)"
+
+					assert equal \
+						"${backend_content}" \
+						"${content}"
+				end
 			end
 		end
+
+		__terminate_container \
+			haproxy.pool-1.1.1 \
+		&> /dev/null
+
+		trap - \
+			INT TERM EXIT
 	end
-
-	__terminate_container \
-		haproxy.pool-1.1.1 \
-	&> /dev/null
-
-	trap - \
-		INT TERM EXIT
 }
 
 function test_custom_configuration ()
 {
-	:
+	local -r backend_hostname="www.app.local"
+	local -r backend_network="bridge_t1"
+	local -r content="$(< test/fixture/apache/var/www/public_html/index.html)"
+
+	local backend_content=""
+	local certificate_fingerprint_file=""
+	local certificate_fingerprint_server=""
+	local certificate_pem_base64=""
+	local container_port_80=""
+	local container_port_443=""
+
+	describe "Customised HAProxy operations"
+		trap "__terminate_container haproxy.pool-1.1.1 &> /dev/null; \
+			__destroy; \
+			exit 1" \
+			INT TERM EXIT
+
+		describe "SSL/TLS"
+			describe "Static certificate."
+				if [[ -s /tmp/www.app.local.pem ]]; then
+					certificate_fingerprint_file="$(
+						cat \
+							/tmp/www.app.local.pem \
+						| sed \
+							-n \
+							-e '/^-----BEGIN CERTIFICATE-----$/,/^-----END CERTIFICATE-----$/p' \
+						| openssl x509 \
+							-fingerprint \
+							-noout \
+						| sed \
+							-e 's~SHA1 Fingerprint=~~'
+					)"
+
+					if [[ $(uname) == "Darwin" ]]; then
+						certificate_pem_base64="$(
+							base64 \
+								-i /tmp/www.app.local.pem
+						)"
+					else
+						certificate_pem_base64="$(
+							base64 \
+								-w 0 \
+								-i /tmp/www.app.local.pem
+						)"
+					fi
+				fi
+
+				it "Sets from file path value."		
+					__terminate_container \
+						haproxy.pool-1.1.1 \
+					&> /dev/null
+
+					docker run \
+						--detach \
+						--name haproxy.pool-1.1.1 \
+						--env HAPROXY_SSL_CERTIFICATE="/var/run/tmp/www.app.local.pem" \
+						--network ${backend_network} \
+						--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
+						--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
+						--volume /tmp:/var/run/tmp:ro \
+						jdeathe/centos-ssh-haproxy:latest \
+					&> /dev/null
+
+					container_port_443="$(
+						__get_container_port \
+							haproxy.pool-1.1.1 \
+							443/tcp
+					)"
+
+					if ! __is_container_ready \
+						haproxy.pool-1.1.1 \
+						${STARTUP_TIME} \
+						"/usr/sbin/haproxy " \
+						"/usr/bin/healthcheck"
+					then
+						exit 1
+					fi
+
+					certificate_fingerprint_server="$(
+						echo -n \
+						| openssl s_client \
+							-connect 127.0.0.1:${container_port_443} \
+							-CAfile /tmp/www.app.local.pem \
+							-nbio \
+							2>&1 \
+						| sed \
+							-n \
+							-e '/^-----BEGIN CERTIFICATE-----$/,/^-----END CERTIFICATE-----$/p' \
+						| openssl \
+							x509 \
+							-fingerprint \
+							-noout \
+						| sed \
+							-e 's~SHA1 Fingerprint=~~'
+					)"
+
+					assert equal \
+						"${certificate_fingerprint_server}" \
+						"${certificate_fingerprint_file}"
+				end
+			end
+		end
+
+		__terminate_container \
+			haproxy.pool-1.1.1 \
+		&> /dev/null
+
+		trap - \
+			INT TERM EXIT
+	end
 }
 
 function test_healthcheck ()
