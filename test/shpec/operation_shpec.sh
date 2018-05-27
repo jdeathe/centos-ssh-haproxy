@@ -353,7 +353,61 @@ function test_custom_configuration ()
 					fi
 				fi
 
-				it "Sets from file path value."		
+				it "Sets from base64 encoded value."
+					__terminate_container \
+						haproxy.pool-1.1.1 \
+					&> /dev/null
+
+					docker run \
+						--detach \
+						--name haproxy.pool-1.1.1 \
+						--env HAPROXY_SSL_CERTIFICATE="${certificate_pem_base64}" \
+						--network ${backend_network} \
+						--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
+						--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
+						--volume /tmp:/var/run/tmp:ro \
+						jdeathe/centos-ssh-haproxy:latest \
+					&> /dev/null
+
+					container_port_443="$(
+						__get_container_port \
+							haproxy.pool-1.1.1 \
+							443/tcp
+					)"
+
+					if ! __is_container_ready \
+						haproxy.pool-1.1.1 \
+						${STARTUP_TIME} \
+						"/usr/sbin/haproxy " \
+						"/usr/bin/healthcheck"
+					then
+						exit 1
+					fi
+
+					certificate_fingerprint_server="$(
+						echo -n \
+						| openssl s_client \
+							-connect 127.0.0.1:${container_port_443} \
+							-CAfile /tmp/www.app.local.pem \
+							-nbio \
+							2>&1 \
+						| sed \
+							-n \
+							-e '/^-----BEGIN CERTIFICATE-----$/,/^-----END CERTIFICATE-----$/p' \
+						| openssl \
+							x509 \
+							-fingerprint \
+							-noout \
+						| sed \
+							-e 's~SHA1 Fingerprint=~~'
+					)"
+
+					assert equal \
+						"${certificate_fingerprint_server}" \
+						"${certificate_fingerprint_file}"
+				end
+
+				it "Sets from file path value."
 					__terminate_container \
 						haproxy.pool-1.1.1 \
 					&> /dev/null
