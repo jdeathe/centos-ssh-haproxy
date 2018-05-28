@@ -92,14 +92,11 @@ function set_haproxy_certificate ()
 		value="$(
 			base64 -d -i <<< "${value}"
 		)"
-		# Write back decoded value to source file
+		# Reset file path so unencoded value is written to container path
 		if [[ -n ${file_path} ]] \
 			&& [[ ${file_path} != ${HAPROXY_SSL_CERTIFICATE_PATH} ]]
 		then
-			printf \
-				-- '%s' \
-				"${value}" \
-			> ${file_path}
+			file_path="${HAPROXY_SSL_CERTIFICATE_PATH}"
 		fi
 	fi
 
@@ -166,14 +163,11 @@ function set_haproxy_config ()
 		value="$(
 			base64 -d -i <<< "${value}"
 		)"
-		# Write back decoded value to source file
+		# Reset file path so unencoded value is written to container path
 		if [[ -n ${file_path} ]] \
 			&& [[ ${file_path} != ${HAPROXY_CONFIG_PATH} ]]
 		then
-			printf \
-				-- '%s' \
-				"${value}" \
-			> ${file_path}
+			file_path="${HAPROXY_CONFIG_PATH}"
 		fi
 	fi
 

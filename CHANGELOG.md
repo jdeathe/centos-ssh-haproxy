@@ -8,7 +8,9 @@ CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
 
 ### 1.0.2 - Unreleased
 
-- Updates source image to [1.8.3 tag](https://github.com/jdeathe/centos-ssh/releases/tag/1.8.3).
+- Updates source image to [1.8.4 tag](https://github.com/jdeathe/centos-ssh/releases/tag/1.8.4).
+- Adds feature to set `HAPROXY_SSL_CERTIFICATE` via a file path. e.g. Docker Swarm secrets.
+- Adds feature to set `HAPROXY_CONF` via a file path. e.g. Docker Swarm secrets.
 
 ### 1.0.1 - 2018-01-22
 
