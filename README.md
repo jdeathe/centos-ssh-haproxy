@@ -8,11 +8,11 @@ Docker Images of CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
 
 ## Overview & links
 
-- `centos-6`, `centos-6-1.0.1`, `1.0.1` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
+- `centos-6`, `centos-6-1.0.2`, `1.0.2` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
 
 #### centos-6
 
-The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.0.1`or `1.0.1` for the [1.0.1](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.0.1) release tag.
+The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.0.2`or `1.0.2` for the [1.0.2](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.0.2) release tag.
 
 Included in the build are the [SCL](https://www.softwarecollections.org/), [EPEL](http://fedoraproject.org/wiki/EPEL) and [IUS](https://ius.io) repositories. Installed packages include [OpenSSH](http://www.openssh.com/portable.html) secure shell, [vim-minimal](http://www.vim.org/), are installed along with python-setuptools, [supervisor](http://supervisord.org/) and [supervisor-stdout](https://github.com/coderanger/supervisor-stdout).
 
@@ -95,11 +95,13 @@ There are several environmental variables defined at runtime which allows the op
 
 The HAProxy SSL/TLS certificate can be defined using `HAPROXY_SSL_CERTIFICATE`. The value may be either a file path, a base64 encoded string of the certificate file contents or a multiline string containing a PEM formatted concatenation of private key and certificate. If set to a file path the contents may also be a base64 encoded string.
 
+**Note:** If using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config however use of unencoded file contents is.
+
 ##### HAPROXY_CONF
 
 The HAProxy configuration file path, (or base64 encoded string of the configuration file contents), is set using `HAPROXY_CONF`. The default http configuration is located at the path `/etc/haproxy/haproxy-http.example.cfg` and will be copied into the runnning configuration path `/etc/haproxy/haproxy-http.example.cfg`. There's also an example tcp configuration in the path `/etc/haproxy/haproxy-tcp.example.cfg`. 
 
-In most situations it will be necessary to define a custom configuration where the use of the base64 encoded string option is recommended.
+**Note:** In most situations it will be necessary to define a custom configuration where the use of the base64 encoded string option is recommended. However if using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config so when using these unencoded file contents is recommended.
 
 ##### HAPROXY_HOST_NAMES
 

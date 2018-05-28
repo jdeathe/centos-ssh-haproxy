@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:1.8.3
+FROM jdeathe/centos-ssh:1.8.4
 
 ARG HATOP_VERSION="0.7.7"
 
@@ -128,7 +128,7 @@ ENV HAPROXY_SSL_CERTIFICATE="" \
 # -----------------------------------------------------------------------------
 # Set image metadata
 # -----------------------------------------------------------------------------
-ARG RELEASE_VERSION="1.0.1"
+ARG RELEASE_VERSION="1.0.2"
 LABEL \
 	maintainer="James Deathe <james.deathe@gmail.com>" \
 	install="docker run \
