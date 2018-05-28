@@ -38,7 +38,7 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "${PWD}/test/fixture/secrets:/var/run/secrets"
+      - "${PWD}/test/fixture/secrets:/var/run/secrets:ro"
   httpd_1:
     environment:
       APACHE_MOD_SSL_ENABLED: "false"
