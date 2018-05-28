@@ -6,7 +6,7 @@ Summary of release changes for Version 1.
 
 CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
 
-### 1.0.2 - Unreleased
+### 1.0.2 - 2018-05-28
 
 - Updates source image to [1.8.4 tag](https://github.com/jdeathe/centos-ssh/releases/tag/1.8.4).
 - Adds feature to set `HAPROXY_SSL_CERTIFICATE` via a file path. e.g. Docker Swarm secrets.

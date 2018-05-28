@@ -8,11 +8,11 @@ Docker Images of CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
 
 ## Overview & links
 
-- `centos-6`, `centos-6-1.0.1`, `1.0.1` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
+- `centos-6`, `centos-6-1.0.2`, `1.0.2` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
 
 #### centos-6
 
-The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.0.1`or `1.0.1` for the [1.0.1](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.0.1) release tag.
+The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.0.2`or `1.0.2` for the [1.0.2](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.0.2) release tag.
 
 Included in the build are the [SCL](https://www.softwarecollections.org/), [EPEL](http://fedoraproject.org/wiki/EPEL) and [IUS](https://ius.io) repositories. Installed packages include [OpenSSH](http://www.openssh.com/portable.html) secure shell, [vim-minimal](http://www.vim.org/), are installed along with python-setuptools, [supervisor](http://supervisord.org/) and [supervisor-stdout](https://github.com/coderanger/supervisor-stdout).
 
