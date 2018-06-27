@@ -1,18 +1,25 @@
 centos-ssh-haproxy
 ==================
 
-Docker Images of CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
+Docker Images of:
+- CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
+- CentOS-7 7.4.1708 x86_64 - HAProxy 1.8 / HATop 0.7.
 
 - http://www.haproxy.org/
 - http://feurix.org/projects/hatop/
 
 ## Overview & links
 
+- `centos-7`, `centos-7-2.0.0`, `2.0.0` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
 - `centos-6`, `centos-6-1.0.2`, `1.0.2` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
 
 #### centos-6
 
 The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.0.2`or `1.0.2` for the [1.0.2](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.0.2) release tag.
+
+#### centos-7
+
+The latest CentOS-7 based release can be pulled from the `centos-7` Docker tag. It is recommended to select a specific release tag - the convention is `centos-7-2.0.0`or `2.0.0` for the [2.0.0](https://github.com/jdeathe/centos-ssh-haproxy/tree/2.0.0) release tag.
 
 Included in the build are the [SCL](https://www.softwarecollections.org/), [EPEL](http://fedoraproject.org/wiki/EPEL) and [IUS](https://ius.io) repositories. Installed packages include [OpenSSH](http://www.openssh.com/portable.html) secure shell, [vim-minimal](http://www.vim.org/), are installed along with python-setuptools, [supervisor](http://supervisord.org/) and [supervisor-stdout](https://github.com/coderanger/supervisor-stdout).
 
@@ -41,7 +48,7 @@ $ docker run -d -t \
   -p 443:443 \
   --add-host httpd_1:172.17.8.101 \
   --add-host httpd_2:172.17.8.102 \
-  jdeathe/centos-ssh-haproxy:centos-6
+  jdeathe/centos-ssh-haproxy:2.0.0
 ```
 
 Now you can verify it is initialised and running successfully by inspecting the container's logs.
@@ -54,7 +61,7 @@ $ docker logs haproxy.pool-1.1.1
 
 ### Running
 
-To run the a docker container from this image you can use the standard docker commands. Alternatively, there's a [docker-compose.yml](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/docker-compose.yml) example.
+To run the a docker container from this image you can use the standard docker commands. Alternatively, there's a [docker-compose.yml](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/docker-compose.yml) example.
 
 In the following example the http service is bound to port 80 and https on port 443 of the docker host. Also, the environment variable `HAPROXY_HOST_NAMES` has been used to set a list of 3 hostnames to be added to the auto-generated self-signed SAN certificate.
 
@@ -78,7 +85,7 @@ $ docker run \
   --env "HAPROXY_HOST_NAMES=www.app.local app.local localhost.localdomain" \
   --add-host httpd_1:172.17.8.101 \
   --add-host httpd_2:172.17.8.102 \
-  jdeathe/centos-ssh-haproxy:centos-6
+  jdeathe/centos-ssh-haproxy:2.0.0
 ```
 
 Now you can verify it is initialised and running successfully by inspecting the container's logs:

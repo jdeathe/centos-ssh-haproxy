@@ -4,7 +4,7 @@ readonly HAPROXY=/usr/sbin/haproxy
 readonly HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg"
 readonly HAPROXY_LOCK_FILE=/var/lock/subsys/haproxy
 readonly HAPROXY_BOOTSTRAP_LOCK_FILE=/var/lock/subsys/haproxy-bootstrap
-readonly PID_PATH=/var/run/haproxy.pid
+readonly PID_PATH=/run/haproxy.pid
 
 BLOCKER_PID=""
 DAEMON_OPTS="

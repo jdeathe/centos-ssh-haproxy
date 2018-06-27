@@ -370,7 +370,7 @@ function test_custom_configuration ()
 						--network ${backend_network} \
 						--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
 						--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
-						--volume /tmp:/var/run/tmp:ro \
+						--volume /tmp:/run/tmp:ro \
 						jdeathe/centos-ssh-haproxy:latest \
 					&> /dev/null
 
@@ -420,11 +420,11 @@ function test_custom_configuration ()
 					docker run \
 						--detach \
 						--name haproxy.pool-1.1.1 \
-						--env HAPROXY_SSL_CERTIFICATE="/var/run/tmp/www.app.local.pem" \
+						--env HAPROXY_SSL_CERTIFICATE="/run/tmp/www.app.local.pem" \
 						--network ${backend_network} \
 						--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
 						--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
-						--volume /tmp:/var/run/tmp:ro \
+						--volume /tmp:/run/tmp:ro \
 						jdeathe/centos-ssh-haproxy:latest \
 					&> /dev/null
 
@@ -474,11 +474,11 @@ function test_custom_configuration ()
 					docker run \
 						--detach \
 						--name haproxy.pool-1.1.1 \
-						--env HAPROXY_SSL_CERTIFICATE="/var/run/tmp/www.app.local.txt" \
+						--env HAPROXY_SSL_CERTIFICATE="/run/tmp/www.app.local.txt" \
 						--network ${backend_network} \
 						--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
 						--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
-						--volume /tmp:/var/run/tmp:ro \
+						--volume /tmp:/run/tmp:ro \
 						jdeathe/centos-ssh-haproxy:latest \
 					&> /dev/null
 
