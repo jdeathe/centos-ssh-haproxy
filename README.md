@@ -35,7 +35,7 @@ SSH is not required in order to access a terminal for the running container. The
 $ docker exec -it {docker-name-or-id} bash
 ```
 
-For cases where access to docker exec is not possible the preferred method is to use Command Keys and the nsenter command. See [command-keys.md](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/command-keys.md) for details on how to set this up.
+For cases where access to docker exec is not possible the preferred method is to use Command Keys and the nsenter command. See [command-keys.md](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/command-keys.md) for details on how to set this up.
 
 ## Quick Example
 
