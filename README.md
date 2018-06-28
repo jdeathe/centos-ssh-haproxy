@@ -1,7 +1,7 @@
 centos-ssh-haproxy
 ==================
 
-Docker Images of:
+Docker Image including:
 - CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
 - CentOS-7 7.4.1708 x86_64 - HAProxy 1.8 / HATop 0.7.
 
