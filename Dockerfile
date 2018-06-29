@@ -30,7 +30,7 @@ RUN rpm --rebuilddb \
 RUN sed -i \
 		-e 's~^#\$ModLoad imudp$~\$ModLoad imudp~' \
 		-e 's~^#\$UDPServerRun 514$~\$UDPServerRun 514~' \
-		-e 's~^\$OmitLocalLogging on$~#\$OmitLocalLogging off~' \
+		-e 's~^\(\$OmitLocalLogging .*\)$~#\1~' \
 		-e 's~^\(\$ModLoad imuxsock .*\)$~#\1~' \
 		-e 's~^\(\$ModLoad imjournal .*\)$~#\1~' \
 		-e 's~^\(\$IMJournalStateFile .*\)$~#\1~' \
