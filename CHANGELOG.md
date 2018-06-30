@@ -9,6 +9,7 @@ CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
 ### 1.0.3 - Unreleased
 
 - Updates README with details of Version 2.
+- Adds fix to healthcheck to account for alternative path to rsyslogd.
 
 ### 1.0.2 - 2018-05-28
 
