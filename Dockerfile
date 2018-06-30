@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:1.8.4
+FROM jdeathe/centos-ssh:2.3.2
 
 ARG HATOP_VERSION="0.7.7"
 
@@ -12,8 +12,8 @@ RUN rpm --rebuilddb \
 	&& yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
-		haproxy-1.5.18-1.el6 \
-		rsyslog-5.8.10-10.el6_6 \
+		haproxy18u-1.8.9-1.ius.centos7 \
+		rsyslog-8.24.0-16.el7 \
 	&& yum versionlock add \
 		haproxy \
 		rsyslog \
@@ -30,7 +30,7 @@ RUN rpm --rebuilddb \
 RUN sed -i \
 		-e 's~^#\$ModLoad imudp$~\$ModLoad imudp~' \
 		-e 's~^#\$UDPServerRun 514$~\$UDPServerRun 514~' \
-		-e 's~^\$OmitLocalLogging on$~\$OmitLocalLogging off~' \
+		-e 's~^\(\$OmitLocalLogging .*\)$~#\1~' \
 		-e 's~^\(\$ModLoad imuxsock .*\)$~#\1~' \
 		-e 's~^\(\$ModLoad imjournal .*\)$~#\1~' \
 		-e 's~^\(\$IMJournalStateFile .*\)$~#\1~' \
@@ -128,7 +128,7 @@ ENV HAPROXY_SSL_CERTIFICATE="" \
 # -----------------------------------------------------------------------------
 # Set image metadata
 # -----------------------------------------------------------------------------
-ARG RELEASE_VERSION="1.0.2"
+ARG RELEASE_VERSION="2.0.0"
 LABEL \
 	maintainer="James Deathe <james.deathe@gmail.com>" \
 	install="docker run \
@@ -155,7 +155,7 @@ jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
 	org.deathe.license="MIT" \
 	org.deathe.vendor="jdeathe" \
 	org.deathe.url="https://github.com/jdeathe/centos-ssh-haproxy" \
-	org.deathe.description="CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7."
+	org.deathe.description="CentOS-7 7.4.1708 x86_64 - HAProxy 1.8 / HATop 0.7."
 
 HEALTHCHECK \
 	--interval=0.5s \
