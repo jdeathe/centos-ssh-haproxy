@@ -165,6 +165,25 @@ function __shpec_matcher_egrep ()
 		0
 }
 
+# Custom shpec matcher
+# Match a string with a case insensitive Extended Regular Expression pattern.
+function __shpec_matcher_egrepi ()
+{
+	local pattern="${2:-}"
+	local string="${1:-}"
+
+	printf -- \
+		'%s' \
+		"${string}" \
+	| grep -iqE -- \
+		"${pattern}" \
+		-
+
+	assert equal \
+		"${?}" \
+		0
+}
+
 function __terminate_container ()
 {
 	local container="${1}"
@@ -311,6 +330,7 @@ function test_custom_configuration ()
 	local -r content="$(< test/fixture/apache/var/www/public_html/index.html)"
 
 	local backend_content=""
+	local backend_location=""
 	local certificate_fingerprint_file=""
 	local certificate_fingerprint_server=""
 	local certificate_pem_base64=""
@@ -518,6 +538,82 @@ function test_custom_configuration ()
 					assert equal \
 						"${certificate_fingerprint_server}" \
 						"${certificate_fingerprint_file}"
+				end
+			end
+		end
+
+		__terminate_container \
+			haproxy.pool-1.1.1 \
+		&> /dev/null
+		
+		describe "HTTP/2"
+			describe "Switch to example config"
+				__terminate_container \
+					haproxy.pool-1.1.1 \
+				&> /dev/null
+
+				docker run \
+					--detach \
+					--name haproxy.pool-1.1.1 \
+					--env HAPROXY_CONFIG="/etc/haproxy/haproxy-h2.cfg" \
+					--env HAPROXY_SSL_CERTIFICATE="/run/tmp/www.app.local.pem" \
+					--network ${backend_network} \
+					--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
+					--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
+					--volume /tmp:/run/tmp:ro \
+					jdeathe/centos-ssh-haproxy:latest \
+				&> /dev/null
+
+				container_port_80="$(
+					__get_container_port \
+						haproxy.pool-1.1.1 \
+						80/tcp
+				)"
+
+				container_port_443="$(
+					__get_container_port \
+						haproxy.pool-1.1.1 \
+						443/tcp
+				)"
+
+				if ! __is_container_ready \
+					haproxy.pool-1.1.1 \
+					${STARTUP_TIME} \
+					"/usr/sbin/haproxy " \
+					"/usr/bin/healthcheck"
+				then
+					exit 1
+				fi
+
+				describe "HTTP requests"
+					describe "Unencrypted response"
+						it "Forces HTTPS"
+							backend_location="$(
+								curl -skI \
+									-H "Host: ${backend_hostname}" \
+									http://127.0.0.1:${container_port_80}/ \
+								| grep -i 'Location:'
+							)"
+
+							assert __shpec_matcher_egrepi \
+								"${backend_location}" \
+								"^Location:[ ]*https:\/\/${backend_hostname//./\.}\/"
+						end
+					end
+
+					describe "Encrypted response"
+						it "Is unaltered."
+							backend_content="$(
+								curl -sk \
+									-H "Host: ${backend_hostname}" \
+									https://127.0.0.1:${container_port_443}/
+							)"
+
+							assert equal \
+								"${backend_content}" \
+								"${content}"
+						end
+					end
 				end
 			end
 		end

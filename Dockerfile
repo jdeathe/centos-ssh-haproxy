@@ -79,6 +79,7 @@ ADD src/opt/scmi \
 	/opt/scmi/
 ADD src/etc/services-config/haproxy/haproxy-bootstrap.conf \
 	src/etc/services-config/haproxy/haproxy-http.example.cfg \
+	src/etc/services-config/haproxy/haproxy-h2.example.cfg \
 	src/etc/services-config/haproxy/haproxy-tcp.example.cfg \
 	/etc/services-config/haproxy/
 ADD src/etc/services-config/supervisor/supervisord.d \
@@ -92,6 +93,9 @@ RUN ln -sf \
 	&& ln -sf \
 		/etc/services-config/haproxy/haproxy-http.example.cfg \
 		/etc/haproxy/haproxy-http.cfg \
+	&& ln -sf \
+		/etc/services-config/haproxy/haproxy-h2.example.cfg \
+		/etc/haproxy/haproxy-h2.cfg \
 	&& ln -sf \
 		/etc/services-config/haproxy/haproxy-tcp.example.cfg \
 		/etc/haproxy/haproxy-tcp.cfg \
