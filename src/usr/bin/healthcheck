@@ -20,19 +20,15 @@ function has_nbproc_running ()
 		| grep -cE '^/usr/sbin/haproxy '
 	)"
 
+	# Account for the Master process
+	(( nbproc_running -= 1 ))
+
 	if [[ ${nbproc_running} -lt ${nbproc} ]]; then
 		return 1
 	fi
 
 	return 0
 }
-
-# haproxy-wrapper
-if ! ps axo args \
-	| grep -qE '^bash /usr/sbin/haproxy-wrapper'
-then
-	exit 1
-fi
 
 # logging
 if ! ps axo command \
