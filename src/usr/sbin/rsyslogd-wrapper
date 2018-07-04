@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 readonly NICE=/bin/nice
-readonly SYSCTL=/usr/sbin/sysctl
+
 DAEMON_OPTS=""
 NICENESS=${RSYSLOGD_NICENESS:-10}
 
