@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 readonly HAPROXY=/usr/sbin/haproxy
-readonly HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg"
+readonly HAPROXY_BASENAME=haproxy
+readonly HAPROXY_CONFIG=/etc/haproxy/haproxy.cfg
 readonly HAPROXY_BOOTSTRAP_LOCK_FILE=/var/lock/subsys/haproxy-bootstrap
 readonly NICE=/bin/nice
 readonly PID_PATH=/run/haproxy.pid
@@ -24,10 +25,7 @@ function __is_valid_configuration ()
 	if [[ ${?} -ne 0 ]]; then
 		printf -- \
 			'Errors in configuration file.\n' \
-			"$(
-				basename \
-				${HAPROXY}
-			)" >&2
+			"${HAPROXY_BASENAME}" >&2
 		return 1
 	fi
 
