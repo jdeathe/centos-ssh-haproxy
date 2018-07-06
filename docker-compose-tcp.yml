@@ -1,0 +1,28 @@
+# ------------------------------------------------------------------------------
+# Ref: https://docs.docker.com/compose/compose-file/
+#
+# Setup:
+# docker-compose down
+# docker-compose build
+#
+# Run TCP example:
+# docker-compose -f docker-compose.yml -f docker-compose-tcp.yml up -d
+#
+# HATop usage:
+# docker-compose exec haproxy hatop --help
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-1 -i 1 -n
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-2 -i 1
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-3 -i 1
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-4 -i 1
+# ------------------------------------------------------------------------------
+version: "3.0"
+services:
+  haproxy:
+    environment:
+      HAPROXY_CONFIG: "/etc/haproxy/haproxy-tcp.cfg"
+  httpd_1:
+    environment:
+      APACHE_MOD_SSL_ENABLED: "true"
+  httpd_2:
+    environment:
+      APACHE_MOD_SSL_ENABLED: "true"
