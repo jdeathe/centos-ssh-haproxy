@@ -13,7 +13,7 @@ RUN rpm --rebuilddb \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
 		haproxy-1.5.18-1.el6 \
-		rsyslog-5.8.10-10.el6_6 \
+		rsyslog-5.8.10-12.el6 \
 	&& yum versionlock add \
 		haproxy \
 		rsyslog \
