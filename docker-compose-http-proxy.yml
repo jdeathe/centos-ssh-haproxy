@@ -1,0 +1,76 @@
+# ------------------------------------------------------------------------------
+# Ref: https://docs.docker.com/compose/compose-file/
+#
+# Setup:
+# docker-compose down
+# docker-compose build
+#
+# Run HTTP/1.1 PROXY (Varnish) example:
+# docker-compose -f docker-compose.yml -f docker-compose-http-proxy.yml up -d
+#
+# HATop usage:
+# docker-compose exec haproxy hatop --help
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-1 -i 1
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-2 -i 1
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-3 -i 1
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-4 -i 1
+# ------------------------------------------------------------------------------
+version: "3.0"
+networks:
+  tier2:
+    driver: "bridge"
+    internal: true
+services:
+  haproxy:
+    environment:
+      HAPROXY_CONFIG: "/etc/haproxy/haproxy-http-proxy.cfg"
+  varnish_1:
+    environment:
+      VARNISH_STORAGE: "malloc,256M"
+      VARNISH_MAX_THREADS: "4096"
+      VARNISH_MIN_THREADS: "1024"
+      VARNISH_VCL_CONF: "${VARNISH_VCL_CONF:-/run/secrets/varnish_vcl_default}"
+    image: "jdeathe/centos-ssh-varnish:2.0.0"
+    networks:
+      - "tier2"
+      - "tier3"
+    restart: "always"
+    sysctls:
+      net.core.somaxconn: "4096"
+      net.ipv4.ip_local_port_range: "1024 65535"
+      net.ipv4.route.flush: "1"
+    tty: true
+    ulimits:
+      memlock: 82000
+      nofile:
+        soft: 524288
+        hard: 1048576
+      nproc: 65535
+    volumes:
+      # Emulate docker swarm secrets
+      - "${PWD}/test/fixture/secrets:/run/secrets:ro"
+  varnish_2:
+    environment:
+      VARNISH_STORAGE: "malloc,256M"
+      VARNISH_MAX_THREADS: "4096"
+      VARNISH_MIN_THREADS: "1024"
+      VARNISH_VCL_CONF: "${VARNISH_VCL_CONF:-/run/secrets/varnish_vcl_default}"
+    image: "jdeathe/centos-ssh-varnish:2.0.0"
+    networks:
+      - "tier2"
+      - "tier3"
+    restart: "always"
+    sysctls:
+      net.core.somaxconn: "4096"
+      net.ipv4.ip_local_port_range: "1024 65535"
+      net.ipv4.route.flush: "1"
+    tty: true
+    ulimits:
+      memlock: 82000
+      nofile:
+        soft: 524288
+        hard: 1048576
+      nproc: 65535
+    volumes:
+      # Emulate docker swarm secrets
+      - "${PWD}/test/fixture/secrets:/run/secrets:ro"

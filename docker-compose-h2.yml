@@ -10,7 +10,7 @@
 #
 # HATop usage:
 # docker-compose exec haproxy hatop --help
-# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-1 -i 1 -n
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-1 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-2 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-3 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-4 -i 1

@@ -5,12 +5,12 @@
 # docker-compose down
 # docker-compose build
 #
-# Run:
+# Run Default example:
 # docker-compose up -d
 #
 # HATop usage:
 # docker-compose exec haproxy hatop --help
-# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-1 -i 1 -n
+# docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-1 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-2 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-3 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-4 -i 1
@@ -19,7 +19,10 @@ version: "3.0"
 networks:
   tier1:
     driver: "bridge"
-  tier2:
+  tier3:
+    driver: "bridge"
+    internal: true
+  tier4:
     driver: "bridge"
     internal: true
 services:
@@ -34,7 +37,7 @@ services:
     image: "jdeathe/centos-ssh-haproxy:latest"
     networks:
       - "tier1"
-      - "tier2"
+      - "tier3"
     ports:
       - "80:80"
       - "443:443"
@@ -54,6 +57,8 @@ services:
       # Emulate docker swarm secrets
       - "${PWD}/test/fixture/secrets:/run/secrets:ro"
   httpd_1:
+    depends_on:
+      - "memcached"
     environment:
       APACHE_MOD_SSL_ENABLED: "false"
       APACHE_MPM: "event"
@@ -63,16 +68,16 @@ services:
       PHP_OPTIONS_SESSION_SAVE_PATH: "memcached:11211"
     image: "jdeathe/centos-ssh-apache-php:3.0.1"
     networks:
-      tier2:
-        aliases:
-          - "httpd_1"
-          - "web_1"
+      - "tier3"
+      - "tier4"
     restart: "always"
     sysctls:
       net.core.somaxconn: "2048"
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
   httpd_2:
+    depends_on:
+      - "memcached"
     environment:
       APACHE_MOD_SSL_ENABLED: "false"
       APACHE_MPM: "event"
@@ -82,10 +87,8 @@ services:
       PHP_OPTIONS_SESSION_SAVE_PATH: "memcached:11211"
     image: "jdeathe/centos-ssh-apache-php:3.0.1"
     networks:
-      tier2:
-        aliases:
-          - "httpd_2"
-          - "web_2"
+      - "tier3"
+      - "tier4"
     restart: "always"
     sysctls:
       net.core.somaxconn: "2048"
@@ -97,7 +100,7 @@ services:
       MEMCACHED_CACHESIZE: "32"
       MEMCACHED_MAXCONN: "2048"
     networks:
-      - "tier2"
+      - "tier4"
     restart: "always"
     sysctls:
       net.core.somaxconn: "2048"
