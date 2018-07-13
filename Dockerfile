@@ -77,12 +77,7 @@ ADD src/usr/sbin \
 	/usr/sbin/
 ADD src/opt/scmi \
 	/opt/scmi/
-ADD src/etc/services-config/haproxy/haproxy-bootstrap.conf \
-	src/etc/services-config/haproxy/haproxy-http.example.cfg \
-	src/etc/services-config/haproxy/haproxy-http-proxy.example.cfg \
-	src/etc/services-config/haproxy/haproxy-h2.example.cfg \
-	src/etc/services-config/haproxy/haproxy-h2-proxy.example.cfg \
-	src/etc/services-config/haproxy/haproxy-tcp.example.cfg \
+ADD src/etc/services-config/haproxy \
 	/etc/services-config/haproxy/
 ADD src/etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
@@ -111,6 +106,27 @@ RUN ln -sf \
 		/etc/services-config/haproxy/haproxy-bootstrap.conf \
 		/etc/haproxy-bootstrap.conf \
 	&& ln -sf \
+		/etc/services-config/haproxy/400.html.http \
+		/etc/haproxy/400.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/403.html.http \
+		/etc/haproxy/403.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/408.html.http \
+		/etc/haproxy/408.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/500.html.http \
+		/etc/haproxy/500.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/502.html.http \
+		/etc/haproxy/502.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/503.html.http \
+		/etc/haproxy/503.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/504.html.http \
+		/etc/haproxy/504.html.http \
+	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-bootstrap.conf \
 		/etc/supervisord.d/haproxy-bootstrap.conf \
 	&& ln -sf \
@@ -120,7 +136,7 @@ RUN ln -sf \
 		/etc/services-config/supervisor/supervisord.d/rsyslogd-wrapper.conf \
 		/etc/supervisord.d/rsyslogd-wrapper.conf \
 	&& chmod 600 \
-		/etc/services-config/haproxy/haproxy-{http,tcp}.example.cfg \
+		/etc/services-config/haproxy/{haproxy-{http,http-proxy,h2,h2-proxy,tcp}.example.cfg,{400,403,408,500,502,503,504}.html.http} \
 	&& chmod 600 \
 		/etc/services-config/supervisor/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
 	&& chmod 700 \
