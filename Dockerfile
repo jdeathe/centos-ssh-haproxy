@@ -109,9 +109,6 @@ RUN ln -sf \
 		/etc/services-config/haproxy/400.html.http \
 		/etc/haproxy/400.html.http \
 	&& ln -sf \
-		/etc/services-config/haproxy/401.html.http \
-		/etc/haproxy/401.html.http \
-	&& ln -sf \
 		/etc/services-config/haproxy/403.html.http \
 		/etc/haproxy/403.html.http \
 	&& ln -sf \
@@ -139,7 +136,7 @@ RUN ln -sf \
 		/etc/services-config/supervisor/supervisord.d/rsyslogd-wrapper.conf \
 		/etc/supervisord.d/rsyslogd-wrapper.conf \
 	&& chmod 600 \
-		/etc/services-config/haproxy/{haproxy-{http,http-proxy,h2,h2-proxy,tcp}.example.cfg,{400,401,403,408,500,502,503,504}.html.http,{400,401,403,408,500,502,503,504}.txt.http} \
+		/etc/services-config/haproxy/{haproxy-{http,http-proxy,h2,h2-proxy,tcp}.example.cfg,{400,403,408,500,502,503,504}.html.http} \
 	&& chmod 600 \
 		/etc/services-config/supervisor/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
 	&& chmod 700 \
