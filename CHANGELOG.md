@@ -14,6 +14,7 @@ CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
 - Updates rsyslog package to rsyslog-5.8.10-12.el6.
 - Adds default healthcheck settings; 5s interval for normal operation and 3 checks before triggering up/down state.
 - Adds updated docker-compose examples including variants for TCP and PROXY (Varnish).
+- Adds custom HTML error files for error codes HAProxy may emit.
 
 ### 1.0.2 - 2018-05-28
 
