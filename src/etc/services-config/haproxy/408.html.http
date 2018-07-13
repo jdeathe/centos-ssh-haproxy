@@ -1,0 +1,23 @@
+HTTP/1.1 408 Request Timeout
+Cache-Control: no-cache
+Connection: close
+Content-Type: text/html; charset=UTF-8
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Request Timeout</title>
+        <style>
+            body{color:#666;background-color:#f1f1f1;font-family:sans-serif;margin:12%;max-width:50%;}
+            h1,h2{color:#333;font-size:4rem;font-weight:400;text-transform:uppercase;}
+            h2{color:#333;font-size:2rem;}
+            p{font-size:1.5rem;}
+        </style>
+    </head>
+    <body>
+        <h1>408</h1>
+        <p>Request timeout.</p>
+    </body>
+</html>
