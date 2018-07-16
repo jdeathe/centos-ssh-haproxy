@@ -11,11 +11,11 @@ Docker Image including:
 ## Overview & links
 
 - `centos-7`, `centos-7-2.0.0`, `2.0.0` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
-- `centos-6`, `centos-6-1.0.2`, `1.0.2` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
+- `centos-6`, `centos-6-1.0.3`, `1.0.3` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
 
 #### centos-6
 
-The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.0.2`or `1.0.2` for the [1.0.2](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.0.2) release tag.
+The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.0.3`or `1.0.3` for the [1.0.3](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.0.3) release tag.
 
 #### centos-7
 
