@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+if [[ ! -f /usr/sbin/rsyslogd ]] \
+	&& [[ -f /sbin/rsyslogd ]]
+then
+	readonly RSYSLOGD=/sbin/rsyslogd
+else
+	readonly RSYSLOGD=/usr/sbin/rsyslogd
+fi
+
 function has_nbproc_running ()
 {
 	local nbproc="$(
@@ -28,7 +36,7 @@ fi
 
 # logging
 if ! ps axo command \
-	| grep -qE '^/sbin/rsyslogd '
+	| grep -qE "^${RSYSLOGD} "
 then
 	exit 1
 fi

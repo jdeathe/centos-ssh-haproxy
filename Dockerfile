@@ -13,7 +13,7 @@ RUN rpm --rebuilddb \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
 		haproxy-1.5.18-1.el6 \
-		rsyslog-5.8.10-10.el6_6 \
+		rsyslog-5.8.10-12.el6 \
 	&& yum versionlock add \
 		haproxy \
 		rsyslog \
@@ -77,9 +77,7 @@ ADD src/usr/sbin \
 	/usr/sbin/
 ADD src/opt/scmi \
 	/opt/scmi/
-ADD src/etc/services-config/haproxy/haproxy-bootstrap.conf \
-	src/etc/services-config/haproxy/haproxy-http.example.cfg \
-	src/etc/services-config/haproxy/haproxy-tcp.example.cfg \
+ADD src/etc/services-config/haproxy \
 	/etc/services-config/haproxy/
 ADD src/etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
@@ -93,11 +91,35 @@ RUN ln -sf \
 		/etc/services-config/haproxy/haproxy-http.example.cfg \
 		/etc/haproxy/haproxy-http.cfg \
 	&& ln -sf \
+		/etc/services-config/haproxy/haproxy-http-proxy.example.cfg \
+		/etc/haproxy/haproxy-http-proxy.cfg \
+	&& ln -sf \
 		/etc/services-config/haproxy/haproxy-tcp.example.cfg \
 		/etc/haproxy/haproxy-tcp.cfg \
 	&& ln -sf \
 		/etc/services-config/haproxy/haproxy-bootstrap.conf \
 		/etc/haproxy-bootstrap.conf \
+	&& ln -sf \
+		/etc/services-config/haproxy/400.html.http \
+		/etc/haproxy/400.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/403.html.http \
+		/etc/haproxy/403.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/408.html.http \
+		/etc/haproxy/408.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/500.html.http \
+		/etc/haproxy/500.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/502.html.http \
+		/etc/haproxy/502.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/503.html.http \
+		/etc/haproxy/503.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/504.html.http \
+		/etc/haproxy/504.html.http \
 	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-bootstrap.conf \
 		/etc/supervisord.d/haproxy-bootstrap.conf \
@@ -108,7 +130,7 @@ RUN ln -sf \
 		/etc/services-config/supervisor/supervisord.d/rsyslogd-wrapper.conf \
 		/etc/supervisord.d/rsyslogd-wrapper.conf \
 	&& chmod 600 \
-		/etc/services-config/haproxy/haproxy-{http,tcp}.example.cfg \
+		/etc/services-config/haproxy/{haproxy-{http,http-proxy,tcp}.example.cfg,{400,403,408,500,502,503,504}.html.http} \
 	&& chmod 600 \
 		/etc/services-config/supervisor/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
 	&& chmod 700 \
@@ -128,7 +150,7 @@ ENV HAPROXY_SSL_CERTIFICATE="" \
 # -----------------------------------------------------------------------------
 # Set image metadata
 # -----------------------------------------------------------------------------
-ARG RELEASE_VERSION="1.0.2"
+ARG RELEASE_VERSION="1.0.3"
 LABEL \
 	maintainer="James Deathe <james.deathe@gmail.com>" \
 	install="docker run \
