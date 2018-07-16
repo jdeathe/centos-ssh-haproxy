@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:1.8.4
+FROM jdeathe/centos-ssh:2.3.2
 
 ARG HATOP_VERSION="0.7.7"
 
@@ -12,8 +12,8 @@ RUN rpm --rebuilddb \
 	&& yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
-		haproxy-1.5.18-1.el6 \
-		rsyslog-5.8.10-10.el6_6 \
+		haproxy18u-1.8.9-1.ius.centos7 \
+		rsyslog-8.24.0-16.el7 \
 	&& yum versionlock add \
 		haproxy \
 		rsyslog \
@@ -30,7 +30,7 @@ RUN rpm --rebuilddb \
 RUN sed -i \
 		-e 's~^#\$ModLoad imudp$~\$ModLoad imudp~' \
 		-e 's~^#\$UDPServerRun 514$~\$UDPServerRun 514~' \
-		-e 's~^\$OmitLocalLogging on$~\$OmitLocalLogging off~' \
+		-e 's~^\(\$OmitLocalLogging .*\)$~#\1~' \
 		-e 's~^\(\$ModLoad imuxsock .*\)$~#\1~' \
 		-e 's~^\(\$ModLoad imjournal .*\)$~#\1~' \
 		-e 's~^\(\$IMJournalStateFile .*\)$~#\1~' \
@@ -77,9 +77,7 @@ ADD src/usr/sbin \
 	/usr/sbin/
 ADD src/opt/scmi \
 	/opt/scmi/
-ADD src/etc/services-config/haproxy/haproxy-bootstrap.conf \
-	src/etc/services-config/haproxy/haproxy-http.example.cfg \
-	src/etc/services-config/haproxy/haproxy-tcp.example.cfg \
+ADD src/etc/services-config/haproxy \
 	/etc/services-config/haproxy/
 ADD src/etc/services-config/supervisor/supervisord.d \
 	/etc/services-config/supervisor/supervisord.d/
@@ -93,11 +91,41 @@ RUN ln -sf \
 		/etc/services-config/haproxy/haproxy-http.example.cfg \
 		/etc/haproxy/haproxy-http.cfg \
 	&& ln -sf \
+		/etc/services-config/haproxy/haproxy-http-proxy.example.cfg \
+		/etc/haproxy/haproxy-http-proxy.cfg \
+	&& ln -sf \
+		/etc/services-config/haproxy/haproxy-h2.example.cfg \
+		/etc/haproxy/haproxy-h2.cfg \
+	&& ln -sf \
+		/etc/services-config/haproxy/haproxy-h2-proxy.example.cfg \
+		/etc/haproxy/haproxy-h2-proxy.cfg \
+	&& ln -sf \
 		/etc/services-config/haproxy/haproxy-tcp.example.cfg \
 		/etc/haproxy/haproxy-tcp.cfg \
 	&& ln -sf \
 		/etc/services-config/haproxy/haproxy-bootstrap.conf \
 		/etc/haproxy-bootstrap.conf \
+	&& ln -sf \
+		/etc/services-config/haproxy/400.html.http \
+		/etc/haproxy/400.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/403.html.http \
+		/etc/haproxy/403.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/408.html.http \
+		/etc/haproxy/408.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/500.html.http \
+		/etc/haproxy/500.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/502.html.http \
+		/etc/haproxy/502.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/503.html.http \
+		/etc/haproxy/503.html.http \
+	&& ln -sf \
+		/etc/services-config/haproxy/504.html.http \
+		/etc/haproxy/504.html.http \
 	&& ln -sf \
 		/etc/services-config/supervisor/supervisord.d/haproxy-bootstrap.conf \
 		/etc/supervisord.d/haproxy-bootstrap.conf \
@@ -108,7 +136,7 @@ RUN ln -sf \
 		/etc/services-config/supervisor/supervisord.d/rsyslogd-wrapper.conf \
 		/etc/supervisord.d/rsyslogd-wrapper.conf \
 	&& chmod 600 \
-		/etc/services-config/haproxy/haproxy-{http,tcp}.example.cfg \
+		/etc/services-config/haproxy/{haproxy-{http,http-proxy,h2,h2-proxy,tcp}.example.cfg,{400,403,408,500,502,503,504}.html.http} \
 	&& chmod 600 \
 		/etc/services-config/supervisor/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
 	&& chmod 700 \
@@ -128,7 +156,7 @@ ENV HAPROXY_SSL_CERTIFICATE="" \
 # -----------------------------------------------------------------------------
 # Set image metadata
 # -----------------------------------------------------------------------------
-ARG RELEASE_VERSION="1.0.2"
+ARG RELEASE_VERSION="2.0.0"
 LABEL \
 	maintainer="James Deathe <james.deathe@gmail.com>" \
 	install="docker run \
@@ -155,7 +183,7 @@ jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
 	org.deathe.license="MIT" \
 	org.deathe.vendor="jdeathe" \
 	org.deathe.url="https://github.com/jdeathe/centos-ssh-haproxy" \
-	org.deathe.description="CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7."
+	org.deathe.description="CentOS-7 7.4.1708 x86_64 - HAProxy 1.8 / HATop 0.7."
 
 HEALTHCHECK \
 	--interval=0.5s \
