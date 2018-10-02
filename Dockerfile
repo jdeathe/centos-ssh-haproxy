@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:2.3.2
+FROM jdeathe/centos-ssh:2.4.0
 
 ARG HATOP_VERSION="0.7.7"
 
@@ -183,7 +183,7 @@ jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
 	org.deathe.license="MIT" \
 	org.deathe.vendor="jdeathe" \
 	org.deathe.url="https://github.com/jdeathe/centos-ssh-haproxy" \
-	org.deathe.description="CentOS-7 7.4.1708 x86_64 - HAProxy 1.8 / HATop 0.7."
+	org.deathe.description="CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7."
 
 HEALTHCHECK \
 	--interval=0.5s \
