@@ -12,8 +12,8 @@ RUN rpm --rebuilddb \
 	&& yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
-		haproxy18u-1.8.9-1.ius.centos7 \
-		rsyslog-8.24.0-16.el7 \
+		haproxy18u-1.8.12-1.ius.centos7 \
+		rsyslog-8.24.0-16.el7_5.4 \
 	&& yum versionlock add \
 		haproxy \
 		rsyslog \
