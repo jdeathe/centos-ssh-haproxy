@@ -1,1 +1,1 @@
-CentOS-6 6.9 x86_64 - HAProxy / HATop.
+CentOS-6 6.10 x86_64 - HAProxy / HATop.
