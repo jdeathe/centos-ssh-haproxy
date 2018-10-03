@@ -30,7 +30,7 @@ services:
       VARNISH_MAX_THREADS: "4096"
       VARNISH_MIN_THREADS: "1024"
       VARNISH_VCL_CONF: "${VARNISH_VCL_CONF:-/run/secrets/varnish_vcl_default}"
-    image: "jdeathe/centos-ssh-varnish:2.0.0"
+    image: "jdeathe/centos-ssh-varnish:2.1.0"
     networks:
       - "tier2"
       - "tier3"
@@ -55,7 +55,7 @@ services:
       VARNISH_MAX_THREADS: "4096"
       VARNISH_MIN_THREADS: "1024"
       VARNISH_VCL_CONF: "${VARNISH_VCL_CONF:-/run/secrets/varnish_vcl_default}"
-    image: "jdeathe/centos-ssh-varnish:2.0.0"
+    image: "jdeathe/centos-ssh-varnish:2.1.0"
     networks:
       - "tier2"
       - "tier3"

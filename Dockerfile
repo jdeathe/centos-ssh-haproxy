@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:2.3.2
+FROM jdeathe/centos-ssh:2.4.0
 
 ARG HATOP_VERSION="0.7.7"
 
@@ -12,8 +12,8 @@ RUN rpm --rebuilddb \
 	&& yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
-		haproxy18u-1.8.9-1.ius.centos7 \
-		rsyslog-8.24.0-16.el7 \
+		haproxy18u-1.8.12-1.ius.centos7 \
+		rsyslog-8.24.0-16.el7_5.4 \
 	&& yum versionlock add \
 		haproxy \
 		rsyslog \
@@ -156,7 +156,7 @@ ENV HAPROXY_SSL_CERTIFICATE="" \
 # -----------------------------------------------------------------------------
 # Set image metadata
 # -----------------------------------------------------------------------------
-ARG RELEASE_VERSION="2.0.0"
+ARG RELEASE_VERSION="2.1.0"
 LABEL \
 	maintainer="James Deathe <james.deathe@gmail.com>" \
 	install="docker run \
@@ -183,7 +183,7 @@ jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
 	org.deathe.license="MIT" \
 	org.deathe.vendor="jdeathe" \
 	org.deathe.url="https://github.com/jdeathe/centos-ssh-haproxy" \
-	org.deathe.description="CentOS-7 7.4.1708 x86_64 - HAProxy 1.8 / HATop 0.7."
+	org.deathe.description="CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7."
 
 HEALTHCHECK \
 	--interval=0.5s \
