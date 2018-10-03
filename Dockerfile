@@ -1,7 +1,7 @@
 # =============================================================================
 # jdeathe/centos-ssh-haproxy
 # =============================================================================
-FROM jdeathe/centos-ssh:1.8.4
+FROM jdeathe/centos-ssh:1.9.0
 
 ARG HATOP_VERSION="0.7.7"
 
@@ -150,7 +150,7 @@ ENV HAPROXY_SSL_CERTIFICATE="" \
 # -----------------------------------------------------------------------------
 # Set image metadata
 # -----------------------------------------------------------------------------
-ARG RELEASE_VERSION="1.0.3"
+ARG RELEASE_VERSION="1.1.0"
 LABEL \
 	maintainer="James Deathe <james.deathe@gmail.com>" \
 	install="docker run \
@@ -177,7 +177,7 @@ jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
 	org.deathe.license="MIT" \
 	org.deathe.vendor="jdeathe" \
 	org.deathe.url="https://github.com/jdeathe/centos-ssh-haproxy" \
-	org.deathe.description="CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7."
+	org.deathe.description="CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7."
 
 HEALTHCHECK \
 	--interval=0.5s \

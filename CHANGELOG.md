@@ -4,7 +4,11 @@
 
 Summary of release changes for Version 1.
 
-CentOS-6 6.9 x86_64 - HAProxy 1.5 / HATop 0.7.
+CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7.
+
+### 1.1.0 - 2018-10-04
+
+- Updates source image to [1.9.0](https://github.com/jdeathe/centos-ssh/releases/tag/1.9.0).
 
 ### 1.0.3 - 2018-07-16
 
