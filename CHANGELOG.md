@@ -6,6 +6,12 @@ Summary of release changes for Version 2.
 
 CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 
+### 2.1.1 - Unreleased
+
+- Updates `haproxy18u` packages to 1.8.14-1.
+- Updates `rsyslog` packages to 8.24.0-34.
+
+
 ### 2.1.0 - 2018-10-04
 
 - Updates `haproxy18u` packages to 1.8.12-1.
