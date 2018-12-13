@@ -66,7 +66,7 @@ services:
       APACHE_SERVER_NAME: "www.app.local"
       PHP_OPTIONS_SESSION_SAVE_HANDLER: "memcached"
       PHP_OPTIONS_SESSION_SAVE_PATH: "memcached:11211"
-    image: "jdeathe/centos-ssh-apache-php:3.1.0"
+    image: "jdeathe/centos-ssh-apache-php:3.1.1"
     networks:
       - "tier3"
       - "tier4"
@@ -85,7 +85,7 @@ services:
       APACHE_SERVER_NAME: "www.app.local"
       PHP_OPTIONS_SESSION_SAVE_HANDLER: "memcached"
       PHP_OPTIONS_SESSION_SAVE_PATH: "memcached:11211"
-    image: "jdeathe/centos-ssh-apache-php:3.1.0"
+    image: "jdeathe/centos-ssh-apache-php:3.1.1"
     networks:
       - "tier3"
       - "tier4"
@@ -95,7 +95,7 @@ services:
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
   memcached:
-    image: "jdeathe/centos-ssh-memcached:2.1.0"
+    image: "jdeathe/centos-ssh-memcached:2.1.1"
     environment:
       MEMCACHED_CACHESIZE: "32"
       MEMCACHED_MAXCONN: "2048"
