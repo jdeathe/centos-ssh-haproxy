@@ -27,10 +27,10 @@ services:
   varnish_1:
     environment:
       VARNISH_STORAGE: "malloc,256M"
-      VARNISH_MAX_THREADS: "4096"
-      VARNISH_MIN_THREADS: "1024"
+      VARNISH_MAX_THREADS: "2000"
+      VARNISH_MIN_THREADS: "200"
       VARNISH_VCL_CONF: "${VARNISH_VCL_CONF:-/var/run/secrets/varnish_vcl_default}"
-    image: "jdeathe/centos-ssh-varnish:2.1.0"
+    image: "jdeathe/centos-ssh-varnish:1.5.2"
     networks:
       - "tier2"
       - "tier3"
@@ -52,10 +52,10 @@ services:
   varnish_2:
     environment:
       VARNISH_STORAGE: "malloc,256M"
-      VARNISH_MAX_THREADS: "4096"
-      VARNISH_MIN_THREADS: "1024"
+      VARNISH_MAX_THREADS: "2000"
+      VARNISH_MIN_THREADS: "200"
       VARNISH_VCL_CONF: "${VARNISH_VCL_CONF:-/var/run/secrets/varnish_vcl_default}"
-    image: "jdeathe/centos-ssh-varnish:2.1.0"
+    image: "jdeathe/centos-ssh-varnish:1.5.2"
     networks:
       - "tier2"
       - "tier3"
