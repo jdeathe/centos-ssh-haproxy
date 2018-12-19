@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 
 readonly NICE=/bin/nice
+readonly NICENESS="10"
 readonly SYSCTL=/usr/sbin/sysctl
-DAEMON_OPTS=""
-NICENESS=${RSYSLOGD_NICENESS:-10}
+
+OPTIONS=""
 
 if [[ ! -f /usr/sbin/rsyslogd ]] \
 	&& [[ -f /sbin/rsyslogd ]]; then
-	readonly RSYSLOGD=/sbin/rsyslogd
-	DAEMON_OPTS+=" -c5"
+	readonly BIN="/sbin/rsyslogd"
+	OPTIONS+=" -c5"
 else
-	readonly RSYSLOGD=/usr/sbin/rsyslogd
+	readonly BIN="/usr/sbin/rsyslogd"
 fi
 
-DAEMON_OPTS+="
+OPTIONS+="
  -n
  -4
  -Q
@@ -23,5 +24,5 @@ DAEMON_OPTS+="
 
 exec ${NICE} \
 	-n ${NICENESS} \
-	${RSYSLOGD} \
-	${DAEMON_OPTS}
+	${BIN} \
+	${OPTIONS}
