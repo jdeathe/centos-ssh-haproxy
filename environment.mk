@@ -31,6 +31,11 @@ DIST_PATH ?= ./dist
 # Number of seconds expected to complete container startup including bootstrap.
 STARTUP_TIME ?= 2
 
+# Docker --sysctl settings
+SYSCTL_NET_CORE_SOMAXCONN ?= 32768
+SYSCTL_NET_IPV4_IP_LOCAL_PORT_RANGE ?= 1024 65535
+SYSCTL_NET_IPV4_ROUTE_FLUSH ?= 1
+
 # Docker --ulimit settings
 ULIMIT_MEMLOCK ?= 82000
 ULIMIT_NOFILE ?= 131072
