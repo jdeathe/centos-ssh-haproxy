@@ -3,9 +3,9 @@
 if [[ ! -f /usr/sbin/rsyslogd ]] \
 	&& [[ -f /sbin/rsyslogd ]]
 then
-	readonly RSYSLOGD=/sbin/rsyslogd
+	readonly RSYSLOGD="/sbin/rsyslogd"
 else
-	readonly RSYSLOGD=/usr/sbin/rsyslogd
+	readonly RSYSLOGD="/usr/sbin/rsyslogd"
 fi
 
 function has_nbproc_running ()
@@ -44,7 +44,8 @@ then
 	exit 1
 fi
 
-if ! has_nbproc_running; then
+if ! has_nbproc_running
+then
 	exit 1
 fi
 

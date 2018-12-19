@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 
+set -e
+
+readonly LOCK_FILE="/var/lock/subsys/haproxy-bootstrap"
+readonly TIMER_START="$(
+	date +%s.%N
+)"
 readonly HAPROXY_SSL_CONFIG_PATH="/etc/pki/tls/certs/localhost.localdomain.cnf"
 readonly HAPROXY_SSL_CERTIFICATE_PATH="/etc/pki/tls/certs/localhost.localdomain.crt"
 readonly HAPROXY_CONFIG_PATH="/etc/haproxy/haproxy.cfg"
 
 # Create lock file
-touch /var/lock/subsys/haproxy-bootstrap
-
-TIMER_START="$(
-	date +%s.%N
-)"
+touch \
+	"${LOCK_FILE}"
 
 source /etc/haproxy-bootstrap.conf
 
@@ -223,6 +226,7 @@ cat <<-EOT
 EOT
 
 # Release lock file
-rm -f /var/lock/subsys/haproxy-bootstrap
+rm -f \
+	"${LOCK_FILE}"
 
 exit 0
