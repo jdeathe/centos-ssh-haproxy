@@ -2,8 +2,8 @@
 # Ref: https://docs.docker.com/compose/compose-file/
 #
 # Setup:
-# docker-compose down
-# docker-compose build
+# docker-compose -f docker-compose.yml -f docker-compose-h2-proxy.yml build
+# docker-compose -f docker-compose.yml -f docker-compose-h2-proxy.yml down
 #
 # Run HTTP/2 PROXY (Varnish) example:
 # docker-compose -f docker-compose.yml -f docker-compose-h2-proxy.yml up -d
