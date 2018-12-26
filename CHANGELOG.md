@@ -6,6 +6,14 @@ Summary of release changes for Version 1.
 
 CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7.
 
+### 1.1.1 - 2018-12-27
+
+- Updates source image to [1.9.1](https://github.com/jdeathe/centos-ssh/releases/tag/1.9.1).
+- Updates image versions in tests and docker-compose examples.
+- Updates and normalises scripts for readability.
+- Adds required `--sysctl` settings to docker run templates.
+- Fixes example docker-compose Setup instructions.
+
 ### 1.1.0 - 2018-10-04
 
 - Updates source image to [1.9.0](https://github.com/jdeathe/centos-ssh/releases/tag/1.9.0).

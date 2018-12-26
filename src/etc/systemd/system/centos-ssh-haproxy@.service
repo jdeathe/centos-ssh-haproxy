@@ -52,9 +52,12 @@ Environment="DOCKER_USER=jdeathe"
 Environment="DOCKER_CONTAINER_OPTS="
 Environment="DOCKER_IMAGE_PACKAGE_PATH=/var/opt/scmi/packages"
 Environment="DOCKER_IMAGE_NAME=centos-ssh-haproxy"
-Environment="DOCKER_IMAGE_TAG=1.1.0"
+Environment="DOCKER_IMAGE_TAG=1.1.1"
 Environment="DOCKER_PORT_MAP_TCP_80=8000"
 Environment="DOCKER_PORT_MAP_TCP_443=8500"
+Environment="SYSCTL_NET_CORE_SOMAXCONN=32768"
+Environment="SYSCTL_NET_IPV4_IP_LOCAL_PORT_RANGE=1024 65535"
+Environment="SYSCTL_NET_IPV4_ROUTE_FLUSH=1"
 Environment="ULIMIT_MEMLOCK=82000"
 Environment="ULIMIT_NOFILE=131072"
 Environment="ULIMIT_NPROC=9223372036854775807"
@@ -91,12 +94,12 @@ ExecStart=/bin/bash -c \
   "exec /usr/bin/docker run \
     -t \
     --name %p.%i \
-    --sysctl \"net.core.somaxconn=32768\" \
-    --sysctl \"net.ipv4.ip_local_port_range=1024 65535\" \
-    --sysctl \"net.ipv4.route.flush=1\" \
-    --ulimit memlock=${ULIMIT_MEMLOCK} \
-    --ulimit nofile=${ULIMIT_NOFILE} \
-    --ulimit nproc=${ULIMIT_NPROC} \
+    --sysctl \"net.core.somaxconn=${SYSCTL_NET_CORE_SOMAXCONN}\" \
+    --sysctl \"net.ipv4.ip_local_port_range=${SYSCTL_NET_IPV4_IP_LOCAL_PORT_RANGE}\" \
+    --sysctl \"net.ipv4.route.flush=${SYSCTL_NET_IPV4_ROUTE_FLUSH}\" \
+    --ulimit \"memlock=${ULIMIT_MEMLOCK}\" \
+    --ulimit \"nofile=${ULIMIT_NOFILE}\" \
+    --ulimit \"nproc=${ULIMIT_NPROC}\" \
     --env \"HAPROXY_SSL_CERTIFICATE=${HAPROXY_SSL_CERTIFICATE}\" \
     --env \"HAPROXY_CONFIG=${HAPROXY_CONFIG}\" \
     --env \"HAPROXY_HOST_NAMES=${HAPROXY_HOST_NAMES}\" \
