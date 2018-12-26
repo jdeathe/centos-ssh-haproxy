@@ -2,9 +2,9 @@
 # Common parameters of create and run targets
 define DOCKER_CONTAINER_PARAMETERS
 --tty \
---sysctl "net.core.somaxconn=32768" \
---sysctl "net.ipv4.ip_local_port_range=1024 65535" \
---sysctl "net.ipv4.route.flush=1" \
+--sysctl "net.core.somaxconn=$(SYSCTL_NET_CORE_SOMAXCONN)" \
+--sysctl "net.ipv4.ip_local_port_range=$(SYSCTL_NET_IPV4_IP_LOCAL_PORT_RANGE)" \
+--sysctl "net.ipv4.route.flush=$(SYSCTL_NET_IPV4_ROUTE_FLUSH)" \
 --ulimit memlock=$(ULIMIT_MEMLOCK) \
 --ulimit nofile=$(ULIMIT_NOFILE) \
 --ulimit nproc=$(ULIMIT_NPROC) \

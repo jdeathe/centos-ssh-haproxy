@@ -94,7 +94,7 @@ function __setup ()
 	local -r backend_name_1="apache-php.pool-1.1.1"
 	local -r backend_name_2="apache-php.pool-1.1.2"
 	local -r backend_network="bridge_t1"
-	local -r backend_release="3.1.0"
+	local -r backend_release="3.1.1"
 
 	# Create the bridge network
 	if [[ -z $(docker network ls -q -f name="${backend_network}") ]]; then

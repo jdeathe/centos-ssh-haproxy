@@ -1,47 +1,48 @@
 #!/usr/bin/env bash
 
-readonly HAPROXY=/usr/sbin/haproxy
-readonly HAPROXY_BASENAME=haproxy
-readonly HAPROXY_CONFIG=/etc/haproxy/haproxy.cfg
-readonly HAPROXY_BOOTSTRAP_LOCK_FILE=/var/lock/subsys/haproxy-bootstrap
-readonly NICE=/bin/nice
-readonly PID_PATH=/run/haproxy.pid
+readonly BIN="/usr/sbin/haproxy"
+readonly CONFIG_PATH="/etc/haproxy/haproxy.cfg"
+readonly LOCK_FILE="/var/lock/subsys/haproxy-bootstrap"
+readonly NICE="/bin/nice"
+readonly NICENESS="10"
+readonly PID_PATH="/run/haproxy.pid"
 
-BLOCKER_PID=""
-DAEMON_OPTS="
+OPTIONS="
  -W
- -f ${HAPROXY_CONFIG}
+ -f ${CONFIG_PATH}
  -p ${PID_PATH}
 "
-NICENESS=${HAPROXY_NICENESS:-10}
 
 function __is_valid_configuration ()
 {
-	${HAPROXY} \
+	${BIN} \
 		-c \
 		-q \
-		-f ${HAPROXY_CONFIG}
+		-f ${CONFIG_PATH}
 
-	if [[ ${?} -ne 0 ]]; then
+	if [[ ${?} -ne 0 ]]
+	then
 		printf -- \
 			'Errors in configuration file.\n' \
-			"${HAPROXY_BASENAME}" >&2
+		>&2
 		return 1
 	fi
 
 	return 0
 }
 
-while true; do
+while true
+do
 	sleep 0.1
-	[[ -e ${HAPROXY_BOOTSTRAP_LOCK_FILE} ]] || break
+	[[ -e ${LOCK_FILE} ]] || break
 done
 
-if ! __is_valid_configuration; then
-	return 1
+if ! __is_valid_configuration
+then
+	exit 1
 else
 	exec ${NICE} \
 		-n ${NICENESS} \
-		${HAPROXY} \
-		${DAEMON_OPTS}
+		${BIN} \
+		${OPTIONS}
 fi

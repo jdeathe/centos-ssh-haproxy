@@ -6,6 +6,16 @@ Summary of release changes for Version 2.
 
 CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 
+### 2.1.1 - 2018-12-27
+
+- Updates `haproxy18u` packages to 1.8.14-1.
+- Updates `rsyslog` packages to 8.24.0-34.
+- Updates source image to [2.4.1](https://github.com/jdeathe/centos-ssh/releases/tag/2.4.1).
+- Updates image versions in tests and docker-compose examples.
+- Adds required `--sysctl` settings to docker run templates.
+- Fixes haproxy-wrapper return error and normalises scripts.
+- Fixes example docker-compose Setup instructions.
+
 ### 2.1.0 - 2018-10-04
 
 - Updates `haproxy18u` packages to 1.8.12-1.
