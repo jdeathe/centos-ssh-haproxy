@@ -2,8 +2,8 @@
 # Ref: https://docs.docker.com/compose/compose-file/
 #
 # Setup:
-# docker-compose down
-# docker-compose build
+# docker-compose -f docker-compose.yml -f docker-compose-tcp.yml build
+# docker-compose -f docker-compose.yml -f docker-compose-tcp.yml down
 #
 # Run TCP example:
 # docker-compose -f docker-compose.yml -f docker-compose-tcp.yml up -d

@@ -2,8 +2,8 @@
 # Ref: https://docs.docker.com/compose/compose-file/
 #
 # Setup:
-# docker-compose down
 # docker-compose build
+# docker-compose down
 #
 # Run Default example:
 # docker-compose up -d
