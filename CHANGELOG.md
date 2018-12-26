@@ -14,6 +14,7 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Updates image versions in tests and docker-compose examples.
 - Adds required `--sysctl` settings to docker run templates.
 - Fixes haproxy-wrapper return error and normalises scripts.
+- Fixes example docker-compose Setup instructions.
 
 ### 2.1.0 - 2018-10-04
 
