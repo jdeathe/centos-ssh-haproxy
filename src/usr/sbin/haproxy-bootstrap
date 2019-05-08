@@ -14,8 +14,6 @@ readonly HAPROXY_CONFIG_PATH="/etc/haproxy/haproxy.cfg"
 touch \
 	"${LOCK_FILE}"
 
-source /etc/haproxy-bootstrap.conf
-
 function make_self_signed_san_certificate ()
 {
 	local CN
