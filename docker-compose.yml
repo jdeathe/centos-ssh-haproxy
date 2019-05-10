@@ -57,7 +57,7 @@ services:
     volumes:
       # Emulate docker swarm secrets
       - "${PWD}/test/fixture/secrets:/run/secrets:ro"
-  apache-php.1:
+  apache-php1:
     depends_on:
       - "memcached"
     environment:
@@ -74,6 +74,7 @@ services:
     networks:
       tier3:
         aliases:
+          - "apache-php.1"
           - "httpd_1"
       tier4:
     restart: "always"
@@ -81,7 +82,7 @@ services:
       net.core.somaxconn: "2048"
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
-  apache-php.2:
+  apache-php2:
     depends_on:
       - "memcached"
     environment:
@@ -98,6 +99,7 @@ services:
     networks:
       tier3:
         aliases:
+          - "apache-php.2"
           - "httpd_2"
       tier4:
     restart: "always"

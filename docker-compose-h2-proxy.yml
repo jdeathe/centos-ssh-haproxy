@@ -25,21 +25,23 @@ services:
   haproxy:
     environment:
       HAPROXY_CONFIG: "/etc/haproxy/haproxy-h2-proxy.cfg"
-  apache-php.1:
+  apache-php1:
     environment:
       APACHE_CUSTOM_LOG_LOCATION: "/dev/null"
     networks:
       tier2:
         aliases:
+          - "apache-php.1"
           - "httpd_1"
-  apache-php.2:
+  apache-php2:
     environment:
       APACHE_CUSTOM_LOG_LOCATION: "/dev/null"
     networks:
       tier2:
         aliases:
+          - "apache-php.2"
           - "httpd_2"
-  varnish.1:
+  varnish1:
     environment:
       VARNISH_AUTOSTART_VARNISHNCSA_WRAPPER: "true"
       VARNISH_MAX_THREADS: "${VARNISH_MAX_THREADS}"
@@ -56,6 +58,7 @@ services:
       tier2:
       tier3:
         aliases:
+          - "varnish.1"
           - "varnish_1"
     restart: "always"
     sysctls:
@@ -72,7 +75,7 @@ services:
     volumes:
       # Emulate docker swarm secrets
       - "${PWD}/test/fixture/secrets:/run/secrets:ro"
-  varnish.2:
+  varnish2:
     environment:
       VARNISH_AUTOSTART_VARNISHNCSA_WRAPPER: "true"
       VARNISH_MAX_THREADS: "${VARNISH_MAX_THREADS}"
@@ -89,6 +92,7 @@ services:
       tier2:
       tier3:
         aliases:
+          - "varnish.2"
           - "varnish_2"
     restart: "always"
     sysctls:

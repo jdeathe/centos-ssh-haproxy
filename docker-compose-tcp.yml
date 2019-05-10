@@ -21,9 +21,9 @@ services:
   haproxy:
     environment:
       HAPROXY_CONFIG: "/etc/haproxy/haproxy-tcp.cfg"
-  apache-php.1:
+  apache-php1:
     environment:
       APACHE_MOD_SSL_ENABLED: "true"
-  apache-php.2:
+  apache-php2:
     environment:
       APACHE_MOD_SSL_ENABLED: "true"
