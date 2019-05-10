@@ -30,7 +30,7 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 #### 2.2.0 - TODO
 - Adds consideration for event lag into test cases for unhealthy health_status events.
 - Adds error messages to healthcheck script and includes supervisord check.
-- Adds improved `healtchcheck`, `varnishd-wrapper` and `varnishncsa-wrapper` scripts.
+- Adds improved `healtchcheck`, `haproxy-wrapper` and `rsyslogd-wrapper` scripts.
 - Adds improved lock/state file implementation in wrapper scripts.
 
 ### 2.1.1 - 2018-12-27
