@@ -5,13 +5,12 @@ readonly NICENESS="10"
 
 OPTIONS=""
 
-if [[ ! -f /usr/sbin/rsyslogd ]] \
-	&& [[ -f /sbin/rsyslogd ]]
+if [[ -f /usr/sbin/rsyslogd ]]
 then
+	readonly BIN="/usr/sbin/rsyslogd"
+else
 	readonly BIN="/sbin/rsyslogd"
 	OPTIONS+=" -c5"
-else
-	readonly BIN="/usr/sbin/rsyslogd"
 fi
 
 OPTIONS+="
