@@ -21,6 +21,7 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Adds improvement to pull logic in systemd unit install template.
 - Adds `SSH_AUTOSTART_SUPERVISOR_STDOUT` with a value "false", disabling startup of `supervisor_stdout`.
 - Adds improved logging output.
+- Adds consideration for event lag into test cases for unhealthy health_status events.
 - Removes use of `/etc/services-config` paths.
 - Removes the unused group element from the default container name.
 - Removes the node element from the default container name.
@@ -28,7 +29,6 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Removes X-Fleet section from etcd register template unit-file.
 
 #### 2.2.0 - TODO
-- Adds consideration for event lag into test cases for unhealthy health_status events.
 - Adds error messages to healthcheck script and includes supervisord check.
 - Adds improved `healtchcheck`, `haproxy-wrapper` and `rsyslogd-wrapper` scripts.
 - Adds improved lock/state file implementation in wrapper scripts.
