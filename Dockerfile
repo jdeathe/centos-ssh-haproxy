@@ -40,6 +40,7 @@ ADD src /
 # - Enable local syslog logging
 # - Add hatop alias
 # - Replace placeholders with values in systemd service unit template
+# - Add default haproxy configuration
 # - Set permissions
 # ------------------------------------------------------------------------------
 RUN { printf -- \
@@ -68,8 +69,11 @@ RUN { printf -- \
 	&& sed -i \
 		-e "s~{{RELEASE_VERSION}}~${RELEASE_VERSION}~g" \
 		/etc/systemd/system/centos-ssh-haproxy@.service \
+	&& cp \
+		/etc/haproxy/haproxy-http.cfg \
+		/etc/haproxy/haproxy.cfg \
 	&& chmod 600 \
-		/etc/haproxy/{haproxy-{http,http-proxy,h2,h2-proxy,tcp}.cfg,{400,403,408,500,502,503,504}.html.http} \
+		/etc/haproxy/{{haproxy,haproxy-{http,http-proxy,h2,h2-proxy,tcp}}.cfg,{400,403,408,500,502,503,504}.html.http} \
 	&& chmod 600 \
 		/etc/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
 	&& chmod 700 \
