@@ -15,9 +15,6 @@ RUN yum -y install \
 		haproxy \
 		rsyslog \
 	&& yum clean all \
-	&& mv \
-		/etc/haproxy/haproxy.cfg \
-		/etc/haproxy/haproxy.cfg.default \
 	&& curl -LsSO \
 		https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/hatop/hatop-${HATOP_VERSION}.tar.gz \
 	&& tar -xzf hatop-${HATOP_VERSION}.tar.gz \
@@ -40,7 +37,8 @@ ADD src /
 # - Enable local syslog logging
 # - Add hatop alias
 # - Replace placeholders with values in systemd service unit template
-# - Add default haproxy configuration
+# - Backup default haproxy configuration
+# - Replace default haproxy configuration with haproxy-http.cfg
 # - Set permissions
 # ------------------------------------------------------------------------------
 RUN { printf -- \
@@ -69,6 +67,9 @@ RUN { printf -- \
 	&& sed -i \
 		-e "s~{{RELEASE_VERSION}}~${RELEASE_VERSION}~g" \
 		/etc/systemd/system/centos-ssh-haproxy@.service \
+	&& mv \
+		/etc/haproxy/haproxy.cfg \
+		/etc/haproxy/haproxy.cfg.default \
 	&& cp \
 		/etc/haproxy/haproxy-http.cfg \
 		/etc/haproxy/haproxy.cfg \
