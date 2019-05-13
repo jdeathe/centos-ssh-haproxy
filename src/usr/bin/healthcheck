@@ -2,14 +2,7 @@
 
 set -e
 
-if [[ -f /usr/sbin/rsyslogd ]]
-then
-	readonly RSYSLOGD="/usr/sbin/rsyslogd"
-else
-	readonly RSYSLOGD="/sbin/rsyslogd"
-fi
-
-function has_nbproc_running ()
+function __has_nbproc_running ()
 {
 	local nbproc="$(
 		sed -rn \
@@ -32,37 +25,49 @@ function has_nbproc_running ()
 	return 0
 }
 
-if ! ps axo command \
-	| grep -qE '^/usr/bin/python /usr/bin/supervisord'
-then
-	>&2 printf -- \
-		'%s\n' \
-		"supervisord not running."
-	exit 1
-fi
+function main ()
+{
+	local rsyslogd_path="/sbin/rsyslogd"
 
-if ! ps axo command \
-	| grep -qE "^${RSYSLOGD} "
-then
-	>&2 printf -- \
-		'%s\n' \
-		"rsyslogd not running."
-	exit 1
-fi
+	if [[ -f /usr/sbin/rsyslogd ]]
+	then
+		rsyslogd_path="/usr/sbin/rsyslogd"
+	fi
 
-if ! ps axo command \
-	| grep -qE '^/usr/sbin/haproxy '
-then
-	>&2 printf -- \
-		'%s\n' \
-		"haproxy not running."
-	exit 1
-fi
+	if ! ps axo command \
+		| grep -qE '^/usr/bin/python /usr/bin/supervisord'
+	then
+		>&2 printf -- \
+			'%s\n' \
+			"supervisord not running."
+		exit 1
+	fi
 
-if ! has_nbproc_running
-then
-	>&2 printf -- \
-		'%s\n' \
-		"unexpected nbproc count."
-	exit 1
-fi
+	if ! ps axo command \
+		| grep -qE "^${rsyslogd_path} "
+	then
+		>&2 printf -- \
+			'%s\n' \
+			"rsyslogd not running."
+		exit 1
+	fi
+
+	if ! ps axo command \
+		| grep -qE '^/usr/sbin/haproxy '
+	then
+		>&2 printf -- \
+			'%s\n' \
+			"haproxy not running."
+		exit 1
+	fi
+
+	if ! __has_nbproc_running
+	then
+		>&2 printf -- \
+			'%s\n' \
+			"unexpected nbproc count."
+		exit 1
+	fi
+}
+
+main "${@}"

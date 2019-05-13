@@ -14,6 +14,7 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Updates container naming conventions and readability of `Makefile`.
 - Updates healthcheck retries to 4.
 - Updates docker-compose configuration examples.
+- Updates default tls/ssl certificate name from `localhost.localdomain.crt` to `localhost.crt`.
 - Fixes issue with unexpected published port in run templates when `DOCKER_PORT_MAP_TCP_80` or `DOCKER_PORT_MAP_TCP_443` is set to an empty string or 0.
 - Fixes binary paths in systemd unit files for compatibility with both EL and Ubuntu hosts.
 - Adds port incrementation to Makefile's run template for container names with an instance suffix.
@@ -23,15 +24,13 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Adds improved logging output.
 - Adds consideration for event lag into test cases for unhealthy health_status events.
 - Adds error messages to healthcheck script and includes supervisord check.
+- Adds improved `healtchcheck`, `haproxy-wrapper` and `rsyslogd-wrapper` scripts.
+- Adds improved lock/state file implementation in wrapper scripts.
 - Removes use of `/etc/services-config` paths.
 - Removes the unused group element from the default container name.
 - Removes the node element from the default container name.
 - Removes unused environment variables from Makefile and scmi configuration.
 - Removes X-Fleet section from etcd register template unit-file.
-
-#### 2.2.0 - TODO
-- Adds improved `healtchcheck`, `haproxy-wrapper` and `rsyslogd-wrapper` scripts.
-- Adds improved lock/state file implementation in wrapper scripts.
 
 ### 2.1.1 - 2018-12-27
 

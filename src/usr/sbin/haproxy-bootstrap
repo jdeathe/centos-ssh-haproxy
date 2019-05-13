@@ -2,53 +2,110 @@
 
 set -e
 
-readonly LOCK_FILE="/var/lock/subsys/haproxy-bootstrap"
-readonly TIMER_START="$(
-	date +%s.%N
-)"
-readonly HAPROXY_SSL_CONFIG_PATH="/etc/pki/tls/certs/localhost.localdomain.cnf"
-readonly HAPROXY_SSL_CERTIFICATE_PATH="/etc/pki/tls/certs/localhost.localdomain.crt"
-readonly HAPROXY_CONFIG_PATH="/etc/haproxy/haproxy.cfg"
-
-# Create lock file
-touch \
-	"${LOCK_FILE}"
-
-function make_self_signed_san_certificate ()
+function __cleanup ()
 {
-	local CN
-	local HOST
-	local HOSTS="${@}"
-	local SAN
+	local -r exit_code="${?}"
+
+	__delete_lock
+
+	if [[ ${exit_code} -eq 0 ]]
+	then
+		__create_state
+	fi
+}
+
+function __create_lock ()
+{
+	if [[ -n ${LOCK_FILE} ]]
+	then
+		touch "${LOCK_FILE}"
+	fi
+}
+
+function __create_state ()
+{
+	if [[ -n ${STATE_FILE} ]]
+	then
+		touch "${STATE_FILE}"
+	fi
+}
+
+function __delete_lock ()
+{
+	if [[ -e ${LOCK_FILE} ]]
+	then
+		rm -f "${LOCK_FILE}"
+	fi
+}
+
+function __get_timer_total ()
+{
+	local -r timer_end="$(
+		date +%s.%N
+	)"
+	local -r timer_start="${1}"
+
+	if [[ -z ${timer_start} ]] \
+		|| [[ ${timer_start//.} -gt ${timer_end//.} ]]
+	then
+		>&2 printf -- \
+			'ERROR: invalid timer start: %s\n' \
+			"${timer_start}"
+		printf -- \
+			'0.000000'
+	else
+		awk \
+			-v timer_end="${timer_end}" \
+			-v timer_start="${timer_start}" \
+			'BEGIN { print \
+				timer_end - timer_start;
+			}'
+	fi
+}
+
+function __make_self_signed_san_certificate ()
+{
+	local -r certificate_path="/etc/pki/tls/certs/localhost.crt"
+	local -r config_path="/etc/pki/tls/certs/localhost.cnf"
+	local -r default_config_path="/etc/pki/tls/openssl.cnf"
+	local -r hosts="${@}"
+
+	local common_name
+	local host
+	local subject_alt_name
 
 	# Use default host if none specified.
-	if [[ ${#HOSTS[@]} -eq 0 ]]; then
-		HOSTS="localhost.localdomain"
+	if [[ ${#hosts[@]} -eq 0 ]]
+	then
+		hosts="localhost.localdomain"
 	fi
 
-	if [[ ${#HOSTS[@]} -gt 0 ]]; then
-		for HOST in ${HOSTS[@]}; do
-			if [[ -z ${SAN} ]]; then
+	if [[ ${#hosts[@]} -gt 0 ]]
+	then
+		for host in ${hosts[@]}
+		do
+			if [[ -z ${subject_alt_name} ]]
+			then
 				# Common Name is required - use the first host.
-				CN="${HOST}"
+				common_name="${host}"
 			else
 				# Additional hosts should be comma separated.
-				SAN+=","
+				subject_alt_name+=","
 			fi
 
 			# Build up the subjectAltName value.
-			SAN+="DNS:${HOST}"
+			subject_alt_name+="DNS:${host}"
 		done
 	fi
 
 	# Generate a custom openssl configuration - appending a san section.
 	cat \
-		/etc/pki/tls/openssl.cnf \
+		"${default_config_path}" \
 		- \
-		<<-CONFIG > ${HAPROXY_SSL_CONFIG_PATH}
+		<<-CONFIG > "${config_path}"
 
 	[ san ]
-	subjectAltName="${SAN:-root@localhost.localdomain}"
+	subjectAltName="${subject_alt_name:-root@localhost.localdomain}"
 	CONFIG
 
 	# Generate the certificate.
@@ -60,20 +117,23 @@ function make_self_signed_san_certificate ()
 		-days 365 \
 		-reqexts san \
 		-extensions san \
-		-subj "/CN=${CN}" \
-		-config ${HAPROXY_SSL_CONFIG_PATH} \
-		-keyout ${HAPROXY_SSL_CERTIFICATE_PATH} \
-		-out ${HAPROXY_SSL_CERTIFICATE_PATH}
-
+		-subj "/CN=${common_name}" \
+		-config "${config_path}" \
+		-keyout "${certificate_path}" \
+		-out "${certificate_path}"
 }
 
-function set_haproxy_certificate ()
+function __set_haproxy_certificate ()
 {
+	local -r certificate_path="/etc/pki/tls/certs/localhost.crt"
+	local -r config_path="/etc/pki/tls/certs/localhost.cnf"
 	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
 	local -r pattern_plain_text='-----BEGIN PRIVATE KEY-----'
+	# local -r sni_certificate_directory_path="/etc/pki/tls/certs/sni"
 
-	local file_path=""
-	local value="${1:-}"
+	local file_path
+	local host_names="${2:-localhost.localdomain}"
+	local value="${1}"
 
 	# Get value from file
 	if [[ -n ${value} ]] \
@@ -95,56 +155,58 @@ function set_haproxy_certificate ()
 		)"
 		# Reset file path so unencoded value is written to container path
 		if [[ -n ${file_path} ]] \
-			&& [[ ${file_path} != ${HAPROXY_SSL_CERTIFICATE_PATH} ]]
+			&& [[ ${file_path} != ${certificate_path} ]]
 		then
-			file_path="${HAPROXY_SSL_CERTIFICATE_PATH}"
+			file_path="${certificate_path}"
 		fi
 	fi
 
 	if [[ -n ${value} ]] \
 		&& [[ ! ${value} =~ ${pattern_plain_text} ]]
 	then
-		printf -- \
-			'ERROR: Invalid HAPROXY_SSL_CERTIFICATE\n' \
-			>&2
-		sleep 0.1
+		>&2 printf -- \
+			'ERROR: Invalid HAPROXY_SSL_CERTIFICATE\n'
 		exit 1
 	elif [[ -n ${value} ]] \
 		&& [[ -n ${file_path} ]] \
-		&& [[ ${file_path} != ${HAPROXY_SSL_CERTIFICATE_PATH} ]]
+		&& [[ ${file_path} != ${certificate_path} ]]
 	then
 		# Create a sym-link if value is defined in a file
 		ln -sf \
-			${file_path} \
-			${HAPROXY_SSL_CERTIFICATE_PATH}
+			"${file_path}" \
+			"${certificate_path}"
 	elif [[ -n ${value} ]]
 	then
 		printf \
 			-- '%s' \
 			"${value}" \
-		> ${HAPROXY_SSL_CERTIFICATE_PATH}
+		> ${certificate_path}
 	fi
 
-	if [[ ! -s ${HAPROXY_SSL_CERTIFICATE_PATH} ]]; then
-		make_self_signed_san_certificate \
-			"${HAPROXY_HOST_NAMES:-localhost.localdomain}" \
+	if [[ ! -s ${certificate_path} ]]
+	then
+		__make_self_signed_san_certificate \
+			"${haproxy_host_names}" \
 			&> /dev/null
 	fi
 
-	if [[ ! -s /etc/pki/tls/certs/sni/localhost.localdomain.crt ]]; then
-		cp -pf \
-			${HAPROXY_SSL_CERTIFICATE_PATH} \
-			/etc/pki/tls/certs/sni/
-	fi
+	#TODO - Not sure why this is necessary
+	# if [[ ! -s ${sni_certificate_directory_path}/localhost.crt ]]
+	# then
+	# 	cp -pf \
+	# 		${certificate_path} \
+	# 		${sni_certificate_directory_path}/
+	# fi
 }
 
-function set_haproxy_config ()
+function __set_haproxy_config ()
 {
+	local -r config_path="/etc/haproxy/haproxy.cfg"
 	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
 	local -r pattern_plain_text='.* /var/lib/haproxy.*'
 
-	local file_path=""
-	local value="${1:-}"
+	local file_path
+	local value="${1}"
 
 	# Get value from file
 	if [[ -n ${value} ]] \
@@ -166,65 +228,110 @@ function set_haproxy_config ()
 		)"
 		# Reset file path so unencoded value is written to container path
 		if [[ -n ${file_path} ]] \
-			&& [[ ${file_path} != ${HAPROXY_CONFIG_PATH} ]]
+			&& [[ ${file_path} != ${config_path} ]]
 		then
-			file_path="${HAPROXY_CONFIG_PATH}"
+			file_path="${config_path}"
 		fi
 	fi
 
 	if [[ -n ${value} ]] \
 		&& [[ ! ${value} =~ ${pattern_plain_text} ]]
 	then
-		printf -- \
-			'ERROR: Invalid HAPROXY_CONFIG\n' \
-			>&2
-		sleep 0.1
+		>&2 printf -- \
+			'ERROR: Invalid HAPROXY_CONFIG\n'
 		exit 1
 	elif [[ -n ${value} ]] \
 		&& [[ -n ${file_path} ]] \
-		&& [[ ${file_path} != ${HAPROXY_CONFIG_PATH} ]]
+		&& [[ ${file_path} != ${config_path} ]]
 	then
 		# Create a sym-link if value is defined in a file
 		ln -sf \
-			${file_path} \
-			${HAPROXY_CONFIG_PATH}
+			"${file_path}" \
+			"${config_path}"
 	elif [[ -n ${value} ]]
 	then
 		printf \
 			-- '%s' \
 			"${value}" \
-		> ${HAPROXY_CONFIG_PATH}
+		> "${config_path}"
 	fi
 }
 
-set_haproxy_certificate \
-	"${HAPROXY_SSL_CERTIFICATE}"
+function main ()
+{
+	LOCK_FILE="/var/lock/subsys/haproxy-bootstrap"
+	STATE_FILE="/var/lib/misc/haproxy-bootstrap"
 
-set_haproxy_config \
-	"${HAPROXY_CONFIG}"
+	local -r timer_start="$(
+		date +%s.%N
+	)"
 
-TIMER_TOTAL="$(
-	echo - | awk "\
-	{ T1=\"${TIMER_START}\" } \
-	{ T2=\"$(date +%s.%N)\" } \
-	{ print T2 - T1; }"
-)"
+	local haproxy_config="${HAPROXY_CONFIG:-"/etc/haproxy/haproxy.cfg"}"
+	local haproxy_host_names="${HAPROXY_HOST_NAMES:-"localhost.localdomain"}"
+	local haproxy_ssl_certificate="${HAPROXY_SSL_CERTIFICATE}"
+	local verbose="false"
 
-cat <<-EOT
+	# Parse options
+	while [[ "${#}" -gt 0 ]]
+	do
+		case "${1}" in
+			-v|--verbose)
+				verbose="true"
+				shift 1
+				;;
+		esac
+	done
 
-	================================================================================
-	HAProxy Details
-	--------------------------------------------------------------------------------
-	host names : ${HAPROXY_HOST_NAMES}
-	
-	$(haproxy -vv)
-	--------------------------------------------------------------------------------
-	${TIMER_TOTAL}
+	if [[ -e ${STATE_FILE} ]]
+	then
+		if [[ ${verbose} == true ]]
+		then
+			printf -- \
+				'INFO: %s finished - skipping.\n' \
+				"${0##*/}"
+		fi
+		exit 0
+	fi
 
-EOT
+	if [[ -e ${LOCK_FILE} ]]
+	then
+		>&2 printf -- \
+			'ERROR: %s lock detected - aborting.\n' \
+			"${0##*/}"
+		exit 1
+	fi
 
-# Release lock file
-rm -f \
-	"${LOCK_FILE}"
+	trap "__cleanup" \
+		INT TERM EXIT
+	__create_lock
 
-exit 0
+	__set_haproxy_certificate \
+		"${haproxy_ssl_certificate}" \
+		"${haproxy_host_names}"
+
+	__set_haproxy_config \
+		"${haproxy_config}"
+
+	timer_total="$(
+		__get_timer_total \
+			"${timer_start}"
+	)"
+
+	if [[ ${verbose} == true ]]
+	then
+		cat <<-EOT
+
+			================================================================================
+			HAProxy Details
+			--------------------------------------------------------------------------------
+			host names : ${haproxy_host_names}
+			
+			$(haproxy -vv)
+			--------------------------------------------------------------------------------
+			${timer_total}
+
+		EOT
+	fi
+}
+
+main "${@}"
