@@ -129,7 +129,6 @@ function __set_haproxy_certificate ()
 	local -r config_path="/etc/pki/tls/certs/localhost.cnf"
 	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
 	local -r pattern_plain_text='-----BEGIN PRIVATE KEY-----'
-	# local -r sni_certificate_directory_path="/etc/pki/tls/certs/sni"
 
 	local file_path
 	local host_names="${2:-localhost.localdomain}"
@@ -189,14 +188,6 @@ function __set_haproxy_certificate ()
 			"${haproxy_host_names}" \
 			&> /dev/null
 	fi
-
-	#TODO - Not sure why this is necessary
-	# if [[ ! -s ${sni_certificate_directory_path}/localhost.crt ]]
-	# then
-	# 	cp -pf \
-	# 		${certificate_path} \
-	# 		${sni_certificate_directory_path}/
-	# fi
 }
 
 function __set_haproxy_config ()
