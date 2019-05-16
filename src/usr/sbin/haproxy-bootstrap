@@ -38,6 +38,48 @@ function __delete_lock ()
 	fi
 }
 
+function __get_haproxy_config ()
+{
+	local -r default_value="${1:-/etc/haproxy/haproxy.cfg}"
+
+	local value="${HAPROXY_CONFIG}"
+
+	if ! __is_valid_haproxy_config "${value}"
+	then
+		value="${default_value}"
+	fi
+
+	printf -- '%s' "${value}"
+}
+
+function __get_haproxy_host_names ()
+{
+	local -r default_value="${1:-localhost.localdomain}"
+
+	local value="${HAPROXY_HOST_NAMES}"
+
+	if ! __is_valid_haproxy_host_names "${value}"
+	then
+		value="${default_value}"
+	fi
+
+	printf -- '%s' "${value}"
+}
+
+function __get_haproxy_ssl_certificate ()
+{
+	local -r default_value="${1}"
+
+	local value="${HAPROXY_SSL_CERTIFICATE}"
+
+	if ! __is_valid_haproxy_ssl_certificate "${value}"
+	then
+		value="${default_value}"
+	fi
+
+	printf -- '%s' "${value}"
+}
+
 function __get_timer_total ()
 {
 	local -r timer_end="$(
@@ -61,6 +103,65 @@ function __get_timer_total ()
 				timer_end - timer_start;
 			}'
 	fi
+}
+
+function __is_valid_haproxy_config ()
+{
+	local -r value="${1}"
+
+	if [[ -n ${value} ]]
+	then
+		return 0
+	fi
+
+	return 1
+}
+
+function __is_valid_haproxy_host_names ()
+{
+	local -r value="${1}"
+
+	if [[ -n ${value} ]]
+	then
+		return 0
+	fi
+
+	return 1
+}
+
+function __is_valid_haproxy_ssl_certificate ()
+{
+	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
+	local -r pattern_plain_text='-----BEGIN PRIVATE KEY-----'
+
+	local value="${1}"
+
+	# Get value from file
+	if [[ -n ${value} ]] \
+		&& [[ -s ${value} ]]
+	then
+		value="$(
+			cat "${value}"
+		)"
+	fi
+
+	# Decode base64 encoded values
+	if [[ -n ${value} ]] \
+		&& [[ ! -s ${value} ]] \
+		&& [[ ${value} =~ ${pattern_base64} ]]
+	then
+		value="$(
+			base64 -d -i <<< "${value}"
+		)"
+	fi
+
+	if [[ -n ${value} ]] \
+		&& [[ ! ${value} =~ ${pattern_plain_text} ]]
+	then
+		return 1
+	fi
+
+	return 0
 }
 
 function __make_self_signed_san_certificate ()
@@ -128,10 +229,9 @@ function __set_haproxy_certificate ()
 	local -r certificate_path="/etc/pki/tls/certs/localhost.crt"
 	local -r config_path="/etc/pki/tls/certs/localhost.cnf"
 	local -r pattern_base64='^[A-Za-z0-9/+=]*$'
-	local -r pattern_plain_text='-----BEGIN PRIVATE KEY-----'
 
 	local file_path
-	local host_names="${2:-localhost.localdomain}"
+	local host_names="${2}"
 	local value="${1}"
 
 	# Get value from file
@@ -161,12 +261,6 @@ function __set_haproxy_certificate ()
 	fi
 
 	if [[ -n ${value} ]] \
-		&& [[ ! ${value} =~ ${pattern_plain_text} ]]
-	then
-		>&2 printf -- \
-			'ERROR: Invalid HAPROXY_SSL_CERTIFICATE\n'
-		exit 1
-	elif [[ -n ${value} ]] \
 		&& [[ -n ${file_path} ]] \
 		&& [[ ${file_path} != ${certificate_path} ]]
 	then
@@ -184,8 +278,12 @@ function __set_haproxy_certificate ()
 
 	if [[ ! -s ${certificate_path} ]]
 	then
+		host_names="${host_names:-"$(
+			__get_haproxy_host_names
+		)"}"
+
 		__make_self_signed_san_certificate \
-			"${haproxy_host_names}" \
+			"${host_names}" \
 			&> /dev/null
 	fi
 }
@@ -257,9 +355,9 @@ function main ()
 		date +%s.%N
 	)"
 
-	local haproxy_config="${HAPROXY_CONFIG:-"/etc/haproxy/haproxy.cfg"}"
-	local haproxy_host_names="${HAPROXY_HOST_NAMES:-"localhost.localdomain"}"
-	local haproxy_ssl_certificate="${HAPROXY_SSL_CERTIFICATE}"
+	local haproxy_config
+	local haproxy_host_names
+	local haproxy_ssl_certificate
 	local verbose="false"
 
 	# Parse options
@@ -295,6 +393,16 @@ function main ()
 	trap "__cleanup" \
 		INT TERM EXIT
 	__create_lock
+
+	haproxy_config="$(
+		__get_haproxy_config
+	)"
+	haproxy_host_names="$(
+		__get_haproxy_host_names
+	)"
+	haproxy_ssl_certificate="$(
+		__get_haproxy_ssl_certificate
+	)"
 
 	__set_haproxy_certificate \
 		"${haproxy_ssl_certificate}" \
