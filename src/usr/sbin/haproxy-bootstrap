@@ -52,6 +52,20 @@ function __get_haproxy_config ()
 	printf -- '%s' "${value}"
 }
 
+function __get_haproxy_config_path ()
+{
+	local -r default_value="${1:-/etc/haproxy/haproxy.cfg}"
+
+	local value="${HAPROXY_CONFIG}"
+
+	if ! __is_valid_haproxy_config_path "${value}"
+	then
+		value="${default_value}"
+	fi
+
+	printf -- '%s' "${value}"
+}
+
 function __get_haproxy_host_names ()
 {
 	local -r default_value="${1:-localhost.localdomain}"
@@ -135,6 +149,30 @@ function __is_valid_haproxy_config ()
 	fi
 
 	return 1
+}
+
+function __is_valid_haproxy_config_path ()
+{
+	local -r bin="/usr/sbin/haproxy"
+	local -r config_path="${1:-/etc/haproxy/haproxy.cfg}"
+
+	if [[ ! -f ${config_path} ]]
+	then
+		return 1
+	fi
+
+	${bin} \
+		-c \
+		-q \
+		-f ${config_path} \
+		&> /dev/null
+
+	if [[ ${?} -ne 0 ]]
+	then
+		return 1
+	fi
+
+	return 0
 }
 
 function __is_valid_haproxy_host_names ()
@@ -376,6 +414,7 @@ function main ()
 	)"
 
 	local haproxy_config
+	local haproxy_config_path
 	local haproxy_host_names
 	local haproxy_ssl_certificate
 	local ssl_certificate_fingerprint
@@ -434,6 +473,10 @@ function main ()
 
 	if [[ ${verbose} == true ]]
 	then
+		haproxy_config_path="$(
+			__get_haproxy_config_path
+		)"
+
 		ssl_certificate_fingerprint="$(
 			__get_ssl_certificate_fingerprint
 		)"
@@ -448,6 +491,7 @@ function main ()
 			================================================================================
 			HAProxy Details
 			--------------------------------------------------------------------------------
+			config path : ${haproxy_config_path}
 			host names : ${haproxy_host_names}
 			tls/ssl certificate sha1 fingerprint :
 			${ssl_certificate_fingerprint}

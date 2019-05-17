@@ -26,6 +26,7 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Adds error messages to healthcheck script and includes supervisord check.
 - Adds improved `healtchcheck`, `haproxy-wrapper` and `rsyslogd-wrapper` scripts.
 - Adds improved lock/state file implementation in wrapper scripts.
+- Adds config path and tls/ssl certificate fingerprint to `haproxy-wrapper` Details output.
 - Removes use of `/etc/services-config` paths.
 - Removes the unused group element from the default container name.
 - Removes the node element from the default container name.
