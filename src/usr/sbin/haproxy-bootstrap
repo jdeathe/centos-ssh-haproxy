@@ -80,6 +80,26 @@ function __get_haproxy_ssl_certificate ()
 	printf -- '%s' "${value}"
 }
 
+function __get_ssl_certificate_fingerprint ()
+{
+	local -r digest="${1:-sha1}"
+	local -r certificate_path="${2:-/etc/pki/tls/certs/localhost.crt}"
+
+	local value
+
+	value="$(
+		openssl x509 \
+			-"${digest,,}" \
+			-in "${certificate_path}" \
+			-noout \
+			-fingerprint
+	)"
+
+	value="${value//${digest^^}' Fingerprint='/}"
+
+	printf -- '%s' "${value}"
+}
+
 function __get_timer_total ()
 {
 	local -r timer_end="$(
@@ -358,6 +378,7 @@ function main ()
 	local haproxy_config
 	local haproxy_host_names
 	local haproxy_ssl_certificate
+	local ssl_certificate_fingerprint
 	local verbose="false"
 
 	# Parse options
@@ -411,19 +432,25 @@ function main ()
 	__set_haproxy_config \
 		"${haproxy_config}"
 
-	timer_total="$(
-		__get_timer_total \
-			"${timer_start}"
-	)"
-
 	if [[ ${verbose} == true ]]
 	then
+		ssl_certificate_fingerprint="$(
+			__get_ssl_certificate_fingerprint
+		)"
+
+		timer_total="$(
+			__get_timer_total \
+				"${timer_start}"
+		)"
+
 		cat <<-EOT
 
 			================================================================================
 			HAProxy Details
 			--------------------------------------------------------------------------------
 			host names : ${haproxy_host_names}
+			tls/ssl certificate sha1 fingerprint :
+			${ssl_certificate_fingerprint}
 			
 			$(haproxy -vv)
 			--------------------------------------------------------------------------------
