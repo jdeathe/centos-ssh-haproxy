@@ -17,6 +17,7 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Updates default tls/ssl certificate name from `localhost.localdomain.crt` to `localhost.crt`.
 - Fixes issue with unexpected published port in run templates when `DOCKER_PORT_MAP_TCP_80` or `DOCKER_PORT_MAP_TCP_443` is set to an empty string or 0.
 - Fixes binary paths in systemd unit files for compatibility with both EL and Ubuntu hosts.
+- Fixes environment variable name typo in README for `HAPROXY_CONFIG`.
 - Adds port incrementation to Makefile's run template for container names with an instance suffix.
 - Adds placeholder replacement of `RELEASE_VERSION` docker argument to systemd service unit template.
 - Adds improvement to pull logic in systemd unit install template.

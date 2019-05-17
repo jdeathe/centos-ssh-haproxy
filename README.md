@@ -104,9 +104,9 @@ The HAProxy SSL/TLS certificate can be defined using `HAPROXY_SSL_CERTIFICATE`. 
 
 **Note:** If using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config however use of unencoded file contents is.
 
-##### HAPROXY_CONF
+##### HAPROXY_CONFIG
 
-The HAProxy configuration file path, (or base64 encoded string of the configuration file contents), is set using `HAPROXY_CONF`. The default http configuration is located at the path `/etc/haproxy/haproxy-http.example.cfg` and will be copied into the runnning configuration path `/etc/haproxy/haproxy-http.example.cfg`. There's also an example tcp configuration in the path `/etc/haproxy/haproxy-tcp.example.cfg`. 
+The HAProxy configuration file path, (or base64 encoded string of the configuration file contents), is set using `HAPROXY_CONFIG`. The default http configuration is located at the path `/etc/haproxy/haproxy-http.example.cfg` and will be copied into the runnning configuration path `/etc/haproxy/haproxy-http.example.cfg`. There's also an example tcp configuration in the path `/etc/haproxy/haproxy-tcp.example.cfg`. 
 
 **Note:** In most situations it will be necessary to define a custom configuration where the use of the base64 encoded string option is recommended. However if using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config so when using these unencoded file contents is recommended.
 
