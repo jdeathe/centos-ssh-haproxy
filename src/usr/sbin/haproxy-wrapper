@@ -26,15 +26,39 @@ function __delete_lock ()
 function __get_options ()
 {
 	local -r config_path="${1:-/etc/haproxy/haproxy.cfg}"
+	local -r options="${4}"
 	local -r pid_path="${2:-/run/haproxy.pid}"
-	local -r options="${3}"
+	local -r stats_socket="${3:-/var/lib/haproxy/stats-1}"
 
-	printf -- \
-		'-W -f %s -p %s%s%s' \
-		"${config_path}" \
-		"${pid_path}" \
-		"${options:+" "}" \
-		"${options}"
+	local pids
+
+	if [[ -s ${pid_path} ]] \
+		&& [[ -S ${stats_socket} ]] \
+		&& ps axo command \
+			| grep -qE '^/usr/sbin/haproxy '
+	then
+		pids="$(< "${pid_path}")"
+
+		# reload
+		printf -- \
+			'-W -f %s -p %s -x %s -sf %s%s%s' \
+			"${config_path}" \
+			"${pid_path}" \
+			"${stats_socket}" \
+			"${pids}" \
+			"${options:+" "}" \
+			"${options}"
+
+	else
+		# start
+		printf -- \
+			'-W -f %s -p %s%s%s' \
+			"${config_path}" \
+			"${pid_path}" \
+			"${options:+" "}" \
+			"${options}"
+	fi
+
 }
 
 function __is_valid_configuration ()
@@ -65,6 +89,7 @@ function main ()
 	local -r lock_file="/var/lock/subsys/haproxy-wrapper"
 	local -r nice="/bin/nice"
 	local -r niceness="10"
+	local -r stats_socket="/var/lib/haproxy/stats-1"
 
 	local options
 	local pid_path="/run/haproxy.pid"
@@ -115,10 +140,21 @@ function main ()
 
 	if [[ ${verbose} == true ]]
 	then
-		printf -- \
-			'INFO: %s starting %s\n' \
-			"${0##*/}" \
-			"${bin##*/}"
+		if [[ -s ${pid_path} ]] \
+			&& [[ -S ${stats_socket} ]] \
+			&& ps axo command \
+				| grep -qE '^/usr/sbin/haproxy '
+		then
+			printf -- \
+				'INFO: %s reloading %s\n' \
+				"${0##*/}" \
+				"${bin##*/}"
+		else
+			printf -- \
+				'INFO: %s starting %s\n' \
+				"${0##*/}" \
+				"${bin##*/}"
+		fi
 	fi
 
 	# Process via eval to allow for quoted option values.
