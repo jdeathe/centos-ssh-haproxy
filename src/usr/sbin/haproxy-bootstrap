@@ -163,6 +163,7 @@ function __is_valid_haproxy_config_path ()
 
 	${bin} \
 		-c \
+		-dr \
 		-q \
 		-f ${config_path} \
 		&> /dev/null
