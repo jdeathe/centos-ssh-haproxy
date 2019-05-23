@@ -8,6 +8,7 @@ CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7.
 
 ### 1.2.0 - Unreleased
 
+- Updates package `rsyslog` to `rsyslog7`.
 - Updates source image to [1.10.1](https://github.com/jdeathe/centos-ssh/releases/tag/1.10.1).
 - Updates and restructures Dockerfile.
 - Updates container naming conventions and readability of `Makefile`.

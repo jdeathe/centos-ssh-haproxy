@@ -10,7 +10,7 @@ RUN yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
 		haproxy-1.5.18-1.el6 \
-		rsyslog-5.8.10-12.el6 \
+		rsyslog7-7.4.10-7.el6 \
 	&& yum versionlock add \
 		haproxy \
 		rsyslog \
@@ -51,9 +51,10 @@ RUN { printf -- \
 	&& sed -i \
 		-e 's~^#\$ModLoad imudp$~\$ModLoad imudp~' \
 		-e 's~^#\$UDPServerRun 514$~\$UDPServerRun 514~' \
-		-e 's~^\(\$OmitLocalLogging \)\(.*\)$~\1off~' \
-		-e 's~^\(\$ModLoad imuxsock .*\)$~#\1~' \
+		-e 's~^\(\$OmitLocalLogging .*\)$~#\1~' \
 		-e 's~^\(\$ModLoad imjournal .*\)$~#\1~' \
+		-e 's~^\(\$ModLoad imklog .*\)$~#\1~' \
+		-e 's~^\(\$ModLoad imuxsock .*\)$~#\1~' \
 		-e 's~^\(\$IMJournalStateFile .*\)$~#\1~' \
 		/etc/rsyslog.conf \
 	&& { printf -- \
