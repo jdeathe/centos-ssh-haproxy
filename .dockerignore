@@ -6,6 +6,7 @@ dist
 test
 var
 docker-compose.yml
+docker-compose-*.yml
 LICENSE
 README-short.txt
 *.md

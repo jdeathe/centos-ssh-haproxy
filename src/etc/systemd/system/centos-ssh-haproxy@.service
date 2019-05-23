@@ -1,4 +1,4 @@
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Naming convention:
 #
 #    centos-ssh-haproxy@.service = {service-unit-install-template-name}
@@ -39,7 +39,7 @@
 #     sudo systemctl stop {service-unit-instance-name}
 #     sudo rm /etc/systemd/system/{service-unit-template-name}
 #     sudo docker rm -f {service-unit-long-name}
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 [Unit]
 Description=centos-ssh-haproxy // %p@%i

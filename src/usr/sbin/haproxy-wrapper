@@ -58,7 +58,6 @@ function __get_options ()
 			"${options:+" "}" \
 			"${options}"
 	fi
-
 }
 
 function __is_valid_configuration ()
