@@ -1,39 +1,87 @@
 #!/usr/bin/env bash
 
-readonly BIN="/usr/sbin/haproxy"
-readonly BOOTSTRAP_LOCK_FILE="/var/lock/subsys/haproxy-bootstrap"
-readonly CONFIG_PATH="/etc/haproxy/haproxy.cfg"
-readonly LOCK_FILE="/var/lock/subsys/haproxy"
-readonly PID_PATH="/var/run/haproxy.pid"
+set -e
 
-BLOCKER_PID=""
-OPTIONS="
- -D
- -f ${CONFIG_PATH}
- -p ${PID_PATH}
-"
+function __cleanup ()
+{
+	__delete_lock
+}
+
+function __create_lock ()
+{
+	if [[ -n ${lock_file} ]]
+	then
+		touch "${lock_file}"
+	fi
+}
+
+function __delete_lock ()
+{
+	if [[ -e ${lock_file} ]]
+	then
+		rm -f "${lock_file}"
+	fi
+}
+
+function __get_options ()
+{
+	local -r config_path="${1:-/etc/haproxy/haproxy.cfg}"
+	local -r options="${3}"
+	local -r pid_path="${2:-/var/run/haproxy.pid}"
+
+	local pids
+
+	if [[ -s ${pid_path} ]] \
+		&& ps axo command \
+			| grep -qE '^/usr/sbin/haproxy '
+	then
+		pids="$(< "${pid_path}")"
+
+		# reload
+		printf -- \
+			'-D -f %s -p %s -sf %s%s%s' \
+			"${config_path}" \
+			"${pid_path}" \
+			"${pids}" \
+			"${options:+" "}" \
+			"${options}"
+
+	else
+		# start
+		printf -- \
+			'-D -f %s -p %s%s%s' \
+			"${config_path}" \
+			"${pid_path}" \
+			"${options:+" "}" \
+			"${options}"
+	fi
+}
 
 function __is_valid_configuration ()
 {
-	${BIN} \
+	local -r bin="${1:-/usr/sbin/haproxy}"
+	local -r config_path="${2:-/etc/haproxy/haproxy.cfg}"
+
+	${bin} \
 		-c \
 		-q \
-		-f ${CONFIG_PATH}
+		-f ${config_path}
 
 	if [[ ${?} -ne 0 ]]
 	then
-		printf -- \
-			'Errors in configuration file.\n' \
-			>&2
+		>&2 printf -- \
+			'ERROR: Configuration error.\n'
 		return 1
 	fi
 
 	return 0
 }
 
-function reload ()
+function __reload ()
 {
-	local pids
+	local -r bin="${1:-/usr/sbin/haproxy}"
+
+	local options
 	local return_value
 
 	if ! __is_valid_configuration
@@ -41,105 +89,177 @@ function reload ()
 		return 1
 	fi
 
-	pids="$(
-		cat "${PID_PATH}"
+	options="$(
+		__get_options
 	)"
 
-	if [[ -n ${pids} ]]
-	then
-		${BIN} \
-			${OPTIONS} \
-			-sf ${pids}
-	else
-		${BIN} \
-			${OPTIONS}
-	fi
+	${bin} \
+		${options}
 
-	return_value=${?}
+	return_value="${?}"
 
-	if [[ -n ${BLOCKER_PID} ]]
+	if [[ -n ${blocker_pid} ]]
 	then
-		kill ${BLOCKER_PID}
+		kill ${blocker_pid}
 	fi
 
 	# Create a lockfile on successful startup.
 	if [[ ${return_value} -eq 0 ]]
 	then
-		touch \
-			${LOCK_FILE}
+		__create_lock
 	fi
 
-	return ${return_value}
+	return "${return_value}"
 }
 
-function start ()
+function __start ()
 {
+	local -r bin="${1:-/usr/sbin/haproxy}"
+
+	local options
 	local return_value
 
-	if ! __is_valid_configuration; then
+	if ! __is_valid_configuration
+	then
 		return 1
 	fi
 
-	${BIN} \
-		${OPTIONS}
+	options="$(
+		__get_options
+	)"
 
-	return_value=${?}
+	${bin} \
+		${options}
+
+	return_value="${?}"
 
 	# Create a lockfile on successful startup.
 	if [[ ${return_value} -eq 0 ]]
 	then
-		touch \
-			${LOCK_FILE}
+		__create_lock
 	fi
 
-	return ${return_value}
+	return "${return_value}"
 }
 
-function stop ()
+function __soft_stop ()
 {
+	local -r bin="${1:-/usr/sbin/haproxy}"
+
 	local return_value
 
-	killall "$(
-		basename \
-		${BIN}
-	)"
+	killall \
+		-w \
+		-s USR1 \
+		"$(
+			basename \
+				"${bin}"
+		)"
 
-	return_value=${?}
+	return_value="${?}"
 
-	if [[ -n ${BLOCKER_PID} ]]
+	if [[ -n ${blocker_pid} ]]
 	then
-		kill ${BLOCKER_PID}
+		kill ${blocker_pid}
 	fi
 
 	# Remove the lockfile on successful stop.
 	if [[ ${return_value} -eq 0 ]]
 	then
-		rm -f \
-			${LOCK_FILE}
+		__delete_lock
 	fi
 
-	return ${return_value}
+	return "${return_value}"
 }
 
-# Use SIGHUP, (kill -1 <pid>), signal to reload instead of stop.
-trap reload \
-	HUP
-trap stop \
-	INT TERM EXIT
+function __stop ()
+{
+	local -r bin="${1:-/usr/sbin/haproxy}"
 
-while true
-do
-	sleep 0.1
-	[[ -e ${BOOTSTRAP_LOCK_FILE} ]] || break
-done
+	local return_value
 
-start
+	killall "$(
+		basename \
+			"${bin}"
+	)"
 
-# Keep script in the foreground and allow reload/stop traps to function.
-while [[ -e ${LOCK_FILE} ]]
-do
-	sleep \
-		infinity &
-	BLOCKER_PID=${!}
-	wait ${BLOCKER_PID}
-done
+	return_value="${?}"
+
+	if [[ -n ${blocker_pid} ]]
+	then
+		kill ${blocker_pid}
+	fi
+
+	# Remove the lockfile on successful stop.
+	if [[ ${return_value} -eq 0 ]]
+	then
+		__delete_lock
+	fi
+
+	return "${return_value}"
+}
+
+function main ()
+{
+	local -r bin="/usr/sbin/haproxy"
+	local -r bootstrap_state_file="/var/lib/misc/haproxy-bootstrap"
+	local -r config_path="/etc/haproxy/haproxy.cfg"
+	local -r lock_file="/var/lock/subsys/haproxy-wrapper"
+	local -r nice="/bin/nice"
+	local -r niceness="10"
+	local -r stats_socket="/var/lib/haproxy/stats-1"
+
+	# local options
+	local blocker_pid
+	local pid_path="/var/run/haproxy.pid"
+	local verbose="false"
+
+	# Parse options
+	while [[ "${#}" -gt 0 ]]
+	do
+		case "${1}" in
+			-v|--verbose)
+				verbose="true"
+				shift 1
+				;;
+		esac
+	done
+
+	if [[ -e ${lock_file} ]]
+	then
+		>&2 printf -- \
+			'ERROR: %s lock detected - aborting\n' \
+			"${0##*/}"
+		exit 1
+	fi
+
+	trap "__reload" \
+		HUP
+	trap "__soft_stop" \
+		USR1
+	trap "__stop" \
+		EXIT INT TERM
+
+	until [[ -e ${bootstrap_state_file} ]]
+	do
+		sleep 0.1
+	done
+
+	__start
+
+	# Keep script in the foreground and allow reload/stop traps to function.
+	while [[ -e ${lock_file} ]]
+	do
+		set +e
+		sleep \
+			infinity &
+		blocker_pid="${!}"
+		wait ${blocker_pid}
+		set -e
+	done
+
+	trap - \
+		EXIT HUP INT TERM USR1
+}
+
+main "${@}"
