@@ -28,19 +28,10 @@ function __get_options ()
 	local -r config_path="/etc/rsyslog.conf"
 	local -r listen_address="127.0.0.1"
 
-	local back_compat_mode
 	local options="${1}"
 
-	if [[ ! -f /usr/sbin/rsyslogd ]]
-	then
-		back_compat_mode="5"
-	fi
-
 	printf -- \
-		'%s%s%s-n -4 -Q -l %s -f %s%s%s' \
-		"${back_compat_mode:+"-c "}" \
-		"${back_compat_mode}" \
-		"${back_compat_mode:+" "}" \
+		'-n -4 -Q -l %s -f %s%s%s' \
 		"${listen_address}" \
 		"${config_path}" \
 		"${options:+" "}" \
