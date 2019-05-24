@@ -25,21 +25,18 @@ function __delete_lock ()
 
 function __get_options ()
 {
-	local -r config_path="${1:-/etc/haproxy/haproxy.cfg}"
-	local -r options="${4}"
-	local -r pid_path="${2:-/run/haproxy.pid}"
-	local -r stats_socket="${3:-/var/lib/haproxy/stats-1}"
+	local -r options="${1}"
 
 	local pids
 
 	if [[ -s ${pid_path} ]] \
 		&& [[ -S ${stats_socket} ]] \
 		&& ps axo command \
-			| grep -qE '^/usr/sbin/haproxy '
+			| grep -qE "^${bin} "
 	then
+		# hitless-reload
 		pids="$(< "${pid_path}")"
 
-		# reload
 		printf -- \
 			'-W -f %s -p %s -x %s -sf %s%s%s' \
 			"${config_path}" \
@@ -48,7 +45,6 @@ function __get_options ()
 			"${pids}" \
 			"${options:+" "}" \
 			"${options}"
-
 	else
 		# start
 		printf -- \
@@ -62,9 +58,6 @@ function __get_options ()
 
 function __is_valid_configuration ()
 {
-	local -r bin="${1:-/usr/sbin/haproxy}"
-	local -r config_path="${2:-/etc/haproxy/haproxy.cfg}"
-
 	${bin} \
 		-c \
 		-q \
@@ -72,8 +65,6 @@ function __is_valid_configuration ()
 
 	if [[ ${?} -ne 0 ]]
 	then
-		>&2 printf -- \
-			'ERROR: Configuration error.\n'
 		return 1
 	fi
 
@@ -126,23 +117,19 @@ function main ()
 		sleep 0.1
 	done
 
-	if ! __is_valid_configuration \
-		"${bin}" \
-		"${config_path}"
+	if ! __is_valid_configuration
 	then
+		>&2 printf -- \
+			'ERROR: Configuration error.\n'
 		exit 1
 	fi
-
-	__cleanup
-	trap - \
-		INT TERM EXIT
 
 	if [[ ${verbose} == true ]]
 	then
 		if [[ -s ${pid_path} ]] \
 			&& [[ -S ${stats_socket} ]] \
 			&& ps axo command \
-				| grep -qE '^/usr/sbin/haproxy '
+				| grep -qE "^${bin} "
 		then
 			printf -- \
 				'INFO: %s reloading %s\n' \
@@ -155,6 +142,10 @@ function main ()
 				"${bin##*/}"
 		fi
 	fi
+
+	__cleanup
+	trap - \
+		INT TERM EXIT
 
 	# Process via eval to allow for quoted option values.
 	eval "exec ${nice} \

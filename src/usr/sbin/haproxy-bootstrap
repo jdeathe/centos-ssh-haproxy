@@ -16,25 +16,25 @@ function __cleanup ()
 
 function __create_lock ()
 {
-	if [[ -n ${LOCK_FILE} ]]
+	if [[ -n ${lock_file} ]]
 	then
-		touch "${LOCK_FILE}"
+		touch "${lock_file}"
 	fi
 }
 
 function __create_state ()
 {
-	if [[ -n ${STATE_FILE} ]]
+	if [[ -n ${state_file} ]]
 	then
-		touch "${STATE_FILE}"
+		touch "${state_file}"
 	fi
 }
 
 function __delete_lock ()
 {
-	if [[ -e ${LOCK_FILE} ]]
+	if [[ -e ${lock_file} ]]
 	then
-		rm -f "${LOCK_FILE}"
+		rm -f "${lock_file}"
 	fi
 }
 
@@ -199,9 +199,7 @@ function __is_valid_haproxy_ssl_certificate ()
 	if [[ -n ${value} ]] \
 		&& [[ -s ${value} ]]
 	then
-		value="$(
-			cat "${value}"
-		)"
+		value="$(< "${value}")"
 	fi
 
 	# Decode base64 encoded values
@@ -298,9 +296,7 @@ function __set_haproxy_certificate ()
 		&& [[ -s ${value} ]]
 	then
 		file_path="${value}"
-		value="$(
-			cat "${value}"
-		)"
+		value="$(< "${value}")"
 	fi
 
 	# Decode base64 encoded values
@@ -332,7 +328,7 @@ function __set_haproxy_certificate ()
 		printf \
 			-- '%s' \
 			"${value}" \
-		> ${certificate_path}
+		> "${certificate_path}"
 	fi
 
 	if [[ ! -s ${certificate_path} ]]
@@ -407,9 +403,8 @@ function __set_haproxy_config ()
 
 function main ()
 {
-	LOCK_FILE="/var/lock/subsys/haproxy-bootstrap"
-	STATE_FILE="/var/lib/misc/haproxy-bootstrap"
-
+	local -r lock_file="/var/lock/subsys/haproxy-bootstrap"
+	local -r state_file="/var/lib/misc/haproxy-bootstrap"
 	local -r timer_start="$(
 		date +%s.%N
 	)"
@@ -432,7 +427,7 @@ function main ()
 		esac
 	done
 
-	if [[ -e ${STATE_FILE} ]]
+	if [[ -e ${state_file} ]]
 	then
 		if [[ ${verbose} == true ]]
 		then
@@ -443,7 +438,7 @@ function main ()
 		exit 0
 	fi
 
-	if [[ -e ${LOCK_FILE} ]]
+	if [[ -e ${lock_file} ]]
 	then
 		>&2 printf -- \
 			'ERROR: %s lock detected - aborting.\n' \
@@ -503,6 +498,9 @@ function main ()
 
 		EOT
 	fi
+
+	# Trigger cleanup trap.
+	exit 0
 }
 
 main "${@}"

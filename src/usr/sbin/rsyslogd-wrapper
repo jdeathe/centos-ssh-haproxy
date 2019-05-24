@@ -99,10 +99,6 @@ function main ()
 		sleep 0.1
 	done
 
-	__cleanup
-	trap - \
-		INT TERM EXIT
-
 	if [[ ${verbose} == true ]]
 	then
 		printf -- \
@@ -110,6 +106,10 @@ function main ()
 			"${0##*/}" \
 			"${bin##*/}"
 	fi
+
+	__cleanup
+	trap - \
+		INT TERM EXIT
 
 	# Process via eval to allow for quoted option values.
 	eval "exec ${nice} \
