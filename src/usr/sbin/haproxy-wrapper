@@ -25,19 +25,17 @@ function __delete_lock ()
 
 function __get_options ()
 {
-	local -r config_path="${1:-/etc/haproxy/haproxy.cfg}"
-	local -r options="${3}"
-	local -r pid_path="${2:-/var/run/haproxy.pid}"
+	local -r options="${1}"
 
 	local pids
 
 	if [[ -s ${pid_path} ]] \
 		&& ps axo command \
-			| grep -qE '^/usr/sbin/haproxy '
+			| grep -qE "^${bin} "
 	then
+		# reload
 		pids="$(< "${pid_path}")"
 
-		# reload
 		printf -- \
 			'-D -f %s -p %s -sf %s%s%s' \
 			"${config_path}" \
@@ -45,7 +43,6 @@ function __get_options ()
 			"${pids}" \
 			"${options:+" "}" \
 			"${options}"
-
 	else
 		# start
 		printf -- \
@@ -59,9 +56,6 @@ function __get_options ()
 
 function __is_valid_configuration ()
 {
-	local -r bin="${1:-/usr/sbin/haproxy}"
-	local -r config_path="${2:-/etc/haproxy/haproxy.cfg}"
-
 	${bin} \
 		-c \
 		-q \
@@ -69,8 +63,6 @@ function __is_valid_configuration ()
 
 	if [[ ${?} -ne 0 ]]
 	then
-		>&2 printf -- \
-			'ERROR: Configuration error.\n'
 		return 1
 	fi
 
@@ -79,19 +71,27 @@ function __is_valid_configuration ()
 
 function __reload ()
 {
-	local -r bin="${1:-/usr/sbin/haproxy}"
-
 	local options
 	local return_value
 
 	if ! __is_valid_configuration
 	then
+		>&2 printf -- \
+			'ERROR: Configuration error.\n'
 		return 1
 	fi
 
 	options="$(
 		__get_options
 	)"
+
+	if [[ ${verbose} == true ]]
+	then
+		printf -- \
+			'INFO: %s reloading %s\n' \
+			"${0##*/}" \
+			"${bin##*/}"
+	fi
 
 	${bin} \
 		${options}
@@ -114,19 +114,27 @@ function __reload ()
 
 function __start ()
 {
-	local -r bin="${1:-/usr/sbin/haproxy}"
-
 	local options
 	local return_value
 
 	if ! __is_valid_configuration
 	then
+		>&2 printf -- \
+			'ERROR: Configuration error.\n'
 		return 1
 	fi
 
 	options="$(
 		__get_options
 	)"
+
+	if [[ ${verbose} == true ]]
+	then
+		printf -- \
+			'INFO: %s starting %s\n' \
+			"${0##*/}" \
+			"${bin##*/}"
+	fi
 
 	${bin} \
 		${options}
@@ -144,9 +152,15 @@ function __start ()
 
 function __soft_stop ()
 {
-	local -r bin="${1:-/usr/sbin/haproxy}"
-
 	local return_value
+
+	if [[ ${verbose} == true ]]
+	then
+		printf -- \
+			'INFO: %s soft-stopping %s\n' \
+			"${0##*/}" \
+			"${bin##*/}"
+	fi
 
 	killall \
 		-w \
@@ -174,9 +188,15 @@ function __soft_stop ()
 
 function __stop ()
 {
-	local -r bin="${1:-/usr/sbin/haproxy}"
-
 	local return_value
+
+	if [[ ${verbose} == true ]]
+	then
+		printf -- \
+			'INFO: %s stopping %s\n' \
+			"${0##*/}" \
+			"${bin##*/}"
+	fi
 
 	killall "$(
 		basename \
@@ -207,11 +227,10 @@ function main ()
 	local -r lock_file="/var/lock/subsys/haproxy-wrapper"
 	local -r nice="/bin/nice"
 	local -r niceness="10"
+	local -r pid_path="/var/run/haproxy.pid"
 	local -r stats_socket="/var/lib/haproxy/stats-1"
 
-	# local options
 	local blocker_pid
-	local pid_path="/var/run/haproxy.pid"
 	local verbose="false"
 
 	# Parse options
@@ -247,7 +266,7 @@ function main ()
 
 	__start
 
-	# Keep script in the foreground and allow reload/stop traps to function.
+	# Keep script in the foreground and allow traps to function.
 	while [[ -e ${lock_file} ]]
 	do
 		set +e
