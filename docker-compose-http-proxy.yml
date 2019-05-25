@@ -52,8 +52,8 @@ services:
       VARNISH_TTL: "${VARNISH_TTL}"
       VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
       VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
-      VARNISH_VCL_CONF: "/run/secrets/varnish_vcl_default"
-    image: "jdeathe/centos-ssh-varnish:1.5.2"
+      VARNISH_VCL_CONF: "/var/run/secrets/varnish_vcl_default"
+    image: "jdeathe/centos-ssh-varnish:1.6.0"
     networks:
       tier2:
       tier3:
@@ -86,8 +86,8 @@ services:
       VARNISH_TTL: "${VARNISH_TTL}"
       VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
       VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
-      VARNISH_VCL_CONF: "/run/secrets/varnish_vcl_default"
-    image: "jdeathe/centos-ssh-varnish:1.5.2"
+      VARNISH_VCL_CONF: "/var/run/secrets/varnish_vcl_default"
+    image: "jdeathe/centos-ssh-varnish:1.6.0"
     networks:
       tier2:
       tier3:
