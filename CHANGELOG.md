@@ -29,11 +29,14 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Adds improved lock/state file implementation in wrapper scripts.
 - Adds config path and tls/ssl certificate fingerprint to `haproxy-wrapper` Details output.
 - Adds support for hitless reload via `haproxy-wrapper`.
+- Adds configuration of Apache certificate via `APACHE_SSL_CERTIFICATE` in `.env` for the tcp example.
+- Adds SNI forwarding in the TLS/SSL tcp example configuration.
 - Removes use of `/etc/services-config` paths.
 - Removes the unused group element from the default container name.
 - Removes the node element from the default container name.
 - Removes unused environment variables from Makefile and scmi configuration.
 - Removes X-Fleet section from etcd register template unit-file.
+- Removes use of `stick-table` in `haproxy-tcp.cfg` as it should not be necessary for web backends that support shared persistence/session data stores.
 
 ### 2.1.1 - 2018-12-27
 
