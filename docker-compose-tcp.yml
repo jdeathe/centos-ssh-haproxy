@@ -24,6 +24,14 @@ services:
   apache-php1:
     environment:
       APACHE_MOD_SSL_ENABLED: "true"
+      APACHE_SSL_CERTIFICATE: "${APACHE_SSL_CERTIFICATE}"
+    volumes:
+      # Emulate docker swarm secrets
+      - "${PWD}/test/fixture/secrets:/var/run/secrets:ro"
   apache-php2:
     environment:
       APACHE_MOD_SSL_ENABLED: "true"
+      APACHE_SSL_CERTIFICATE: "${APACHE_SSL_CERTIFICATE}"
+    volumes:
+      # Emulate docker swarm secrets
+      - "${PWD}/test/fixture/secrets:/var/run/secrets:ro"
