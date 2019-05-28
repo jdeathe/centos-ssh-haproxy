@@ -2,8 +2,9 @@
 # Ref: https://docs.docker.com/compose/compose-file/
 #
 # Setup:
-# docker-compose build
+# Copy .env.example to .env and modify values as required.
 # docker-compose down
+# docker-compose build
 #
 # Run Default example:
 # docker-compose up -d
@@ -31,9 +32,9 @@ services:
       context: "."
       dockerfile: "Dockerfile"
     environment:
-      HAPROXY_SSL_CERTIFICATE: "${HAPROXY_SSL_CERTIFICATE:-/run/secrets/haproxy_ssl_certificate}"
-      HAPROXY_CONFIG: "/etc/haproxy/haproxy-http.cfg"
-      HAPROXY_HOST_NAMES: "www.app.local app.local localhost.localdomain"
+      HAPROXY_SSL_CERTIFICATE: "${HAPROXY_SSL_CERTIFICATE}"
+      HAPROXY_CONFIG: "${HAPROXY_CONFIG}"
+      HAPROXY_HOST_NAMES: "${HAPROXY_HOST_NAMES}"
     image: "jdeathe/centos-ssh-haproxy:latest"
     networks:
       - "tier1"
@@ -56,46 +57,58 @@ services:
     volumes:
       # Emulate docker swarm secrets
       - "${PWD}/test/fixture/secrets:/run/secrets:ro"
-  httpd_1:
+  apache-php1:
     depends_on:
       - "memcached"
     environment:
+      APACHE_CUSTOM_LOG_LOCATION: "/dev/stdout"
+      APACHE_ERROR_LOG_LOCATION: "/dev/stderr"
+      APACHE_LOAD_MODULES: "rewrite_module"
       APACHE_MOD_SSL_ENABLED: "false"
       APACHE_MPM: "event"
       APACHE_SERVER_ALIAS: "app.local"
       APACHE_SERVER_NAME: "www.app.local"
       PHP_OPTIONS_SESSION_SAVE_HANDLER: "memcached"
       PHP_OPTIONS_SESSION_SAVE_PATH: "memcached:11211"
-    image: "jdeathe/centos-ssh-apache-php:3.1.1"
+    image: "jdeathe/centos-ssh-apache-php:3.2.0"
     networks:
-      - "tier3"
-      - "tier4"
+      tier3:
+        aliases:
+          - "apache-php.1"
+          - "httpd_1"
+      tier4:
     restart: "always"
     sysctls:
       net.core.somaxconn: "2048"
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
-  httpd_2:
+  apache-php2:
     depends_on:
       - "memcached"
     environment:
+      APACHE_CUSTOM_LOG_LOCATION: "/dev/stdout"
+      APACHE_ERROR_LOG_LOCATION: "/dev/stderr"
+      APACHE_LOAD_MODULES: "rewrite_module"
       APACHE_MOD_SSL_ENABLED: "false"
       APACHE_MPM: "event"
       APACHE_SERVER_ALIAS: "app.local"
       APACHE_SERVER_NAME: "www.app.local"
       PHP_OPTIONS_SESSION_SAVE_HANDLER: "memcached"
       PHP_OPTIONS_SESSION_SAVE_PATH: "memcached:11211"
-    image: "jdeathe/centos-ssh-apache-php:3.1.1"
+    image: "jdeathe/centos-ssh-apache-php:3.2.0"
     networks:
-      - "tier3"
-      - "tier4"
+      tier3:
+        aliases:
+          - "apache-php.2"
+          - "httpd_2"
+      tier4:
     restart: "always"
     sysctls:
       net.core.somaxconn: "2048"
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
   memcached:
-    image: "jdeathe/centos-ssh-memcached:2.1.1"
+    image: "jdeathe/centos-ssh-memcached:2.2.1"
     environment:
       MEMCACHED_CACHESIZE: "32"
       MEMCACHED_MAXCONN: "2048"
