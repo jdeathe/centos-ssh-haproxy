@@ -15,6 +15,10 @@
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-2 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-3 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-4 -i 1
+#
+# Varnish usage:
+# docker-compose -f docker-compose.yml -f docker-compose-http-proxy.yml \
+#   exec varnish1 varnishadm help
 # ------------------------------------------------------------------------------
 version: "3.0"
 networks:
