@@ -31,6 +31,7 @@ CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 - Adds support for hitless reload via `haproxy-wrapper`.
 - Adds configuration of Apache certificate via `APACHE_SSL_CERTIFICATE` in `.env` for the tcp example.
 - Adds SNI forwarding in the TLS/SSL tcp example configuration.
+- Adds `/status` (`monitor-uri`) endpoints and custom error responses to http example configuration.
 - Removes use of `/etc/services-config` paths.
 - Removes the unused group element from the default container name.
 - Removes the node element from the default container name.

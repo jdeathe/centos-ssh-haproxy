@@ -208,12 +208,17 @@ function __terminate_container ()
 function test_basic_operations ()
 {
 	local -r backend_hostname="localhost.localdomain"
+	local -r backend_name_1="apache-php.1"
+	local -r backend_name_2="apache-php.2"
 	local -r backend_network="bridge_t1"
 	local -r content="$(< test/fixture/apache/var/www/public_html/index.html)"
 
 	local backend_content=""
+	local backend_response_code=""
 	local container_port_80=""
 	local container_port_443=""
+	local logs_since=1
+	local logs_timeout=60
 
 	describe "Basic HAProxy operations"
 		trap "__terminate_container haproxy.1 &> /dev/null; \
@@ -310,6 +315,136 @@ function test_basic_operations ()
 						"${backend_content}" \
 						"${content}"
 				end
+			end
+		end
+
+		describe "Monitor URI"
+			describe "Backend healthy"
+				describe "Unencrypted response"
+					it "Is 200 OK."
+						backend_response_code="$(
+							curl -sI \
+								-o /dev/null \
+								-w "%{http_code}" \
+								-H "Host: ${backend_hostname}" \
+								http://127.0.0.1:${container_port_80}/status
+						)"
+
+						backend_content="$(
+							curl -s \
+								-H "Host: ${backend_hostname}" \
+								http://127.0.0.1:${container_port_80}/status
+						)"
+
+						assert equal \
+							"${backend_response_code}:${backend_content}" \
+							"200:OK"
+					end
+				end
+
+				describe "Encrypted response"
+					it "Is 200 OK."
+						backend_response_code="$(
+							curl -skI \
+								-o /dev/null \
+								-w "%{http_code}" \
+								-H "Host: ${backend_hostname}" \
+								https://127.0.0.1:${container_port_443}/status
+						)"
+
+						backend_content="$(
+							curl -sk \
+								-H "Host: ${backend_hostname}" \
+								https://127.0.0.1:${container_port_443}/status
+						)"
+
+						assert equal \
+							"${backend_response_code}:${backend_content}" \
+							"200:OK"
+					end
+				end
+			end
+
+			describe "Backend down"
+
+				# set server https/web_1 drain
+				# set server http/web_1 drain
+
+				# Take backends down
+				docker pause \
+					${backend_name_1} \
+					${backend_name_2} \
+				&> /dev/null
+
+				# TODO - Add non-interactive CLI method of putting servers into
+				# maintenance mode.
+				#
+				# Check inter is 5s with a fall of 3 (15s) however the 
+				# spread-check setting means checks are non-linear so need to 
+				# wait at least 60 seconds for all backend servers to be down.
+				until (( logs_since >= logs_timeout )) \
+					|| docker logs \
+						--since ${logs_since}s \
+						haproxy.1 \
+					| grep -qE 'backend http has no server available' \
+					&& docker logs \
+						--since ${logs_since}s \
+						haproxy.1 \
+					| grep -qE 'backend http has no server available'
+				do
+					sleep 1
+					(( logs_since += 1 ))
+				done
+
+				describe "Unencrypted response"
+					it "Is 503 Service Unavailable."
+						backend_response_code="$(
+							curl -sI \
+								-o /dev/null \
+								-w "%{http_code}" \
+								-H "Host: ${backend_hostname}" \
+								http://127.0.0.1:${container_port_80}/status
+						)"
+
+						backend_content="$(
+							curl -s \
+								-H "Host: ${backend_hostname}" \
+								http://127.0.0.1:${container_port_80}/status
+						)"
+
+						assert equal \
+							"${backend_response_code}:${backend_content}" \
+							"503:Service Unavailable"
+					end
+				end
+
+				describe "Encrypted response"
+					it "Is 503 Service Unavailable."
+						backend_response_code="$(
+							curl -skI \
+								-o /dev/null \
+								-w "%{http_code}" \
+								-H "Host: ${backend_hostname}" \
+								https://127.0.0.1:${container_port_443}/status
+						)"
+
+						backend_content="$(
+							curl -sk \
+								-H "Host: ${backend_hostname}" \
+								https://127.0.0.1:${container_port_443}/status
+						)"
+
+						assert equal \
+							"${backend_response_code}:${backend_content}" \
+							"503:Service Unavailable"
+					end
+				end
+
+				# Bring backends up
+				docker unpause \
+					${backend_name_1} \
+					${backend_name_2} \
+				&> /dev/null
 			end
 		end
 
