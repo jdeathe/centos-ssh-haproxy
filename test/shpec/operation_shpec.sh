@@ -347,10 +347,6 @@ function test_basic_operations ()
 			end
 
 			describe "Backend down"
-
-				# set server https/web_1 drain
-				# set server http/web_1 drain
-
 				# Take backends down
 				docker pause \
 					${backend_name_1} \
