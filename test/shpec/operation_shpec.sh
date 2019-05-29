@@ -319,7 +319,7 @@ function test_basic_operations ()
 		end
 
 		describe "Monitor URI"
-			describe "Backend healthy"
+			describe "Backend up"
 				describe "Unencrypted response"
 					it "Is 200 OK."
 						backend_response_code="$(
