@@ -196,6 +196,9 @@ function test_basic_operations ()
 
 	local backend_content=""
 	local backend_response_code=""
+	local cli_server=""
+	local cli_server_state="maint"
+	local cli_servers="http/web_1 http/web_2 https/web_1 https/web_2"
 	local container_port_80=""
 	local container_port_443=""
 	local logs_since=1
@@ -347,30 +350,15 @@ function test_basic_operations ()
 			end
 
 			describe "Backend down"
-				# Take backends down
-				docker pause \
-					${backend_name_1} \
-					${backend_name_2} \
-				&> /dev/null
-
-				# TODO - Add non-interactive CLI method of putting servers into
-				# maintenance mode.
-				#
-				# Check inter is 5s with a fall of 3 (15s) however the 
-				# spread-check setting means checks are non-linear so need to 
-				# wait at least 60 seconds for all backend servers to be down.
-				until (( logs_since >= logs_timeout )) \
-					|| docker logs \
-						--since ${logs_since}s \
-						haproxy.1 \
-					| grep -qE 'backend http has no server available' \
-					&& docker logs \
-						--since ${logs_since}s \
-						haproxy.1 \
-					| grep -qE 'backend http has no server available'
+				# Put backend servers into maintenance state
+				cli_server_state="maint"
+				for cli_server in ${cli_servers}
 				do
-					sleep 1
-					(( logs_since += 1 ))
+					docker exec -i \
+						haproxy.1 \
+						socat - UNIX:/var/lib/haproxy/stats-1 \
+						<<< "set server ${cli_server} state ${cli_server_state}" \
+					&> /dev/null
 				done
 
 				describe "Unencrypted response"
@@ -416,12 +404,6 @@ function test_basic_operations ()
 							"503:Service Unavailable"
 					end
 				end
-
-				# Bring backends up
-				docker unpause \
-					${backend_name_1} \
-					${backend_name_2} \
-				&> /dev/null
 			end
 		end
 

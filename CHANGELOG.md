@@ -31,6 +31,7 @@ CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7.
 - Adds support for soft-stop in `haproxy-wrapper`.
 - Adds configuration of Apache certificate via `APACHE_SSL_CERTIFICATE` in `.env` for the tcp example.
 - Adds `/status` (`monitor-uri`) endpoints and custom error responses to http example configuration.
+- Adds `socat` package to the image to allow for non-interactive HAProxy CLI usage.
 - Removes use of `/etc/services-config` paths.
 - Removes the unused group element from the default container name.
 - Removes the node element from the default container name.

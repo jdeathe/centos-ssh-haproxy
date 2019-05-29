@@ -11,9 +11,11 @@ RUN yum -y install \
 			--disableplugin=fastestmirror \
 		haproxy-1.5.18-1.el6 \
 		rsyslog7-7.4.10-7.el6 \
+		socat-1.7.2.3-1.el6 \
 	&& yum versionlock add \
 		haproxy \
 		rsyslog \
+		socat \
 	&& yum clean all \
 	&& curl -LsSO \
 		https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/hatop/hatop-${HATOP_VERSION}.tar.gz \
