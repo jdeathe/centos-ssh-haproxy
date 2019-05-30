@@ -3,7 +3,6 @@ readonly TEST_DIRECTORY="test"
 
 # These should ideally be a static value but hosts might be using this port so 
 # need to allow for alternatives.
-DOCKER_PORT_MAP_TCP_22="${DOCKER_PORT_MAP_TCP_22:-NULL}"
 DOCKER_PORT_MAP_TCP_80="${DOCKER_PORT_MAP_TCP_80:-80}"
 DOCKER_PORT_MAP_TCP_443="${DOCKER_PORT_MAP_TCP_443:-443}"
 
@@ -11,8 +10,8 @@ function __destroy ()
 {
 	local -r backend_alias_1="httpd_1"
 	local -r backend_alias_2="httpd_2"
-	local -r backend_name_1="apache-php.pool-1.1.1"
-	local -r backend_name_2="apache-php.pool-1.1.2"
+	local -r backend_name_1="apache-php.1"
+	local -r backend_name_2="apache-php.2"
 	local -r backend_network="bridge_t1"
 
 	# Destroy the backend
@@ -91,10 +90,10 @@ function __setup ()
 {
 	local -r backend_alias_1="httpd_1"
 	local -r backend_alias_2="httpd_2"
-	local -r backend_name_1="apache-php.pool-1.1.1"
-	local -r backend_name_2="apache-php.pool-1.1.2"
+	local -r backend_name_1="apache-php.1"
+	local -r backend_name_2="apache-php.2"
 	local -r backend_network="bridge_t1"
-	local -r backend_release="2.3.1"
+	local -r backend_release="2.4.0"
 
 	# Create the bridge network
 	if [[ -z $(docker network ls -q -f name="${backend_network}") ]]; then
@@ -190,27 +189,35 @@ function __terminate_container ()
 function test_basic_operations ()
 {
 	local -r backend_hostname="localhost.localdomain"
+	local -r backend_name_1="apache-php.1"
+	local -r backend_name_2="apache-php.2"
 	local -r backend_network="bridge_t1"
 	local -r content="$(< test/fixture/apache/var/www/public_html/index.html)"
 
 	local backend_content=""
+	local backend_response_code=""
+	local cli_server=""
+	local cli_server_state="maint"
+	local cli_servers="http/web_1 http/web_2 https/web_1 https/web_2"
 	local container_port_80=""
 	local container_port_443=""
+	local logs_since=1
+	local logs_timeout=60
 
 	describe "Basic HAProxy operations"
-		trap "__terminate_container haproxy.pool-1.1.1 &> /dev/null; \
+		trap "__terminate_container haproxy.1 &> /dev/null; \
 			__destroy; \
 			exit 1" \
 			INT TERM EXIT
 
 		__terminate_container \
-			haproxy.pool-1.1.1 \
+			haproxy.1 \
 		&> /dev/null
 
 		describe "Runs named container"
 			docker run \
 				--detach \
-				--name haproxy.pool-1.1.1 \
+				--name haproxy.1 \
 				--network ${backend_network} \
 				--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
 				--publish ${DOCKER_PORT_MAP_TCP_443}:443 \
@@ -220,7 +227,7 @@ function test_basic_operations ()
 			it "Can publish ${DOCKER_PORT_MAP_TCP_80}:80."
 				container_port_80="$(
 					__get_container_port \
-						haproxy.pool-1.1.1 \
+						haproxy.1 \
 						80/tcp
 				)"
 
@@ -239,7 +246,7 @@ function test_basic_operations ()
 			it "Can publish ${DOCKER_PORT_MAP_TCP_443}:443."
 				container_port_443="$(
 					__get_container_port \
-						haproxy.pool-1.1.1 \
+						haproxy.1 \
 						443/tcp
 				)"
 
@@ -257,7 +264,7 @@ function test_basic_operations ()
 		end
 
 		if ! __is_container_ready \
-			haproxy.pool-1.1.1 \
+			haproxy.1 \
 			${STARTUP_TIME} \
 			"/usr/sbin/haproxy " \
 			"/usr/bin/healthcheck"
@@ -295,8 +302,113 @@ function test_basic_operations ()
 			end
 		end
 
+		describe "Monitor URI"
+			describe "Backend up"
+				describe "Unencrypted response"
+					it "Is 200 OK."
+						backend_response_code="$(
+							curl -sI \
+								-o /dev/null \
+								-w "%{http_code}" \
+								-H "Host: ${backend_hostname}" \
+								http://127.0.0.1:${container_port_80}/status
+						)"
+
+						backend_content="$(
+							curl -s \
+								-H "Host: ${backend_hostname}" \
+								http://127.0.0.1:${container_port_80}/status
+						)"
+
+						assert equal \
+							"${backend_response_code}:${backend_content}" \
+							"200:OK"
+					end
+				end
+
+				describe "Encrypted response"
+					it "Is 200 OK."
+						backend_response_code="$(
+							curl -skI \
+								-o /dev/null \
+								-w "%{http_code}" \
+								-H "Host: ${backend_hostname}" \
+								https://127.0.0.1:${container_port_443}/status
+						)"
+
+						backend_content="$(
+							curl -sk \
+								-H "Host: ${backend_hostname}" \
+								https://127.0.0.1:${container_port_443}/status
+						)"
+
+						assert equal \
+							"${backend_response_code}:${backend_content}" \
+							"200:OK"
+					end
+				end
+			end
+
+			describe "Backend down"
+				# Put backend servers into maintenance state
+				cli_server_state="maint"
+				for cli_server in ${cli_servers}
+				do
+					docker exec -i \
+						haproxy.1 \
+						socat - UNIX:/var/lib/haproxy/stats-1 \
+						<<< "set server ${cli_server} state ${cli_server_state}" \
+					&> /dev/null
+				done
+
+				describe "Unencrypted response"
+					it "Is 503 Service Unavailable."
+						backend_response_code="$(
+							curl -sI \
+								-o /dev/null \
+								-w "%{http_code}" \
+								-H "Host: ${backend_hostname}" \
+								http://127.0.0.1:${container_port_80}/status
+						)"
+
+						backend_content="$(
+							curl -s \
+								-H "Host: ${backend_hostname}" \
+								http://127.0.0.1:${container_port_80}/status
+						)"
+
+						assert equal \
+							"${backend_response_code}:${backend_content}" \
+							"503:Service Unavailable"
+					end
+				end
+
+				describe "Encrypted response"
+					it "Is 503 Service Unavailable."
+						backend_response_code="$(
+							curl -skI \
+								-o /dev/null \
+								-w "%{http_code}" \
+								-H "Host: ${backend_hostname}" \
+								https://127.0.0.1:${container_port_443}/status
+						)"
+
+						backend_content="$(
+							curl -sk \
+								-H "Host: ${backend_hostname}" \
+								https://127.0.0.1:${container_port_443}/status
+						)"
+
+						assert equal \
+							"${backend_response_code}:${backend_content}" \
+							"503:Service Unavailable"
+					end
+				end
+			end
+		end
+
 		__terminate_container \
-			haproxy.pool-1.1.1 \
+			haproxy.1 \
 		&> /dev/null
 
 		trap - \
@@ -318,7 +430,7 @@ function test_custom_configuration ()
 	local container_port_443=""
 
 	describe "Customised HAProxy operations"
-		trap "__terminate_container haproxy.pool-1.1.1 &> /dev/null; \
+		trap "__terminate_container haproxy.1 &> /dev/null; \
 			__destroy; \
 			exit 1" \
 			INT TERM EXIT
@@ -360,12 +472,12 @@ function test_custom_configuration ()
 
 				it "Sets from base64 encoded value."
 					__terminate_container \
-						haproxy.pool-1.1.1 \
+						haproxy.1 \
 					&> /dev/null
 
 					docker run \
 						--detach \
-						--name haproxy.pool-1.1.1 \
+						--name haproxy.1 \
 						--env HAPROXY_SSL_CERTIFICATE="${certificate_pem_base64}" \
 						--network ${backend_network} \
 						--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
@@ -376,12 +488,12 @@ function test_custom_configuration ()
 
 					container_port_443="$(
 						__get_container_port \
-							haproxy.pool-1.1.1 \
+							haproxy.1 \
 							443/tcp
 					)"
 
 					if ! __is_container_ready \
-						haproxy.pool-1.1.1 \
+						haproxy.1 \
 						${STARTUP_TIME} \
 						"/usr/sbin/haproxy " \
 						"/usr/bin/healthcheck"
@@ -414,12 +526,12 @@ function test_custom_configuration ()
 
 				it "Sets from file path value."
 					__terminate_container \
-						haproxy.pool-1.1.1 \
+						haproxy.1 \
 					&> /dev/null
 
 					docker run \
 						--detach \
-						--name haproxy.pool-1.1.1 \
+						--name haproxy.1 \
 						--env HAPROXY_SSL_CERTIFICATE="/var/run/tmp/www.app.local.pem" \
 						--network ${backend_network} \
 						--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
@@ -430,12 +542,12 @@ function test_custom_configuration ()
 
 					container_port_443="$(
 						__get_container_port \
-							haproxy.pool-1.1.1 \
+							haproxy.1 \
 							443/tcp
 					)"
 
 					if ! __is_container_ready \
-						haproxy.pool-1.1.1 \
+						haproxy.1 \
 						${STARTUP_TIME} \
 						"/usr/sbin/haproxy " \
 						"/usr/bin/healthcheck"
@@ -468,12 +580,12 @@ function test_custom_configuration ()
 
 				it "Sets from file path with base64 encoded content."
 					__terminate_container \
-						haproxy.pool-1.1.1 \
+						haproxy.1 \
 					&> /dev/null
 
 					docker run \
 						--detach \
-						--name haproxy.pool-1.1.1 \
+						--name haproxy.1 \
 						--env HAPROXY_SSL_CERTIFICATE="/var/run/tmp/www.app.local.txt" \
 						--network ${backend_network} \
 						--publish ${DOCKER_PORT_MAP_TCP_80}:80 \
@@ -484,12 +596,12 @@ function test_custom_configuration ()
 
 					container_port_443="$(
 						__get_container_port \
-							haproxy.pool-1.1.1 \
+							haproxy.1 \
 							443/tcp
 					)"
 
 					if ! __is_container_ready \
-						haproxy.pool-1.1.1 \
+						haproxy.1 \
 						${STARTUP_TIME} \
 						"/usr/sbin/haproxy " \
 						"/usr/bin/healthcheck"
@@ -523,7 +635,7 @@ function test_custom_configuration ()
 		end
 
 		__terminate_container \
-			haproxy.pool-1.1.1 \
+			haproxy.1 \
 		&> /dev/null
 
 		trap - \
@@ -534,11 +646,14 @@ function test_custom_configuration ()
 function test_healthcheck ()
 {
 	local -r backend_network="bridge_t1"
-	local -r interval_seconds=0.5
+	local -r event_lag_seconds=2
+	local -r interval_seconds=1
 	local -r retries=4
-	local health_status=""
+	local container_id
+	local events_since_timestamp
+	local health_status
 
-	trap "__terminate_container haproxy.pool-1.1.1 &> /dev/null; \
+	trap "__terminate_container haproxy.1 &> /dev/null; \
 		__destroy; \
 		exit 1" \
 		INT TERM EXIT
@@ -546,21 +661,31 @@ function test_healthcheck ()
 	describe "Healthcheck"
 		describe "Default configuration"
 			__terminate_container \
-				haproxy.pool-1.1.1 \
+				haproxy.1 \
 			&> /dev/null
 
 			docker run \
 				--detach \
-				--name haproxy.pool-1.1.1 \
+				--name haproxy.1 \
 				--network ${backend_network} \
 				jdeathe/centos-ssh-haproxy:latest \
 			&> /dev/null
+
+			events_since_timestamp="$(
+				date +%s
+			)"
+
+			container_id="$(
+				docker ps \
+					--quiet \
+					--filter "name=haproxy.1"
+			)"
 
 			it "Returns a valid status on starting."
 				health_status="$(
 					docker inspect \
 						--format='{{json .State.Health.Status}}' \
-						haproxy.pool-1.1.1
+						haproxy.1
 				)"
 
 				assert __shpec_matcher_egrep \
@@ -568,57 +693,69 @@ function test_healthcheck ()
 					"\"(starting|healthy|unhealthy)\""
 			end
 
-			sleep $(
-				awk \
-					-v interval_seconds="${interval_seconds}" \
-					-v startup_time="${STARTUP_TIME}" \
-					'BEGIN { print 1 + interval_seconds + startup_time; }'
-			)
-
 			it "Returns healthy after startup."
+				events_timeout="$(
+					awk \
+						-v event_lag="${event_lag_seconds}" \
+						-v interval="${interval_seconds}" \
+						-v startup_time="${STARTUP_TIME}" \
+						'BEGIN { print event_lag + startup_time + interval; }'
+				)"
+
 				health_status="$(
-					docker inspect \
-						--format='{{json .State.Health.Status}}' \
-						haproxy.pool-1.1.1
+					test/health_status \
+						--container="${container_id}" \
+						--since="${events_since_timestamp}" \
+						--timeout="${events_timeout}" \
+						--monochrome \
+					2>&1
 				)"
 
 				assert equal \
 					"${health_status}" \
-					"\"healthy\""
+					"✓ healthy"
 			end
 
 			it "Returns unhealthy on failure."
 				docker exec -t \
-					haproxy.pool-1.1.1 \
+					haproxy.1 \
 					bash -c "mv \
 						/usr/sbin/haproxy \
 						/usr/sbin/haproxy2" \
 				&& docker exec -t \
-					haproxy.pool-1.1.1 \
+					haproxy.1 \
 					bash -c "if [[ -n \$(pgrep -f '^/usr/sbin/haproxy ') ]]; then \
 						kill -9 \$(pgrep -f '^/usr/sbin/haproxy ')
 					fi"
 
-				sleep $(
+				events_since_timestamp="$(
+					date +%s
+				)"
+
+				events_timeout="$(
 					awk \
-						-v interval_seconds="${interval_seconds}" \
+						-v event_lag="${event_lag_seconds}" \
+						-v interval="${interval_seconds}" \
 						-v retries="${retries}" \
-						'BEGIN { print 1 + interval_seconds * retries; }'
-				)
+						'BEGIN { print (2 * event_lag) + (interval * retries); }'
+				)"
 
 				health_status="$(
-					docker inspect \
-						--format='{{json .State.Health.Status}}' \
-						haproxy.pool-1.1.1
+					test/health_status \
+						--container="${container_id}" \
+						--since="$(( ${event_lag_seconds} + ${events_since_timestamp} ))" \
+						--timeout="${events_timeout}" \
+						--monochrome \
+					2>&1
 				)"
 
 				assert equal \
 					"${health_status}" \
-					"\"unhealthy\""
+					"✗ unhealthy"
 			end
 
 			__terminate_container \
-				haproxy.pool-1.1.1 \
+				haproxy.1 \
 			&> /dev/null
 		end
 	end
