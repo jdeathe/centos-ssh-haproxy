@@ -2,6 +2,7 @@
 # Ref: https://docs.docker.com/compose/compose-file/
 #
 # Setup:
+# Copy .env.example to .env and modify values as required.
 # docker-compose -f docker-compose.yml -f docker-compose-h2.yml build
 # docker-compose -f docker-compose.yml -f docker-compose-h2.yml down
 #

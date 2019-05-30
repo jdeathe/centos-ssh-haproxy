@@ -1,14 +1,8 @@
 #!/usr/bin/env bash
 
-if [[ ! -f /usr/sbin/rsyslogd ]] \
-	&& [[ -f /sbin/rsyslogd ]]
-then
-	readonly RSYSLOGD="/sbin/rsyslogd"
-else
-	readonly RSYSLOGD="/usr/sbin/rsyslogd"
-fi
+set -e
 
-function has_nbproc_running ()
+function __has_nbproc_running ()
 {
 	local nbproc="$(
 		sed -rn \
@@ -20,33 +14,60 @@ function has_nbproc_running ()
 		| grep -cE '^/usr/sbin/haproxy '
 	)"
 
-	# Account for the Master process
+	# Account for the master process
 	(( nbproc_running -= 1 ))
 
-	if [[ ${nbproc_running} -lt ${nbproc} ]]; then
+	if [[ ${nbproc_running} -lt ${nbproc} ]]
+	then
 		return 1
 	fi
 
 	return 0
 }
 
-# logging
-if ! ps axo command \
-	| grep -qE "^${RSYSLOGD} "
-then
-	exit 1
-fi
+function main ()
+{
+	local rsyslogd_path="/sbin/rsyslogd"
 
-# child processes
-if ! ps axo command \
-	| grep -qE '^/usr/sbin/haproxy '
-then
-	exit 1
-fi
+	if [[ -f /usr/sbin/rsyslogd ]]
+	then
+		rsyslogd_path="/usr/sbin/rsyslogd"
+	fi
 
-if ! has_nbproc_running
-then
-	exit 1
-fi
+	if ! ps axo command \
+		| grep -qE '^/usr/bin/python /usr/bin/supervisord'
+	then
+		>&2 printf -- \
+			'%s\n' \
+			"supervisord not running."
+		exit 1
+	fi
 
-exit 0
+	if ! ps axo command \
+		| grep -qE "^${rsyslogd_path} "
+	then
+		>&2 printf -- \
+			'%s\n' \
+			"rsyslogd not running."
+		exit 1
+	fi
+
+	if ! ps axo command \
+		| grep -qE '^/usr/sbin/haproxy '
+	then
+		>&2 printf -- \
+			'%s\n' \
+			"haproxy not running."
+		exit 1
+	fi
+
+	if ! __has_nbproc_running
+	then
+		>&2 printf -- \
+			'%s\n' \
+			"unexpected nbproc count."
+		exit 1
+	fi
+}
+
+main "${@}"

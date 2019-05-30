@@ -2,6 +2,7 @@
 # Ref: https://docs.docker.com/compose/compose-file/
 #
 # Setup:
+# Copy .env.example to .env and modify values as required.
 # docker-compose -f docker-compose.yml -f docker-compose-h2-proxy.yml build
 # docker-compose -f docker-compose.yml -f docker-compose-h2-proxy.yml down
 #
@@ -14,6 +15,10 @@
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-2 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-3 -i 1
 # docker-compose exec haproxy hatop -s /var/lib/haproxy/stats-4 -i 1
+#
+# Varnish usage:
+# docker-compose -f docker-compose.yml -f docker-compose-h2-proxy.yml \
+#   exec varnish1 varnishadm help
 # ------------------------------------------------------------------------------
 version: "3.0"
 networks:
@@ -24,16 +29,41 @@ services:
   haproxy:
     environment:
       HAPROXY_CONFIG: "/etc/haproxy/haproxy-h2-proxy.cfg"
-  varnish_1:
+  apache-php1:
     environment:
-      VARNISH_STORAGE: "malloc,256M"
-      VARNISH_MAX_THREADS: "2000"
-      VARNISH_MIN_THREADS: "200"
-      VARNISH_VCL_CONF: "${VARNISH_VCL_CONF:-/run/secrets/varnish_vcl_terminated_https}"
-    image: "jdeathe/centos-ssh-varnish:2.2.1"
+      APACHE_CUSTOM_LOG_LOCATION: "/dev/null"
     networks:
-      - "tier2"
-      - "tier3"
+      tier2:
+        aliases:
+          - "apache-php.1"
+          - "httpd_1"
+  apache-php2:
+    environment:
+      APACHE_CUSTOM_LOG_LOCATION: "/dev/null"
+    networks:
+      tier2:
+        aliases:
+          - "apache-php.2"
+          - "httpd_2"
+  varnish1:
+    environment:
+      VARNISH_AUTOSTART_VARNISHNCSA_WRAPPER: "true"
+      VARNISH_MAX_THREADS: "${VARNISH_MAX_THREADS}"
+      VARNISH_MIN_THREADS: "${VARNISH_MIN_THREADS}"
+      VARNISH_OPTIONS: "${VARNISH_OPTIONS}"
+      VARNISH_STORAGE: "${VARNISH_STORAGE}"
+      VARNISH_THREAD_TIMEOUT: "${VARNISH_THREAD_TIMEOUT}"
+      VARNISH_TTL: "${VARNISH_TTL}"
+      VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
+      VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
+      VARNISH_VCL_CONF: "/run/secrets/varnish_vcl_terminated_https"
+    image: "jdeathe/centos-ssh-varnish:2.3.0"
+    networks:
+      tier2:
+      tier3:
+        aliases:
+          - "varnish.1"
+          - "varnish_1"
     restart: "always"
     sysctls:
       net.core.somaxconn: "4096"
@@ -49,16 +79,25 @@ services:
     volumes:
       # Emulate docker swarm secrets
       - "${PWD}/test/fixture/secrets:/run/secrets:ro"
-  varnish_2:
+  varnish2:
     environment:
-      VARNISH_STORAGE: "malloc,256M"
-      VARNISH_MAX_THREADS: "2000"
-      VARNISH_MIN_THREADS: "200"
-      VARNISH_VCL_CONF: "${VARNISH_VCL_CONF:-/run/secrets/varnish_vcl_terminated_https}"
-    image: "jdeathe/centos-ssh-varnish:2.2.1"
+      VARNISH_AUTOSTART_VARNISHNCSA_WRAPPER: "true"
+      VARNISH_MAX_THREADS: "${VARNISH_MAX_THREADS}"
+      VARNISH_MIN_THREADS: "${VARNISH_MIN_THREADS}"
+      VARNISH_OPTIONS: "${VARNISH_OPTIONS}"
+      VARNISH_STORAGE: "${VARNISH_STORAGE}"
+      VARNISH_THREAD_TIMEOUT: "${VARNISH_THREAD_TIMEOUT}"
+      VARNISH_TTL: "${VARNISH_TTL}"
+      VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
+      VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
+      VARNISH_VCL_CONF: "/run/secrets/varnish_vcl_terminated_https"
+    image: "jdeathe/centos-ssh-varnish:2.3.0"
     networks:
-      - "tier2"
-      - "tier3"
+      tier2:
+      tier3:
+        aliases:
+          - "varnish.2"
+          - "varnish_2"
     restart: "always"
     sysctls:
       net.core.somaxconn: "4096"
