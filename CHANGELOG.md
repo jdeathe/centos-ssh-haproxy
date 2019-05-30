@@ -6,7 +6,7 @@ Summary of release changes for Version 1.
 
 CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7.
 
-### 1.2.0 - Unreleased
+### 1.2.0 - 2019-05-30
 
 - Updates package `rsyslog` to `rsyslog7`.
 - Updates source image to [1.10.1](https://github.com/jdeathe/centos-ssh/releases/tag/1.10.1).
