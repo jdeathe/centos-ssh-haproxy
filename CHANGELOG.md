@@ -6,7 +6,7 @@ Summary of release changes for Version 2.
 
 CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
 
-### 2.2.0 - Unreleased
+### 2.2.0 - 2019-05-30
 
 - Updates `haproxy18u` packages to 1.8.19-1.
 - Updates source image to [2.5.1](https://github.com/jdeathe/centos-ssh/releases/tag/2.5.1).
