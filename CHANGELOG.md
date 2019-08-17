@@ -7,6 +7,24 @@ Summary of release changes.
 ### 2.3.0 - Unreleased
 
 - Updates `haproxy18u` packages to 1.8.20-1.
+- Updates source image to [2.6.0](https://github.com/jdeathe/centos-ssh/releases/tag/2.6.0).
+- Updates CHANGELOG.md to simplify maintenance.
+- Updates README.md to simplify contents and improve readability.
+- Updates README-short.txt to apply to all image variants.
+- Updates Dockerfile `org.deathe.description` metadata LABEL for consistency.
+- Updates supervisord configuration to send error log output to stderr.
+- Updates haproxy-bootstrap supervisord configuration file/priority to `20-haproxy-bootstrap.conf`/`80`.
+- Updates resyslogd-wrapper supervisord configuration file/priority to `50-rsyslogd-wrapper.conf`/`50`.
+- Updates haproxy-wrapper supervisord configuration file/priority to `90-haproxy-wrapper.conf`/`90`.
+- Updates docker-compose example with redis session store replacing memcached for the apache-php service.
+- Updates wrapper scripts timer to use UTC date timestamps.
+- Fixes docker host connection status check in Makefile.
+- Adds `inspect`, `reload` and `top` Makefile targets.
+- Adds improved `clean` Makefile target; includes exited containers and dangling images.
+- Adds `SYSTEM_TIMEZONE` handling to Makefile, scmi, systemd unit and docker-compose templates.
+- Adds system time zone validation to healthcheck.
+- Adds lock/state file to wrapper scripts.
+- Removes support for long image tags (i.e. centos-7-2.x.x).
 
 ### 2.2.0 - 2019-05-30
 
