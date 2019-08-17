@@ -13,7 +13,7 @@ Summary of release changes.
 - Updates README-short.txt to apply to all image variants.
 - Updates Dockerfile `org.deathe.description` metadata LABEL for consistency.
 - Updates supervisord configuration to send error log output to stderr.
-- Updates haproxy-bootstrap supervisord configuration file/priority to `20-haproxy-bootstrap.conf`/`80`.
+- Updates haproxy-bootstrap supervisord configuration file/priority to `20-haproxy-bootstrap.conf`/`20`.
 - Updates resyslogd-wrapper supervisord configuration file/priority to `50-rsyslogd-wrapper.conf`/`50`.
 - Updates haproxy-wrapper supervisord configuration file/priority to `90-haproxy-wrapper.conf`/`90`.
 - Updates docker-compose example with redis session store replacing memcached for the apache-php service.
