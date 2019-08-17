@@ -1,10 +1,12 @@
 # Change Log
 
-## centos-7
+## 2 - centos-7
 
-Summary of release changes for Version 2.
+Summary of release changes.
 
-CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
+### 2.3.0 - Unreleased
+
+- Updates `haproxy18u` packages to 1.8.20-1.
 
 ### 2.2.0 - 2019-05-30
 

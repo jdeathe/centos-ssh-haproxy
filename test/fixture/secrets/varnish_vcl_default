@@ -9,7 +9,7 @@ import std;
 probe healthcheck {
 	.interval = 5s;
 	.timeout = 2s;
-	.window = 5;
+	.window = 3;
 	.threshold = 3;
 	.initial = 2;
 	.expected_response = 200;

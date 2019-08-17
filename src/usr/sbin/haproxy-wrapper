@@ -17,7 +17,7 @@ function __create_lock ()
 
 function __delete_lock ()
 {
-	if [[ -e ${lock_file} ]]
+	if [[ -f ${lock_file} ]]
 	then
 		rm -f "${lock_file}"
 	fi
@@ -85,7 +85,6 @@ function main ()
 	local pid_path="/run/haproxy.pid"
 	local verbose="false"
 
-	# Parse options
 	while [[ "${#}" -gt 0 ]]
 	do
 		case "${1}" in
@@ -96,7 +95,7 @@ function main ()
 		esac
 	done
 
-	if [[ -e ${lock_file} ]]
+	if [[ -f ${lock_file} ]]
 	then
 		>&2 printf -- \
 			'ERROR: %s lock detected - aborting\n' \
@@ -120,7 +119,8 @@ function main ()
 	if ! __is_valid_configuration
 	then
 		>&2 printf -- \
-			'ERROR: Configuration error.\n'
+			'ERROR: %s configuration error\n' \
+			"${0##*/}"
 		exit 1
 	fi
 
