@@ -56,6 +56,14 @@ function __get_options ()
 	fi
 }
 
+function __get_proxy ()
+{
+	printf -- \
+		'%s -n %s' \
+		"${nice}" \
+		"${niceness}"
+}
+
 function __is_valid_configuration ()
 {
 	${bin} \
@@ -75,6 +83,7 @@ function main ()
 {
 	local -r bin="/usr/sbin/haproxy"
 	local -r bootstrap_state_file="/var/lib/misc/haproxy-bootstrap"
+	local -r bootstrap_timeout="4"
 	local -r config_path="/etc/haproxy/haproxy.cfg"
 	local -r lock_file="/var/lock/subsys/haproxy-wrapper"
 	local -r nice="/bin/nice"
@@ -82,6 +91,7 @@ function main ()
 	local -r stats_socket="/var/lib/haproxy/stats-1"
 
 	local options
+	local proxy
 	local pid_path="/run/haproxy.pid"
 	local verbose="false"
 
@@ -110,11 +120,39 @@ function main ()
 	options="$(
 		__get_options
 	)"
+	proxy="$(
+		__get_proxy
+	)"
 
-	until [[ -e ${bootstrap_state_file} ]]
+	if [[ ${verbose} == true ]]
+	then
+		printf -- \
+			'INFO: %s waiting on %s\n' \
+			"${0##*/}" \
+			"${bootstrap_state_file##*/}"
+	fi
+
+	set +e
+	until [[ -f ${bootstrap_state_file} ]]
 	do
-		sleep 0.1
+		if ! inotifywait -qq \
+			-e "create" \
+			-t "${bootstrap_timeout}" \
+			"${bootstrap_state_file%/*}"
+		then
+			break
+		fi
 	done
+	set -e
+
+	if ! [[ -f ${bootstrap_state_file} ]]
+	then
+		>&2 printf -- \
+			'ERROR: %s timed out waiting on %s\n' \
+			"${0##*/}" \
+			"${bootstrap_state_file##*/}"
+		exit 1
+	fi
 
 	if ! __is_valid_configuration
 	then
@@ -147,9 +185,8 @@ function main ()
 	trap - \
 		INT TERM EXIT
 
-	# Process via eval to allow for quoted option values.
-	eval "exec ${nice} \
-		-n ${niceness} \
+	eval "exec \
+		${proxy} \
 		${bin} \
 		${options}"
 }
