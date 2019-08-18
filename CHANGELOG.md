@@ -24,6 +24,7 @@ Summary of release changes.
 - Adds `SYSTEM_TIMEZONE` handling to Makefile, scmi, systemd unit and docker-compose templates.
 - Adds system time zone validation to healthcheck.
 - Adds lock/state file to wrapper scripts.
+- Adds revised default timeout values.
 - Removes support for long image tags (i.e. centos-7-2.x.x).
 
 ### 2.2.0 - 2019-05-30
