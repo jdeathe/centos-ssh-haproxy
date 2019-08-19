@@ -112,18 +112,18 @@ services:
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
   redis:
-      environment:
+    environment:
       REDIS_MAXMEMORY: "32mb"
       REDIS_TCP_BACKLOG: "2048"
       SYSTEM_TIMEZONE: "${SYSTEM_TIMEZONE}"
     image: "jdeathe/centos-ssh-redis:1.2.0"
-      networks:
-        - "tier4"
+    networks:
+      - "tier4"
     ports:
       - "6379:6379"
-      restart: "always"
-      sysctls:
-        net.core.somaxconn: "2048"
+    restart: "always"
+    sysctls:
+      net.core.somaxconn: "2048"
       net.ipv4.ip_local_port_range: "1024 65535"
       net.ipv4.route.flush: "1"
     ulimits:
