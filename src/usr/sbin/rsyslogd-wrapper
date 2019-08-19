@@ -148,9 +148,8 @@ function main ()
 	trap - \
 		INT TERM EXIT
 
-	# Process via eval to allow for quoted option values.
-	eval "exec ${nice} \
-		-n ${niceness} \
+	eval "exec \
+		${proxy} \
 		${bin} \
 		${options}"
 }
