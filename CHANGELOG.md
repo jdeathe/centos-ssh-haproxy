@@ -18,13 +18,15 @@ Summary of release changes.
 - Updates haproxy-wrapper supervisord configuration file/priority to `90-haproxy-wrapper.conf`/`90`.
 - Updates docker-compose example with redis session store replacing memcached for the apache-php service.
 - Updates wrapper scripts timer to use UTC date timestamps.
+- Updates default timeout values.
+- Updates proxy (varnish) configuration examples to use uri balance algorithm.
+- Updates proxy (varnish) configuration examples to use both backends (removes backup).
 - Fixes docker host connection status check in Makefile.
 - Adds `inspect`, `reload` and `top` Makefile targets.
 - Adds improved `clean` Makefile target; includes exited containers and dangling images.
 - Adds `SYSTEM_TIMEZONE` handling to Makefile, scmi, systemd unit and docker-compose templates.
 - Adds system time zone validation to healthcheck.
 - Adds lock/state file to wrapper scripts.
-- Adds revised default timeout values.
 - Removes support for long image tags (i.e. centos-7-2.x.x).
 
 ### 2.2.0 - 2019-05-30
