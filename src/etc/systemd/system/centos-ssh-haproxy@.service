@@ -60,12 +60,13 @@ Environment="DOCKER_USER=jdeathe"
 Environment="SYSCTL_NET_CORE_SOMAXCONN=32768"
 Environment="SYSCTL_NET_IPV4_IP_LOCAL_PORT_RANGE=1024 65535"
 Environment="SYSCTL_NET_IPV4_ROUTE_FLUSH=1"
+Environment="SYSTEM_TIMEZONE=UTC"
 Environment="ULIMIT_MEMLOCK=82000"
 Environment="ULIMIT_NOFILE=131072"
 Environment="ULIMIT_NPROC=9223372036854775807"
-Environment="HAPROXY_SSL_CERTIFICATE="
 Environment="HAPROXY_CONFIG=/etc/haproxy/haproxy.cfg"
 Environment="HAPROXY_HOST_NAMES=localhost.localdomain"
+Environment="HAPROXY_SSL_CERTIFICATE="
 
 # Initialisation: Load image from local storage if available, otherwise pull.
 ExecStartPre=/bin/bash -c \
@@ -129,9 +130,10 @@ ExecStart=/bin/bash -c \
     --ulimit \"memlock=${ULIMIT_MEMLOCK}\" \
     --ulimit \"nofile=${ULIMIT_NOFILE}\" \
     --ulimit \"nproc=${ULIMIT_NPROC}\" \
-    --env \"HAPROXY_SSL_CERTIFICATE=${HAPROXY_SSL_CERTIFICATE}\" \
     --env \"HAPROXY_CONFIG=${HAPROXY_CONFIG}\" \
     --env \"HAPROXY_HOST_NAMES=${HAPROXY_HOST_NAMES}\" \
+    --env \"HAPROXY_SSL_CERTIFICATE=${HAPROXY_SSL_CERTIFICATE}\" \
+    --env \"SYSTEM_TIMEZONE=${SYSTEM_TIMEZONE}\" \
     $(if [[ ${DOCKER_PORT_MAP_TCP_80} != NULL ]]; \
     then \
       if /bin/grep -qE \
