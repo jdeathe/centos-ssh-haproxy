@@ -358,9 +358,7 @@ function __set_haproxy_config ()
 		&& [[ -s ${value} ]]
 	then
 		file_path="${value}"
-		value="$(
-			cat "${value}"
-		)"
+		value="$(< "${value}")"
 	fi
 
 	# Decode base64 encoded values
@@ -383,7 +381,8 @@ function __set_haproxy_config ()
 		&& [[ ! ${value} =~ ${pattern_plain_text} ]]
 	then
 		>&2 printf -- \
-			'ERROR: Invalid HAPROXY_CONFIG\n'
+			'ERROR: %s invalid HAPROXY_CONFIG\n' \
+			"${0##*/}"
 		exit 1
 	elif [[ -n ${value} ]] \
 		&& [[ -n ${file_path} ]] \
