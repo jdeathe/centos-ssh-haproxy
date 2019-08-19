@@ -22,6 +22,7 @@ Summary of release changes.
 - Updates proxy (varnish) configuration examples to use uri balance algorithm.
 - Updates proxy (varnish) configuration examples to use both backends (removes backup).
 - Fixes docker host connection status check in Makefile.
+- Fixes docker-compose examples; volume mount errors on CentOS host.
 - Adds `inspect`, `reload` and `top` Makefile targets.
 - Adds improved `clean` Makefile target; includes exited containers and dangling images.
 - Adds `SYSTEM_TIMEZONE` handling to Makefile, scmi, systemd unit and docker-compose templates.

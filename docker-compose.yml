@@ -57,7 +57,7 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "${PWD}/test/fixture/secrets:/run/secrets:ro"
+      - "./test/fixture/secrets:/var/run/secrets:ro"
   apache-php1:
     depends_on:
       - "redis"
