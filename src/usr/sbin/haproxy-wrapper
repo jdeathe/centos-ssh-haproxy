@@ -17,7 +17,7 @@ function __create_lock ()
 
 function __delete_lock ()
 {
-	if [[ -e ${lock_file} ]]
+	if [[ -f ${lock_file} ]]
 	then
 		rm -f "${lock_file}"
 	fi
@@ -52,6 +52,14 @@ function __get_options ()
 			"${options:+" "}" \
 			"${options}"
 	fi
+}
+
+function __get_proxy ()
+{
+	printf -- \
+		'%s -n %s' \
+		"${nice}" \
+		"${niceness}"
 }
 
 function __is_valid_configuration ()
@@ -115,6 +123,7 @@ function __reload ()
 function __start ()
 {
 	local options
+	local proxy
 	local return_value
 
 	if ! __is_valid_configuration
@@ -127,6 +136,9 @@ function __start ()
 	options="$(
 		__get_options
 	)"
+	proxy="$(
+		__get_proxy
+	)"
 
 	if [[ ${verbose} == true ]]
 	then
@@ -136,8 +148,10 @@ function __start ()
 			"${bin##*/}"
 	fi
 
-	${bin} \
-		${options}
+	eval "exec \
+		${proxy} \
+		${bin} \
+		${options}"
 
 	return_value="${?}"
 
@@ -223,6 +237,7 @@ function main ()
 {
 	local -r bin="/usr/sbin/haproxy"
 	local -r bootstrap_state_file="/var/lib/misc/haproxy-bootstrap"
+	local -r bootstrap_timeout="4"
 	local -r config_path="/etc/haproxy/haproxy.cfg"
 	local -r lock_file="/var/lock/subsys/haproxy-wrapper"
 	local -r nice="/bin/nice"
@@ -244,7 +259,7 @@ function main ()
 		esac
 	done
 
-	if [[ -e ${lock_file} ]]
+	if [[ -f ${lock_file} ]]
 	then
 		>&2 printf -- \
 			'ERROR: %s lock detected - aborting\n' \

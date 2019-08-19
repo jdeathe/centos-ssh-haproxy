@@ -47,7 +47,8 @@ services:
           - "httpd_2"
   varnish1:
     environment:
-      VARNISH_AUTOSTART_VARNISHNCSA_WRAPPER: "true"
+      ENABLE_VARNISHNCSA_WRAPPER: "true"
+      SYSTEM_TIMEZONE: "${SYSTEM_TIMEZONE}"
       VARNISH_MAX_THREADS: "${VARNISH_MAX_THREADS}"
       VARNISH_MIN_THREADS: "${VARNISH_MIN_THREADS}"
       VARNISH_OPTIONS: "${VARNISH_OPTIONS}"
@@ -57,7 +58,7 @@ services:
       VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
       VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
       VARNISH_VCL_CONF: "/var/run/secrets/varnish_vcl_default"
-    image: "jdeathe/centos-ssh-varnish:1.6.0"
+    image: "jdeathe/centos-ssh-varnish:1.7.0"
     networks:
       tier2:
       tier3:
@@ -78,10 +79,11 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "${PWD}/test/fixture/secrets:/var/run/secrets:ro"
+      - "./test/fixture/secrets:/var/run/secrets:ro"
   varnish2:
     environment:
-      VARNISH_AUTOSTART_VARNISHNCSA_WRAPPER: "true"
+      ENABLE_VARNISHNCSA_WRAPPER: "true"
+      SYSTEM_TIMEZONE: "${SYSTEM_TIMEZONE}"
       VARNISH_MAX_THREADS: "${VARNISH_MAX_THREADS}"
       VARNISH_MIN_THREADS: "${VARNISH_MIN_THREADS}"
       VARNISH_OPTIONS: "${VARNISH_OPTIONS}"
@@ -91,7 +93,7 @@ services:
       VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
       VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
       VARNISH_VCL_CONF: "/var/run/secrets/varnish_vcl_default"
-    image: "jdeathe/centos-ssh-varnish:1.6.0"
+    image: "jdeathe/centos-ssh-varnish:1.7.0"
     networks:
       tier2:
       tier3:
@@ -112,4 +114,4 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "${PWD}/test/fixture/secrets:/var/run/secrets:ro"
+      - "./test/fixture/secrets:/var/run/secrets:ro"

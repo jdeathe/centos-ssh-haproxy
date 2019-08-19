@@ -1,42 +1,26 @@
-Docker Image including:
-- CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7.
-- CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
+### Tags and respective `Dockerfile` links
 
-- http://www.haproxy.org/
-- http://feurix.org/projects/hatop/
+- `centos-7`, `2.2.0` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
+- `centos-6`, `1.2.0` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
 
-## Overview & links
+## Overview
 
-- `centos-7`, `centos-7-2.2.0`, `2.2.0` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
-- `centos-6`, `centos-6-1.2.0`, `1.2.0` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
+This build uses the base image [jdeathe/centos-ssh](https://github.com/jdeathe/centos-ssh) so inherits it's features but with `sshd` disabled by default. [Supervisor](http://supervisord.org/) is used to start the [haproxy](http://www.haproxy.org/) daemon when a docker container based on this image is run.
 
-#### centos-6
+To manage HAProxy both [HATop](http://feurix.org/projects/hatop/) and [socat](http://www.dest-unreach.org/socat/) are included to provide both a UI and low level cli management interface respectively.
 
-The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.2.0`or `1.2.0` for the [1.2.0](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.2.0) release tag.
+### Image variants
 
-#### centos-7
+- [HAProxy 1.8 / HATop 0.7 - CentOS-7](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7)
+- [HAProxy 1.5 / HATop 0.7 - CentOS-6](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6)
 
-The latest CentOS-7 based release can be pulled from the `centos-7` Docker tag. It is recommended to select a specific release tag - the convention is `centos-7-2.2.0`or `2.2.0` for the [2.2.0](https://github.com/jdeathe/centos-ssh-haproxy/tree/2.2.0) release tag.
+## Quick start
 
-Included in the build are the [SCL](https://www.softwarecollections.org/), [EPEL](http://fedoraproject.org/wiki/EPEL) and [IUS](https://ius.io) repositories. Installed packages include [OpenSSH](http://www.openssh.com/portable.html) secure shell, [vim-minimal](http://www.vim.org/), are installed along with python-setuptools, [supervisor](http://supervisord.org/) and [supervisor-stdout](https://github.com/coderanger/supervisor-stdout).
+> For production use, it is recommended to select a specific release tag as shown in the examples.
 
-Supervisor is used to start the haproxy (and optionally the sshd) daemon when a docker container based on this image is run.
+Run up a container named `haproxy.1` from the docker image `jdeathe/centos-ssh-haproxy` on port 80 and 443 of your docker host. 2 backend hosts, `httpd_1` and `httpd_2`, are defined with IP addresses `172.17.8.101` and `172.17.8.101`; this is required to identify the backend hosts from within the HAProxy configuration file if not using docker network aliases.
 
-If enabling and configuring SSH access, it is by public key authentication and, by default, the [Vagrant](http://www.vagrantup.com/) [insecure private key](https://github.com/mitchellh/vagrant/blob/master/keys/vagrant) is required.
-
-### SSH Alternatives
-
-SSH is not required in order to access a terminal for the running container. The simplest method is to use the docker exec command to run bash (or sh) as follows: 
-
-```
-$ docker exec -it {docker-name-or-id} bash
-```
-
-For cases where access to docker exec is not possible the preferred method is to use Command Keys and the nsenter command. See [command-keys.md](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/command-keys.md) for details on how to set this up.
-
-## Quick Example
-
-Run up a container named `haproxy.1` from the docker image `jdeathe/centos-ssh-haproxy` on port 80 and 443 of your docker host. 2 backend hosts, `httpd_1` and `httpd_2`, are defined with IP addresses 172.17.8.101 and 172.17.8.101; this is required to identify the backend hosts from within the HAProxy configuration file if not using docker network aliases.
+> Change `172.17.8.101` and `172.17.8.101` in the example below to IP addresses that resolve to valid web servers on your network.
 
 ```
 $ docker run -d -t \
@@ -45,10 +29,17 @@ $ docker run -d -t \
   -p 443:443 \
   --add-host httpd_1:172.17.8.101 \
   --add-host httpd_2:172.17.8.102 \
-  jdeathe/centos-ssh-haproxy:1.2.0
+  jdeathe/centos-ssh-haproxy:2.2.0
 ```
 
-Now you can verify it is initialised and running successfully by inspecting the container's logs.
+Verify the named container's process status and health.
+
+```
+$ docker ps -a \
+  -f "name=haproxy.1"
+```
+
+Verify successful initialisation of the named container.
 
 ```
 $ docker logs haproxy.1
@@ -66,8 +57,8 @@ In the following example the http service is bound to port 80 and https on port 
 
 ```
 $ docker stop haproxy.1 && \
-  docker rm haproxy.1
-$ docker run \
+  docker rm haproxy.1; \
+  docker run \
   --detach \
   --tty \
   --name haproxy.1 \
@@ -82,7 +73,7 @@ $ docker run \
   --env "HAPROXY_HOST_NAMES=www.app.local app.local localhost.localdomain" \
   --add-host httpd_1:172.17.8.101 \
   --add-host httpd_2:172.17.8.102 \
-  jdeathe/centos-ssh-haproxy:1.2.0
+  jdeathe/centos-ssh-haproxy:2.2.0
 ```
 
 Now you can verify it is initialised and running successfully by inspecting the container's logs:
@@ -91,7 +82,7 @@ Now you can verify it is initialised and running successfully by inspecting the 
 $ docker logs haproxy.1
 ```
 
-#### Environment Variables
+#### Environment variables
 
 There are several environmental variables defined at runtime which allows the operator to customise the running container.
 
