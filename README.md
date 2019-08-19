@@ -76,12 +76,6 @@ $ docker stop haproxy.1 && \
   jdeathe/centos-ssh-haproxy:2.2.0
 ```
 
-Now you can verify it is initialised and running successfully by inspecting the container's logs:
-
-```
-$ docker logs haproxy.1
-```
-
 #### Environment variables
 
 There are several environmental variables defined at runtime which allows the operator to customise the running container.
@@ -90,16 +84,16 @@ There are several environmental variables defined at runtime which allows the op
 
 The HAProxy SSL/TLS certificate can be defined using `HAPROXY_SSL_CERTIFICATE`. The value may be either a file path, a base64 encoded string of the certificate file contents or a multiline string containing a PEM formatted concatenation of private key and certificate. If set to a file path the contents may also be a base64 encoded string.
 
-**Note:** If using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config however use of unencoded file contents is.
+> **Note:** If using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config however use of unencoded file contents is.
 
 ##### HAPROXY_CONFIG
 
-The HAProxy configuration file path, (or base64 encoded string of the configuration file contents), is set using `HAPROXY_CONFIG`. The default http configuration is located at the path `/etc/haproxy/haproxy-http.example.cfg` and will be copied into the runnning configuration path `/etc/haproxy/haproxy-http.example.cfg`. There's also an example tcp configuration in the path `/etc/haproxy/haproxy-tcp.example.cfg`. 
+The HAProxy configuration file path, (or base64 encoded string of the configuration file contents), is set using `HAPROXY_CONFIG`. The default http configuration is located at the path `/etc/haproxy/haproxy-http.example.cfg` and will be copied into the running configuration path `/etc/haproxy/haproxy.cfg`. There's also an example tcp configuration in the path `/etc/haproxy/haproxy-tcp.example.cfg`.
 
-**Note:** In most situations it will be necessary to define a custom configuration where the use of the base64 encoded string option is recommended. However if using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config so when using these unencoded file contents is recommended.
+> **Note:** In most situations it will be necessary to define a custom configuration where the use of the base64 encoded string option is recommended. However if using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config so when using these unencoded file contents is recommended.
 
 ##### HAPROXY_HOST_NAMES
 
 The `HAPROXY_HOST_NAMES` can be used to set a, space separated, list of hostnames to be added to the automatically generated self-signed SAN certificate.
 
-**Note:** The value is unused if `HAPROXY_SSL_CERTIFICATE` has a valid value set.
+> **Note:** The value is unused if `HAPROXY_SSL_CERTIFICATE` has a valid value set.
