@@ -1,45 +1,26 @@
-centos-ssh-haproxy
-==================
+### Tags and respective `Dockerfile` links
 
-Docker Image including:
-- CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7.
-- CentOS-7 7.5.1804 x86_64 - HAProxy 1.8 / HATop 0.7.
+- `centos-7`, `2.3.0` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
+- `centos-6`, `1.3.0` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
 
-- http://www.haproxy.org/
-- http://feurix.org/projects/hatop/
+## Overview
 
-## Overview & links
+This build uses the base image [jdeathe/centos-ssh](https://github.com/jdeathe/centos-ssh) so inherits it's features but with `sshd` disabled by default. [Supervisor](http://supervisord.org/) is used to start the [haproxy](http://www.haproxy.org/) daemon when a docker container based on this image is run.
 
-- `centos-7`, `centos-7-2.2.0`, `2.2.0` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
-- `centos-6`, `centos-6-1.2.0`, `1.2.0` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
+To manage HAProxy both [HATop](http://feurix.org/projects/hatop/) and [socat](http://www.dest-unreach.org/socat/) are included to provide both a UI and low level cli management interface respectively.
 
-#### centos-6
+### Image variants
 
-The latest CentOS-6 based release can be pulled from the `centos-6` Docker tag. It is recommended to select a specific release tag - the convention is `centos-6-1.2.0`or `1.2.0` for the [1.2.0](https://github.com/jdeathe/centos-ssh-haproxy/tree/1.2.0) release tag.
+- [HAProxy 1.8 / HATop 0.7 - CentOS-7](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7)
+- [HAProxy 1.5 / HATop 0.7 - CentOS-6](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6)
 
-#### centos-7
+## Quick start
 
-The latest CentOS-7 based release can be pulled from the `centos-7` Docker tag. It is recommended to select a specific release tag - the convention is `centos-7-2.2.0`or `2.2.0` for the [2.2.0](https://github.com/jdeathe/centos-ssh-haproxy/tree/2.2.0) release tag.
+> For production use, it is recommended to select a specific release tag as shown in the examples.
 
-Included in the build are the [SCL](https://www.softwarecollections.org/), [EPEL](http://fedoraproject.org/wiki/EPEL) and [IUS](https://ius.io) repositories. Installed packages include [OpenSSH](http://www.openssh.com/portable.html) secure shell, [vim-minimal](http://www.vim.org/), are installed along with python-setuptools, [supervisor](http://supervisord.org/) and [supervisor-stdout](https://github.com/coderanger/supervisor-stdout).
+Run up a container named `haproxy.1` from the docker image `jdeathe/centos-ssh-haproxy` on port 80 and 443 of your docker host. 2 backend hosts, `httpd_1` and `httpd_2`, are defined with IP addresses `172.17.8.101` and `172.17.8.102`; this is required to identify the backend hosts from within the HAProxy configuration file if not using docker network aliases.
 
-Supervisor is used to start the haproxy (and optionally the sshd) daemon when a docker container based on this image is run.
-
-If enabling and configuring SSH access, it is by public key authentication and, by default, the [Vagrant](http://www.vagrantup.com/) [insecure private key](https://github.com/mitchellh/vagrant/blob/master/keys/vagrant) is required.
-
-### SSH Alternatives
-
-SSH is not required in order to access a terminal for the running container. The simplest method is to use the docker exec command to run bash (or sh) as follows: 
-
-```
-$ docker exec -it {docker-name-or-id} bash
-```
-
-For cases where access to docker exec is not possible the preferred method is to use Command Keys and the nsenter command. See [command-keys.md](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/command-keys.md) for details on how to set this up.
-
-## Quick Example
-
-Run up a container named `haproxy.1` from the docker image `jdeathe/centos-ssh-haproxy` on port 80 and 443 of your docker host. 2 backend hosts, `httpd_1` and `httpd_2`, are defined with IP addresses 172.17.8.101 and 172.17.8.101; this is required to identify the backend hosts from within the HAProxy configuration file if not using docker network aliases.
+> Change `172.17.8.101` and `172.17.8.102` in the example below to IP addresses that resolve to valid web servers on your network.
 
 ```
 $ docker run -d -t \
@@ -48,10 +29,17 @@ $ docker run -d -t \
   -p 443:443 \
   --add-host httpd_1:172.17.8.101 \
   --add-host httpd_2:172.17.8.102 \
-  jdeathe/centos-ssh-haproxy:2.2.0
+  jdeathe/centos-ssh-haproxy:2.3.0
 ```
 
-Now you can verify it is initialised and running successfully by inspecting the container's logs.
+Verify the named container's process status and health.
+
+```
+$ docker ps -a \
+  -f "name=haproxy.1"
+```
+
+Verify successful initialisation of the named container.
 
 ```
 $ docker logs haproxy.1
@@ -69,8 +57,8 @@ In the following example the http service is bound to port 80 and https on port 
 
 ```
 $ docker stop haproxy.1 && \
-  docker rm haproxy.1
-$ docker run \
+  docker rm haproxy.1; \
+  docker run \
   --detach \
   --tty \
   --name haproxy.1 \
@@ -85,16 +73,10 @@ $ docker run \
   --env "HAPROXY_HOST_NAMES=www.app.local app.local localhost.localdomain" \
   --add-host httpd_1:172.17.8.101 \
   --add-host httpd_2:172.17.8.102 \
-  jdeathe/centos-ssh-haproxy:2.2.0
+  jdeathe/centos-ssh-haproxy:2.3.0
 ```
 
-Now you can verify it is initialised and running successfully by inspecting the container's logs:
-
-```
-$ docker logs haproxy.1
-```
-
-#### Environment Variables
+#### Environment variables
 
 There are several environmental variables defined at runtime which allows the operator to customise the running container.
 
@@ -102,16 +84,16 @@ There are several environmental variables defined at runtime which allows the op
 
 The HAProxy SSL/TLS certificate can be defined using `HAPROXY_SSL_CERTIFICATE`. The value may be either a file path, a base64 encoded string of the certificate file contents or a multiline string containing a PEM formatted concatenation of private key and certificate. If set to a file path the contents may also be a base64 encoded string.
 
-**Note:** If using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config however use of unencoded file contents is.
+> **Note:** If using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config however use of unencoded file contents is.
 
 ##### HAPROXY_CONFIG
 
-The HAProxy configuration file path, (or base64 encoded string of the configuration file contents), is set using `HAPROXY_CONFIG`. The default http configuration is located at the path `/etc/haproxy/haproxy-http.example.cfg` and will be copied into the runnning configuration path `/etc/haproxy/haproxy-http.example.cfg`. There's also an example tcp configuration in the path `/etc/haproxy/haproxy-tcp.example.cfg`. 
+The HAProxy configuration file path, (or base64 encoded string of the configuration file contents), is set using `HAPROXY_CONFIG`. The default http configuration is located at the path `/etc/haproxy/haproxy-http.example.cfg` and will be copied into the running configuration path `/etc/haproxy/haproxy.cfg`. There's also an example tcp configuration in the path `/etc/haproxy/haproxy-tcp.example.cfg`.
 
-**Note:** In most situations it will be necessary to define a custom configuration where the use of the base64 encoded string option is recommended. However if using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config so when using these unencoded file contents is recommended.
+> **Note:** In most situations it will be necessary to define a custom configuration where the use of the base64 encoded string option is recommended. However if using a file path with base64 encoded content the on container path is not maintained so this feature is *not* suitable for use with orchestration secrets such as Docker Swarm secrets or config so when using these unencoded file contents is recommended.
 
 ##### HAPROXY_HOST_NAMES
 
 The `HAPROXY_HOST_NAMES` can be used to set a, space separated, list of hostnames to be added to the automatically generated self-signed SAN certificate.
 
-**Note:** The value is unused if `HAPROXY_SSL_CERTIFICATE` has a valid value set.
+> **Note:** The value is unused if `HAPROXY_SSL_CERTIFICATE` has a valid value set.

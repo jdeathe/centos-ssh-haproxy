@@ -1,1 +1,1 @@
-CentOS-7 7.5.1804 x86_64 - HAProxy / HATop.
+HAProxy / HATop - CentOS.
