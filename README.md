@@ -18,9 +18,9 @@ To manage HAProxy both [HATop](http://feurix.org/projects/hatop/) and [socat](ht
 
 > For production use, it is recommended to select a specific release tag as shown in the examples.
 
-Run up a container named `haproxy.1` from the docker image `jdeathe/centos-ssh-haproxy` on port 80 and 443 of your docker host. 2 backend hosts, `httpd_1` and `httpd_2`, are defined with IP addresses `172.17.8.101` and `172.17.8.101`; this is required to identify the backend hosts from within the HAProxy configuration file if not using docker network aliases.
+Run up a container named `haproxy.1` from the docker image `jdeathe/centos-ssh-haproxy` on port 80 and 443 of your docker host. 2 backend hosts, `httpd_1` and `httpd_2`, are defined with IP addresses `172.17.8.101` and `172.17.8.102`; this is required to identify the backend hosts from within the HAProxy configuration file if not using docker network aliases.
 
-> Change `172.17.8.101` and `172.17.8.101` in the example below to IP addresses that resolve to valid web servers on your network.
+> Change `172.17.8.101` and `172.17.8.102` in the example below to IP addresses that resolve to valid web servers on your network.
 
 ```
 $ docker run -d -t \
