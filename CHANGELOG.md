@@ -28,7 +28,10 @@ Summary of release changes.
 - Adds `SYSTEM_TIMEZONE` handling to Makefile, scmi, systemd unit and docker-compose templates.
 - Adds system time zone validation to healthcheck.
 - Adds lock/state file to wrapper scripts.
+- Adds maintenance feature controlled via acl file `/etc/haproxy/maint-blacklist.acl`.
+- Adds maintenance whitelist via acl file `/etc/haproxy/maint-whitelist.acl`.
 - Removes support for long image tags (i.e. centos-6-1.x.x).
+- Removes `dontlog-normal` from all configuration defaults and add to listeners.
 
 ### 1.2.0 - 2019-05-30
 
