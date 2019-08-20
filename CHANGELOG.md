@@ -1,10 +1,36 @@
 # Change Log
 
-## centos-6
+## 1 - centos-6
 
-Summary of release changes for Version 1.
+Summary of release changes.
 
-CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7.
+### 1.3.0 - 2019-08-20
+
+- Updates source image to [1.11.0](https://github.com/jdeathe/centos-ssh/releases/tag/1.11.0).
+- Updates CHANGELOG.md to simplify maintenance.
+- Updates README.md to simplify contents and improve readability.
+- Updates README-short.txt to apply to all image variants.
+- Updates Dockerfile `org.deathe.description` metadata LABEL for consistency.
+- Updates supervisord configuration to send error log output to stderr.
+- Updates haproxy-bootstrap supervisord configuration file/priority to `20-haproxy-bootstrap.conf`/`20`.
+- Updates resyslogd-wrapper supervisord configuration file/priority to `50-rsyslogd-wrapper.conf`/`50`.
+- Updates haproxy-wrapper supervisord configuration file/priority to `90-haproxy-wrapper.conf`/`90`.
+- Updates docker-compose example with redis session store replacing memcached for the apache-php service.
+- Updates wrapper scripts timer to use UTC date timestamps.
+- Updates default timeout values.
+- Updates proxy (varnish) configuration examples to use uri balance algorithm.
+- Updates proxy (varnish) configuration examples to use both backends (removes backup).
+- Fixes docker host connection status check in Makefile.
+- Fixes docker-compose examples; volume mount errors on CentOS host.
+- Adds `inspect`, `reload` and `top` Makefile targets.
+- Adds improved `clean` Makefile target; includes exited containers and dangling images.
+- Adds `SYSTEM_TIMEZONE` handling to Makefile, scmi, systemd unit and docker-compose templates.
+- Adds system time zone validation to healthcheck.
+- Adds lock/state file to wrapper scripts.
+- Adds maintenance feature controlled via acl file `/etc/haproxy/maint-blacklist.acl`.
+- Adds maintenance whitelist via acl file `/etc/haproxy/maint-whitelist.acl`.
+- Removes support for long image tags (i.e. centos-6-1.x.x).
+- Removes `dontlog-normal` from all configuration defaults and add to listeners.
 
 ### 1.2.0 - 2019-05-30
 

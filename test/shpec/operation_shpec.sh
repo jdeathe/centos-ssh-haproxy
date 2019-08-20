@@ -93,7 +93,7 @@ function __setup ()
 	local -r backend_name_1="apache-php.1"
 	local -r backend_name_2="apache-php.2"
 	local -r backend_network="bridge_t1"
-	local -r backend_release="2.4.0"
+	local -r backend_release="1.13.2"
 
 	# Create the bridge network
 	if [[ -z $(docker network ls -q -f name="${backend_network}") ]]; then
@@ -275,10 +275,11 @@ function test_basic_operations ()
 		describe "HTTP requests"
 			describe "Unencrypted response"
 				it "Is unaltered."
+					#TODO remove workaround added for https://github.com/jdeathe/centos-ssh-apache-php/issues/786
 					backend_content="$(
 						curl -s \
 							-H "Host: ${backend_hostname}" \
-							http://127.0.0.1:${container_port_80}/
+							http://127.0.0.1:${container_port_80}/index.html
 					)"
 
 					assert equal \
@@ -289,10 +290,11 @@ function test_basic_operations ()
 
 			describe "Encrypted response"
 				it "Is unaltered."
+					#TODO remove workaround added for https://github.com/jdeathe/centos-ssh-apache-php/issues/786
 					backend_content="$(
 						curl -sk \
 							-H "Host: ${backend_hostname}" \
-							https://127.0.0.1:${container_port_443}/
+							https://127.0.0.1:${container_port_443}/index.html
 					)"
 
 					assert equal \

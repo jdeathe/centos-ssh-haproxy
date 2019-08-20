@@ -1,7 +1,7 @@
-FROM jdeathe/centos-ssh:1.10.1
+FROM jdeathe/centos-ssh:1.11.0
 
 ARG HATOP_VERSION="0.7.7"
-ARG RELEASE_VERSION="1.2.0"
+ARG RELEASE_VERSION="1.3.0"
 
 # ------------------------------------------------------------------------------
 # Base install of required packages
@@ -79,7 +79,7 @@ RUN { printf -- \
 	&& chmod 600 \
 		/etc/haproxy/{{haproxy,haproxy-{http,http-proxy,tcp}}.cfg,{400,403,408,500,502,503,504}.html.http} \
 	&& chmod 600 \
-		/etc/supervisord.d/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}.conf \
+		/etc/supervisord.d/{20-haproxy-bootstrap,{50-rsyslogd,90-haproxy}-wrapper}.conf \
 	&& chmod 700 \
 		/usr/{bin/healthcheck,sbin/{haproxy-bootstrap,{haproxy,rsyslogd}-wrapper}}
 
@@ -88,12 +88,12 @@ EXPOSE 80 443
 # ------------------------------------------------------------------------------
 # Set default environment variables
 # ------------------------------------------------------------------------------
-ENV HAPROXY_SSL_CERTIFICATE="" \
+ENV \
+	ENABLE_SSHD_WRAPPER="false" \
+	ENABLE_SSHD_BOOTSTRAP="false" \
 	HAPROXY_CONFIG="/etc/haproxy/haproxy.cfg" \
 	HAPROXY_HOST_NAMES="localhost.localdomain" \
-	SSH_AUTOSTART_SSHD="false" \
-	SSH_AUTOSTART_SSHD_BOOTSTRAP="false" \
-	SSH_AUTOSTART_SUPERVISOR_STDOUT="false"
+	HAPROXY_SSL_CERTIFICATE=""
 
 # ------------------------------------------------------------------------------
 # Set image metadata
@@ -124,7 +124,7 @@ jdeathe/centos-ssh-haproxy:${RELEASE_VERSION} \
 	org.deathe.license="MIT" \
 	org.deathe.vendor="jdeathe" \
 	org.deathe.url="https://github.com/jdeathe/centos-ssh-haproxy" \
-	org.deathe.description="CentOS-6 6.10 x86_64 - HAProxy 1.5 / HATop 0.7."
+	org.deathe.description="HAProxy 1.5 / HATop 0.7 - CentOS-6 6.10 x86_64."
 
 HEALTHCHECK \
 	--interval=1s \
