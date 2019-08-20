@@ -4,7 +4,7 @@
 
 Summary of release changes.
 
-### 1.3.0 - Unreleased
+### 1.3.0 - 2019-08-20
 
 - Updates `haproxy18u` packages to 1.8.20-1.
 - Updates source image to [2.6.0](https://github.com/jdeathe/centos-ssh/releases/tag/2.6.0).
