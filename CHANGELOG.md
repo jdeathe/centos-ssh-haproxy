@@ -4,6 +4,10 @@
 
 Summary of release changes.
 
+### 2.3.1 - Unreleased
+
+- Updates `rsyslog-8` package to 8.24.0-41.el7_7.
+
 ### 2.3.0 - 2019-08-20
 
 - Updates `haproxy18u` packages to 1.8.20-1.
