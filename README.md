@@ -1,7 +1,7 @@
 ### Tags and respective `Dockerfile` links
 
-- `centos-7`, `2.3.0` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
-- `centos-6`, `1.3.0` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
+- [`2.3.0`](https://github.com/jdeathe/centos-ssh-haproxy/releases/tag/2.3.0), `centos-7` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
+- [`1.3.0`](https://github.com/jdeathe/centos-ssh-haproxy/releases/tag/1.3.0), `centos-6` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
 
 ## Overview
 
