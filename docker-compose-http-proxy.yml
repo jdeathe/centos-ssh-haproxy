@@ -79,7 +79,7 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "./test/fixture/secrets:/var/run/secrets:ro"
+      - "${PWD:-.}/test/fixture/secrets:/var/run/secrets:ro"
   varnish2:
     environment:
       ENABLE_VARNISHNCSA_WRAPPER: "true"
@@ -114,4 +114,4 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "./test/fixture/secrets:/var/run/secrets:ro"
+      - "${PWD:-.}/test/fixture/secrets:/var/run/secrets:ro"
