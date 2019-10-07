@@ -7,6 +7,7 @@ Summary of release changes.
 ### 2.3.1 - Unreleased
 
 - Updates `rsyslog-8` package to 8.24.0-41.el7_7.
+- Fixes docker-compose example configuration files to work on CentOS-7 hosts.
 
 ### 2.3.0 - 2019-08-20
 
