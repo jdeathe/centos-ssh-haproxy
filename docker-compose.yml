@@ -56,7 +56,9 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "./test/fixture/secrets:/var/run/secrets:ro"
+      # On CentOS-7 ${PWD} appears to get unset when running docker-compose.
+      # Fail back with the "." value for the working directory.
+      - "${PWD:-.}/test/fixture/secrets:/var/run/secrets:ro"
   apache-php1:
     depends_on:
       - "redis"

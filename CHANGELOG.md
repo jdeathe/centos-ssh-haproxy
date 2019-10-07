@@ -4,6 +4,10 @@
 
 Summary of release changes.
 
+### 1.3.1 - Unreleased
+
+- Fixes docker-compose example configuration files to work on CentOS-7 hosts.
+
 ### 1.3.0 - 2019-08-20
 
 - Updates source image to [1.11.0](https://github.com/jdeathe/centos-ssh/releases/tag/1.11.0).
