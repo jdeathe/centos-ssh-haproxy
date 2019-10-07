@@ -57,7 +57,7 @@ services:
       VARNISH_TTL: "${VARNISH_TTL}"
       VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
       VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
-      VARNISH_VCL_CONF: "/run/secrets/varnish_vcl_default"
+      VARNISH_VCL_CONF: "/var/run/secrets/varnish_vcl_default"
     image: "jdeathe/centos-ssh-varnish:2.4.0"
     networks:
       tier2:
@@ -79,7 +79,7 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "${PWD}/test/fixture/secrets:/run/secrets:ro"
+      - "${PWD:-.}/test/fixture/secrets:/var/run/secrets:ro"
   varnish2:
     environment:
       ENABLE_VARNISHNCSA_WRAPPER: "true"
@@ -92,7 +92,7 @@ services:
       VARNISH_TTL: "${VARNISH_TTL}"
       VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
       VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
-      VARNISH_VCL_CONF: "/run/secrets/varnish_vcl_default"
+      VARNISH_VCL_CONF: "/var/run/secrets/varnish_vcl_default"
     image: "jdeathe/centos-ssh-varnish:2.4.0"
     networks:
       tier2:
@@ -114,4 +114,4 @@ services:
       nproc: 65535
     volumes:
       # Emulate docker swarm secrets
-      - "${PWD}/test/fixture/secrets:/run/secrets:ro"
+      - "${PWD:-.}/test/fixture/secrets:/var/run/secrets:ro"
