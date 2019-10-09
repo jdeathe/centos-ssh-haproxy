@@ -7,7 +7,6 @@ Summary of release changes.
 ### 1.3.1 - Unreleased
 
 - Deprecate Makefile target `logs-delayed`; replaced with `logsdef`.
-- Updates `rsyslog-8` package to 8.24.0-41.el7_7.
 - Updates source image to [2.6.1](https://github.com/jdeathe/centos-ssh/releases/tag/2.6.1).
 - Updates `test/health_status` helper script with for consistency.
 - Updates Makefile target `logs` to accept `[OPTIONS]` (e.g `make -- logs -ft`).
