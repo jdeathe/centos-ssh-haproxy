@@ -447,7 +447,7 @@ function main ()
 	fi
 
 	trap "__cleanup" \
-		INT TERM EXIT
+		EXIT INT TERM
 	__create_lock
 
 	haproxy_config="$(

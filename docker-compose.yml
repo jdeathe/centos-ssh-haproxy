@@ -74,7 +74,7 @@ services:
       PHP_OPTIONS_SESSION_SAVE_HANDLER: "redis"
       PHP_OPTIONS_SESSION_SAVE_PATH: "redis:6379"
       SYSTEM_TIMEZONE: "${SYSTEM_TIMEZONE}"
-    image: "jdeathe/centos-ssh-apache-php:1.13.2"
+    image: "jdeathe/centos-ssh-apache-php:1.13.3"
     networks:
       tier3:
         aliases:
@@ -101,7 +101,7 @@ services:
       PHP_OPTIONS_SESSION_SAVE_HANDLER: "redis"
       PHP_OPTIONS_SESSION_SAVE_PATH: "redis:6379"
       SYSTEM_TIMEZONE: "${SYSTEM_TIMEZONE}"
-    image: "jdeathe/centos-ssh-apache-php:1.13.2"
+    image: "jdeathe/centos-ssh-apache-php:1.13.3"
     networks:
       tier3:
         aliases:
@@ -118,7 +118,7 @@ services:
       REDIS_MAXMEMORY: "32mb"
       REDIS_TCP_BACKLOG: "2048"
       SYSTEM_TIMEZONE: "${SYSTEM_TIMEZONE}"
-    image: "jdeathe/centos-ssh-redis:1.2.0"
+    image: "jdeathe/centos-ssh-redis:1.2.1"
     networks:
       - "tier4"
     ports:
