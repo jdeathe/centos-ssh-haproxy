@@ -7,7 +7,7 @@ Summary of release changes.
 ### 1.3.1 - Unreleased
 
 - Deprecate Makefile target `logs-delayed`; replaced with `logsdef`.
-- Updates source image to [2.6.1](https://github.com/jdeathe/centos-ssh/releases/tag/2.6.1).
+- Updates source image to [1.11.1](https://github.com/jdeathe/centos-ssh/releases/tag/1.11.1).
 - Updates `test/health_status` helper script with for consistency.
 - Updates Makefile target `logs` to accept `[OPTIONS]` (e.g `make -- logs -ft`).
 - Updates `healthcheck` script; state file existence confirms bootstrap completion.
