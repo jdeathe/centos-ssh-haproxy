@@ -1,7 +1,7 @@
 ### Tags and respective `Dockerfile` links
 
-- `centos-7`, `2.3.0` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
-- `centos-6`, `1.3.0` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
+- [`2.3.1`](https://github.com/jdeathe/centos-ssh-haproxy/releases/tag/2.3.1), `centos-7` [(centos-7/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-7/Dockerfile)
+- [`1.3.1`](https://github.com/jdeathe/centos-ssh-haproxy/releases/tag/1.3.1), `centos-6` [(centos-6/Dockerfile)](https://github.com/jdeathe/centos-ssh-haproxy/blob/centos-6/Dockerfile)
 
 ## Overview
 
@@ -29,7 +29,7 @@ $ docker run -d -t \
   -p 443:443 \
   --add-host httpd_1:172.17.8.101 \
   --add-host httpd_2:172.17.8.102 \
-  jdeathe/centos-ssh-haproxy:2.3.0
+  jdeathe/centos-ssh-haproxy:2.3.1
 ```
 
 Verify the named container's process status and health.
@@ -73,7 +73,7 @@ $ docker stop haproxy.1 && \
   --env "HAPROXY_HOST_NAMES=www.app.local app.local localhost.localdomain" \
   --add-host httpd_1:172.17.8.101 \
   --add-host httpd_2:172.17.8.102 \
-  jdeathe/centos-ssh-haproxy:2.3.0
+  jdeathe/centos-ssh-haproxy:2.3.1
 ```
 
 #### Environment variables

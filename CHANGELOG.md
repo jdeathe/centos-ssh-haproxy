@@ -4,6 +4,23 @@
 
 Summary of release changes.
 
+### 2.3.1 - 2019-10-10
+
+- Deprecate Makefile target `logs-delayed`; replaced with `logsdef`.
+- Updates `rsyslog` package to 8.24.0-41.el7_7.
+- Updates source image to [2.6.1](https://github.com/jdeathe/centos-ssh/releases/tag/2.6.1).
+- Updates `test/health_status` helper script with for consistency.
+- Updates Makefile target `logs` to accept `[OPTIONS]` (e.g `make -- logs -ft`).
+- Updates `healthcheck` script; state file existence confirms bootstrap completion.
+- Updates healthcheck failure messages to remove EOL character that is rendered in status response.
+- Updates wrapper script; only emit "waiting on" info message if bootstrap hasn't completed.
+- Updates ordering of Tags and respective Dockerfile links in README.md for readability.
+- Adds improved test workflow; added `test-setup` target to Makefile.
+- Adds Makefile target `logsdef` to handle deferred logs output within a target chain.
+- Adds `/docs` directory for supplementary documentation and simplify README.
+- Fixes docker-compose example configuration files to work on CentOS-7 hosts.
+- Fixes validation failure of 0 second --timeout value in `test/health_status`.
+
 ### 2.3.0 - 2019-08-20
 
 - Updates `haproxy18u` packages to 1.8.20-1.

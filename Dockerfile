@@ -1,7 +1,7 @@
-FROM jdeathe/centos-ssh:2.6.0
+FROM jdeathe/centos-ssh:2.6.1
 
 ARG HATOP_VERSION="0.7.7"
-ARG RELEASE_VERSION="2.3.0"
+ARG RELEASE_VERSION="2.3.1"
 
 # ------------------------------------------------------------------------------
 # Base install of required packages
@@ -10,7 +10,7 @@ RUN yum -y install \
 			--setopt=tsflags=nodocs \
 			--disableplugin=fastestmirror \
 		haproxy18u-1.8.20-1.el7.ius \
-		rsyslog-8.24.0-34.el7 \
+		rsyslog-8.24.0-41.el7_7 \
 		socat-1.7.3.2-2.el7 \
 	&& yum versionlock add \
 		haproxy \

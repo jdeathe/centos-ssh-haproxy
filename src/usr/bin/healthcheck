@@ -77,16 +77,16 @@ function main ()
 		| grep -qE '^/usr/bin/python /usr/bin/supervisord'
 	then
 		>&2 printf -- \
-			'%s\n' \
-			"supervisord not running."
+			'%s' \
+			"supervisord not running"
 		exit 1
 	fi
 
 	if [[ ${system_timezone} != "${zone}" ]]
 	then
 		>&2 printf -- \
-			'%s\n' \
-			"system-timezone zone mismatch."
+			'%s' \
+			"system-timezone zone mismatch"
 		exit 1
 	fi
 
@@ -94,8 +94,8 @@ function main ()
 		| grep -qE "^${rsyslogd_path} "
 	then
 		>&2 printf -- \
-			'%s\n' \
-			"rsyslogd not running."
+			'%s' \
+			"rsyslogd not running"
 		exit 1
 	fi
 
@@ -103,16 +103,16 @@ function main ()
 		| grep -qE '^/usr/sbin/haproxy '
 	then
 		>&2 printf -- \
-			'%s\n' \
-			"haproxy not running."
+			'%s' \
+			"haproxy not running"
 		exit 1
 	fi
 
 	if ! __has_nbproc_running
 	then
 		>&2 printf -- \
-			'%s\n' \
-			"unexpected nbproc count."
+			'%s' \
+			"unexpected nbproc count"
 		exit 1
 	fi
 }
