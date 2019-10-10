@@ -1,7 +1,7 @@
 FROM jdeathe/centos-ssh:1.11.1
 
 ARG HATOP_VERSION="0.7.7"
-ARG RELEASE_VERSION="1.3.0"
+ARG RELEASE_VERSION="1.3.1"
 
 # ------------------------------------------------------------------------------
 # Base install of required packages
