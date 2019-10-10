@@ -4,7 +4,7 @@
 
 Summary of release changes.
 
-### 2.3.1 - Unreleased
+### 2.3.1 - 2019-10-10
 
 - Deprecate Makefile target `logs-delayed`; replaced with `logsdef`.
 - Updates `rsyslog` package to 8.24.0-41.el7_7.

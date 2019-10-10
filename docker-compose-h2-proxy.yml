@@ -58,7 +58,7 @@ services:
       VARNISH_VARNISHNCSA_FORMAT: "${VARNISH_VARNISHNCSA_FORMAT}"
       VARNISH_VARNISHNCSA_OPTIONS: "${VARNISH_VARNISHNCSA_OPTIONS}"
       VARNISH_VCL_CONF: "/var/run/secrets/varnish_vcl_terminated_https"
-    image: "jdeathe/centos-ssh-varnish:2.4.1"
+    image: "jdeathe/centos-ssh-varnish:2.5.0"
     networks:
       tier2:
       tier3:
